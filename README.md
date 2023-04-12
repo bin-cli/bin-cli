@@ -473,7 +473,7 @@ For example, if you ran `bin sample -h`, it would be set to `bin sample`, so wou
 Usage: bin sample [...]
 ```
 
-But if you ran the script manually with `bin/sample/script -h`, it would output the fallback from `$0` instead:
+But if you ran the script manually with `bin/sample -h`, it would output the fallback from `$0` instead:
 
 ```
 Usage: bin/sample [...]
