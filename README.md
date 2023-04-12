@@ -212,7 +212,7 @@ In `.binconfig`, use the full command names:
 help=Deploy to the production site
 
 [deploy staging]
-help=Deploy to the live site
+help=Deploy to the staging site
 ```
 
 Alternatively, you can put a separate `.binconfig` file in each subdirectory - then all command names are relative to that:
@@ -224,7 +224,7 @@ Alternatively, you can put a separate `.binconfig` file in each subdirectory - t
 help=Deploy to the production site
 
 [staging]
-help=Deploy to the live site
+help=Deploy to the staging site
 ```
 
 ### Script extensions
