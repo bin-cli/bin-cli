@@ -6,15 +6,15 @@
 
 *Bin* is a simple task/script runner, designed to be used in code repositories, with scripts written in any programming language.
 
-It serves a similar purpose to `npm run`, `yarn run` and `composer run`, without being tied to a particular language/ecosystem.
-
 It automatically searches in parent directories, so you can run scripts from anywhere in the project tree.
 
 It supports aliases and unique prefix matching, as well as tab completion, reducing the amount you need to type.
 
-It requires minimal configuration, and its use is completely optional. Some users may choose to install it, while others can bypass it and run the scripts directly.
+It is implemented as a self-contained shell script, small enough to bundle with your dotfiles or projects if you want to.
 
-*It doesn't (currently) natively support Windows - though it can be used via [WSL](https://learn.microsoft.com/en-us/windows/wsl/about), [Git Bash](https://gitforwindows.org/), [MSYS2](https://www.msys2.org/) or [Cygwin](https://www.cygwin.com/).*
+Its use is completely optional - users who choose not to install *Bin* can run the scripts directly.
+
+*It doesn't natively support Windows - though it can be used via [WSL](https://learn.microsoft.com/en-us/windows/wsl/about), [Git Bash](https://gitforwindows.org/), [MSYS2](https://www.msys2.org/) or [Cygwin](https://www.cygwin.com/).*
 
 ### How it works
 
@@ -23,9 +23,9 @@ A project just needs a `bin/` folder and some executable scripts:
 ```
 repo/
 ├── bin/
-│   ├── build
-│   ├── deploy
-│   └── hello
+│   ├── build
+│   ├── deploy
+│   └── hello
 └── ...
 ```
 
@@ -730,102 +730,3 @@ The following options are for internal use (in unit tests), and may change witho
   --list-prefixes       List all unique prefixes
   --print-root          Print the full path to the directory that was determined to be the script root
 ```
-
-## Design considerations
-
-This section explains some of the reasons I built *Bin* the way I did.
-
-### Location of scripts
-
-The options I considered are:
-
-- `bin/`
-- `scripts/`
-- Project root directory
-
-I decided not to use the project root directory because that is often already cluttered with files - `package.json`, `composer.json`, `README.md`, and more.
-
-I looked at a number of open source projects, and found a fairly even split between `bin` and `scripts`. I decided to use `bin` because it is shorter and it follows the [standard UNIX convention (FHS)](https://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard).
-
-**Note:** Despite "bin" technically being short for "binary", the same location is used for executable text-based scripts:
-
-```bash
-$ file /usr/bin/* | grep 'text executable' | wc -l
-421
-```
-
-### Executable name
-
-I didn't find any existing executables named `bin` in Ubuntu:
-
-```bash
-$ bin
-Command 'bin' not found, did you mean:
-  command 'tin' from deb tin (1:2.6.2~20220129-1)
-  command 'bing' from deb bing (1.3.5-4)
-  command 'ben' from deb ben (0.9.2ubuntu5)
-  command 'bip' from deb bip (0.9.3-1)
-  command 'dbin' from deb dbmix (0.9.8-8)
-  command 'din' from deb din (51.1.1-2build1)
-  command 'win' from deb wily (0.13.41-10)
-```
-
-So it made sense to have the executable name match the directory name. That way I can write documentation for other people using the full path, but can easily translate to the shorthand version in my head:
-
-```bash
-# Full path:
-$ bin/hello/world param1 param2
-
-# Using Bin:
-$ bin hello world param1 param2
-
-# With the appropriate aliases and/or prefix matches:
-$ b h w param1 param2
-```
-
-I considered naming it simply "`b`", but I think that would be more confusing and more likely to conflict with users' existing aliases. So I made that an optional alias instead.
-
-I also considered "`run`". Apparently I'm [not the only one](https://www.youtube.com/watch?v=SdmYd5hJISM&t=12s) to think of that, but there don't seem to be any in standard Ubuntu packages. But ultimately I liked `bin` better.
-
-I couldn't use "`do`" because it is a Bash keyword, and "`go`" is used by the [Go programming language](https://go.dev/).
-
-### Config files
-
-I decided to use INI files because they are standard, easy to write and simple to parse (unlike YAML files). The format and filename is loosely based on [EditorConfig](https://editorconfig.org/) files.
-
-I considered having help text and aliases defined in magic comments within the scripts themselves - but that would require modifications to the scripts (which may come from elsewhere), and it wouldn't work for binary executables. I decided not to support both options simultaneously for simplicity and consistency.
-
-### Comparison with alternatives
-
-The reasons I decided to write Bin, rather than using one of the existing options, are:
-
-1. It works from any project subdirectory (unlike manually running shell scripts)
-2. Scripts can accept arbitrary arguments (unlike [Make](https://makefiletutorial.com/), [Just](https://just.systems/)) - useful when writing a [shim](https://en.wikipedia.org/wiki/Shim_(computing)) for another program
-3. It isn't tied to any particular language, and it has no dependencies (unlike [npm](https://docs.npmjs.com/cli/v7/commands/npm-run-script), [Yarn](https://classic.yarnpkg.com/lang/en/docs/cli/run/), [Composer](https://getcomposer.org/doc/articles/scripts.md), [Rake](https://ruby.github.io/rake/), [Grunt](https://gruntjs.com/)) - so I can safely use it for all my projects
-4. Installing it is completely optional (unlike [Task](https://taskfile.dev/)) - collaborators can run the scripts directly if they prefer (they don't even need to know I'm using it)
-5. It is standalone and small enough to include in my [dotfiles](https://github.com/d13r/dotfiles), for use on systems where I don't have root access
-
-The alternatives I considered include:
-
-[^make]: Can be used as a task runner by marking every target as [`.PHONY`](https://stackoverflow.com/a/2145605/167815), but that feels a bit hacky to me!
-[^grunt]: Can be used as a basic task runner via [grunt-shell](https://www.npmjs.com/package/grunt-shell).
-[^alias]: By defining a script/task that just calls another script/task.
-
-|                      | Bin        | Scripts         | [npm](https://docs.npmjs.com/cli/v7/commands/npm-run-script) | [Yarn](https://classic.yarnpkg.com/lang/en/docs/cli/run/) | [Composer](https://getcomposer.org/doc/articles/scripts.md)  | [Task](https://taskfile.dev/)                                | [Just](https://just.systems/)                          | [Rake](https://ruby.github.io/rake/)                   | [Make](https://makefiletutorial.com/)                  | [Grunt](https://gruntjs.com/)                   |
-| -------------------- | ---------- | --------------- | ------------------------------------------------------------ | --------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------ | ------------------------------------------------------ | ------------------------------------------------------ | ----------------------------------------------- |
-| **Type**             | **Runner** | **N/A**         | **Runner**                                                   | **Runner**                                                | **Runner**                                                   | **Both**                                                     | **Both**                                               | **Both**                                               | Builder[^make]                                         | Builder[^grunt]                                 |
-| **Written in**       | Shell      | N/A             | JavaScript                                                   | TypeScript                                                | PHP                                                          | Go                                                           | Rust                                                   | Ruby                                                   | C                                                      | JavaScript                                      |
-| **Requires**         | **Shell**  | **Shell**       | Node.js                                                      | Node.js                                                   | PHP                                                          | **Nothing**                                                  | **Shell**                                              | Ruby                                                   | **Nothing**                                            | JavaScript                                      |
-| **Standalone**       | **Yes**    | **N/A**         | No                                                           | No                                                        | Kind of (2.8 MB)                                             | **Yes** (5 MB)                                               | **Yes** (5 MB)                                         | No                                                     | No                                                     | No                                              |
-| **Scripts in**       | **Any**    | **Any**         | **Any**                                                      | **Any**                                                   | **Any**                                                      | **Any**                                                      | **Any**                                                | **[Any](https://stackoverflow.com/a/14360488/167815)** | **Any**                                                | JavaScript                                      |
-| **Config in**        | INI        | N/A             | JSON                                                         | JSON                                                      | JSON                                                         | YAML                                                         | Custom                                                 | Ruby                                                   | Custom                                                 | JavaScript                                      |
-| **Linux/Mac/WSL**    | Yes        | Yes             | Yes                                                          | Yes                                                       | Yes                                                          | Yes                                                          | Yes                                                    | Yes                                                    | Yes                                                    | Yes                                             |
-| **Windows (native)** | No         | No              | **Yes**                                                      | **Yes**                                                   | **Yes**                                                      | **Yes**                                                      | **Yes**                                                | **Yes**                                                | [Maybe](https://stackoverflow.com/a/32127632/167815)   | **Yes**                                         |
-| **Search parents**   | **Yes**    | No              | **Yes**                                                      | **Yes**                                                   | Prompts first                                                | **Yes**                                                      | **Yes**                                                | **Yes**                                                | No                                                     | **Yes**                                         |
-| **Arguments**        | **Yes**    | **Yes**         | **Yes**                                                      | **Yes**                                                   | **Yes**                                                      | [Prefixed](https://taskfile.dev/usage/#forwarding-cli-arguments-to-commands) | Limited                                                | Limited                                                | Limited                                                | Limited                                         |
-| **CLI optional**     | **Yes**    | **N/A**         | No                                                           | No                                                        | No                                                           | No                                                           | No                                                     | No                                                     | No                                                     | No                                              |
-| **Tab completion**   | **Yes**    | **Yes**         | **[Yes](https://docs.npmjs.com/cli/v7/commands/npm-completion)** | [Third party](https://github.com/mklabs/yarn-completions) | [Third party](https://github.com/bramus/composer-autocomplete) | **[Yes](https://taskfile.dev/installation/#bash)**           | **[Yes](https://just.systems/man/en/chapter_63.html)** | **Yes**                                                | **Yes**                                                | **[Yes](https://github.com/gruntjs/grunt-cli)** |
-| **Prefix matches**   | **Yes**    | No              | No                                                           | No                                                        | No                                                           | No                                                           | No                                                     | No                                                     | No                                                     | No                                              |
-| **Aliases**          | **Yes**    | Kind of[^alias] | Kind of[^alias]                                              | Kind of[^alias]                                           | Kind of[^alias]                                              | [Yes](https://taskfile.dev/usage/#task-aliases)              | **[Yes](https://github.com/casey/just#aliases)**       | [Kind of](https://stackoverflow.com/a/7661613/167815)  | [Kind of](https://stackoverflow.com/a/33594470/167815) | Kind of[^alias]                                 |
-
-Of these, [Task](https://taskfile.dev/) would be my second choice - but I find shell scripts more suitable for the majority of my own use cases. YMMV.
