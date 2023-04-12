@@ -8,7 +8,7 @@
 
 It serves a similar purpose to `npm run`, `yarn run` and `composer run`, without being tied to a particular language/ecosystem.
 
-It automatically searches in parent directories, so you can run scripts from anywhere in the project tree (similar to `git`, `npm` and others).
+It automatically searches in parent directories, so you can run scripts from anywhere in the project tree.
 
 It supports aliases and unique prefix matching, as well as tab completion, reducing the amount you need to type.
 
