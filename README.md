@@ -77,7 +77,7 @@ There are [a few more optional features](#other-features), but that's all you re
 #### Interactive installer
 
 ```bash
-curl https://bin.djm.me/install | bash -
+curl https://bin-cli.com/install | bash -
 ```
 
 This will ask you whether to use `sudo` or not, which installation method to use, and where to install it to (as appropriate). It won't make any changes without confirming them with you first.
