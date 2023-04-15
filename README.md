@@ -613,12 +613,20 @@ alias php='bin php'
 You can also use that shim to run PHP scripts within the `bin/` directory:
 
 ```php
-#!/usr/bin/env -S bin php
+#!/usr/bin/env -S bin --exact php
 <?php
 echo "Using PHP " . PHP_VERSION . "\n";
 ```
 
-However, that requires both *Bin* and [Coreutils](https://www.gnu.org/software/coreutils/coreutils.html) 8.30 or above (e.g. Ubuntu 20.04+). This is the [shortest portable alternative](https://stackoverflow.com/a/33225083/167815) I could find, which only requires Perl:
+However, that requires both *Bin* and [Coreutils](https://www.gnu.org/software/coreutils/coreutils.html) 8.30 or above (e.g. Ubuntu 20.04+). You could simplify it a little to work with older versions of Coreutils:
+
+```php
+#!/usr/bin/bin php
+<?php
+echo "Using PHP " . PHP_VERSION . "\n";
+```
+
+But this is the [shortest portable alternative](https://stackoverflow.com/a/33225083/167815) I could find, which only requires Perl:
 
 ```php
 #!/usr/bin/perl -e$_=$ARGV[0];exec(s/[^\/]+$/php/r,@ARGV)
