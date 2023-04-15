@@ -32,49 +32,13 @@ Feature: Subcommands
       bin deploy staging
       """
 
-  Scenario: Help text can be provided in the root directory
+  Scenario: Help text can be provided in .binconfig
     Given a file '/project/.binconfig' with content:
       """
       [deploy live]
       help=Deploy to the production site
 
       [deploy staging]
-      help=Deploy to the staging site
-      """
-    When I run 'bin deploy'
-    Then it is successful
-    And the output is:
-      """
-      Available subcommands
-      bin deploy live       Deploy to the production site
-      bin deploy staging    Deploy to the staging site
-      """
-
-  Scenario: Help text can be provided in the bin directory
-    Given a file '/project/bin/.binconfig' with content:
-      """
-      [deploy live]
-      help=Deploy to the production site
-
-      [deploy staging]
-      help=Deploy to the staging site
-      """
-    When I run 'bin deploy'
-    Then it is successful
-    And the output is:
-      """
-      Available subcommands
-      bin deploy live       Deploy to the production site
-      bin deploy staging    Deploy to the staging site
-      """
-
-  Scenario: Help text can be provided in the subdirectory
-    Given a file '/project/bin/deploy/.binconfig' with content:
-      """
-      [live]
-      help=Deploy to the production site
-
-      [staging]
       help=Deploy to the staging site
       """
     When I run 'bin deploy'

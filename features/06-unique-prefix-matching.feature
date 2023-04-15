@@ -21,7 +21,7 @@ Feature: Unique prefix matching
       bin hi
       """
 
-  Scenario: Unique prefix matching can be disabled via a config file in the root directory
+  Scenario: Unique prefix matching can be disabled in .binconfig
     Given a file '/project/.binconfig' with content 'exact=true'
     When I run 'bin hel'
     Then it is successful
@@ -30,23 +30,6 @@ Feature: Unique prefix matching
       Matching commands
       bin hello
       """
-
-  Scenario: Unique prefix matching can be disabled via a config file in the bin/ directory
-    Given a file '/project/bin/.binconfig' with content 'exact=true'
-    When I run 'bin hel'
-    Then it is successful
-    And the output is:
-      """
-      Matching commands
-      bin hello
-      """
-
-  Scenario: Unique prefix matching can't be disabled via a config file in a subdirectory
-    Given a file '/project/.binconfig' with content 'exact=true'
-    When I run 'bin hello'
-    Then the exit code is 246
-    And there is no output
-    And the error is "The config option 'exact' cannot be used in /project/bin/subdir/.binconfig"
 
   Scenario: Unique prefix matching can be disabled with --exact
     When I run 'bin --exact hel'

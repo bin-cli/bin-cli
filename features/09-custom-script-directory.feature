@@ -1,7 +1,7 @@
 Feature: Custom script directory
   https://github.com/bin-cli/bin#custom-script-directory
 
-  Scenario: The script directory can be overridden in .binconfig in the root directory
+  Scenario: The script directory can be overridden in .binconfig
     Given a file '/project/.binconfig' with content 'root=scripts'
     And a script '/project/scripts/test' that outputs 'Right'
     And a script '/project/bin/test' that outputs 'Wrong'

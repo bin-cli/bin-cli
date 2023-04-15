@@ -15,14 +15,6 @@ Feature: Debugging
       [Three]
       help=Three
       """
-    And a file '/project/scripts/.binconfig' with content:
-      """
-      [four]
-      help=Four
-
-      [five]
-      help=Five
-      """
     And a script '/project/scripts/one'
     And a script '/project/scripts/two'
     And a script '/project/scripts/three'
@@ -44,12 +36,10 @@ Feature: Debugging
       Parsing /project/.binconfig
         Root set to /project/scripts/
         Found config for 3 commands
-      Searching /project/scripts/ for scripts and config files
-        Parsing /project/scripts/.binconfig
-          Found config for 2 commands
+      Searching /project/scripts/ for scripts
         Found 1 subdirectory
         Found 5 commands in this directory
-      Searching /project/scripts/subdir/ for scripts and config files
+      Searching /project/scripts/subdir/ for scripts
       [...]
       Looking for a script or alias matching 'php' - not found
       Looking for scripts and aliases with the prefix 'php' - 0 found

@@ -1,20 +1,9 @@
 Feature: Aliases
   https://github.com/bin-cli/bin#aliases
 
-  Scenario: An alias can be defined in .binconfig in the root directory
+  Scenario: An alias can be defined in .binconfig
     Given a script '/project/bin/deploy' that outputs 'Copying to production...'
     And a file '/project/.binconfig' with content:
-      """
-      [deploy]
-      alias=publish
-      """
-    When I run 'bin publish'
-    Then it is successful
-    And the output is 'Copying to production...'
-
-  Scenario: An alias can be defined in .binconfig in the bin/ directory
-    Given a script '/project/bin/deploy' that outputs 'Copying to production...'
-    And a file '/project/bin/.binconfig' with content:
       """
       [deploy]
       alias=publish
@@ -73,17 +62,6 @@ Feature: Aliases
     And a file '/project/.binconfig' with content:
       """
       [deploy live]
-      alias=publish
-      """
-    When I run 'bin publish'
-    Then it is successful
-    And the output is 'Copying to production...'
-
-  Scenario: Aliases can be defined for subcommands in .binconfig in a subdirectory
-    Given a script '/project/bin/deploy/live' that outputs 'Copying to production...'
-    And a file '/project/bin/deploy/.binconfig' with content:
-      """
-      [live]
       alias=publish
       """
     When I run 'bin publish'

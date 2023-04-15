@@ -141,7 +141,7 @@ alias=hi
 help=Say "Hello, World!"
 ```
 
-They can be placed in the project root directory:
+They should be placed in the project root directory:
 
 ```
 repo/
@@ -149,17 +149,6 @@ repo/
 │   └── ...
 └── .binconfig
 ```
-
-Or in the `bin/` directory (with the exception of the `root` option):
-
-```
-repo/
-└── bin/
-    ├── .binconfig
-    └── ...
-```
-
-I recommend the latter, because it keeps the scripts and their configuration together - but it's up to you. If there are multiple config files, they are merged together.
 
 ## Other features
 
@@ -206,18 +195,6 @@ In `.binconfig`, use the full command names:
 help=Deploy to the production site
 
 [deploy staging]
-help=Deploy to the staging site
-```
-
-Alternatively, you can put a separate `.binconfig` file in each subdirectory - then all command names are relative to that:
-
-```ini
-; bin/deploy/.binconfig
-
-[live]
-help=Deploy to the production site
-
-[staging]
 help=Deploy to the staging site
 ```
 
@@ -356,7 +333,7 @@ eval "$(bin --completion --exe b)"
 
 ### Custom script directory
 
-If you prefer the directory to be named `scripts` (or something else), you can configure that at the top of `.binconfig` in the **root** directory:
+If you prefer the directory to be named `scripts` (or something else), you can configure that at the top of `.binconfig`:
 
 ```ini
 root=scripts
@@ -384,9 +361,9 @@ You can also set the root directory at the command line, which will override the
 $ bin --root scripts
 ```
 
-In this case, it will search the parent directories as normal, and ignore the `root` setting in any `.binconfig` files.
+In this case, it will search the parent directories as normal, and ignore the `root` setting in any `.binconfig` files it finds.
 
-This is mostly useful when defining a custom alias:
+This is mostly useful when defining a custom alias, to support repositories you don't control:
 
 ```bash
 alias scr='bin --exe scr --root scripts'
@@ -458,19 +435,17 @@ If something doesn't seem to be working (or you're not sure why it works the way
 ```bash
 $ bin --debug --shim php -v
 Bin version 1.2.3
-Working directory is /home/dave/project/public/
+Working directory is /project/public/
 Looking for a root config file
-  /home/dave/project/public/.binconfig - not found
-  /home/dave/project/.binconfig - found
-Parsing /home/dave/project/.binconfig
-  Root set to /home/dave/project/scripts/
+  /project/public/.binconfig - not found
+  /project/.binconfig - found
+Parsing /project/.binconfig
+  Root set to /project/scripts/
   Found config for 3 commands
-Searching /home/dave/project/scripts/ for scripts and config files
-  Parsing /home/dave/project/scripts/.binconfig
-    Found config for 2 commands
+Searching /project/scripts/ for scripts
   Found 1 subdirectory
   Found 5 commands in this directory
-Searching /home/dave/project/scripts/subdir/ for scripts and config files
+Searching /project/scripts/subdir/ for scripts
 [...]
 Looking for a script or alias matching 'php' - not found
 Looking for scripts and aliases with the prefix 'php' - 0 found
@@ -482,11 +457,11 @@ You can also use `--print` to display only the command that would have been exec
 
 ```bash
 $ bin --print sample hello world
-/home/dave/project/bin/sample/hello world
+/project/bin/sample/hello world
 $ bin --print --shim php -v
 php -v
 $ bin --print php -v
-'php' not found in /home/dave/project/bin/
+'php' not found in /project/bin/
 ```
 
 ### Automatic exclusions
