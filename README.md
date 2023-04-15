@@ -645,7 +645,7 @@ exec docker compose exec web php artisan "$@"
 
 ### Parameters & help
 
-For more complex scripts, you may want to implement parameter parsing and help text. That is too complex to get into here, but I like to [use Getopt](https://djm.me/getopt) for Bash scripts (including *Bin* itself). Most other languages will have their own libraries.
+For more complex scripts, you may want to implement parameter parsing and help text. That is too complex to get into here, but I like to [use Getopt](https://djm.me/getopt) for Bash scripts. Most other languages will have their own libraries.
 
 ## CLI reference
 
