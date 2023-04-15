@@ -1,0 +1,353 @@
+#!/bin/sh
+set -o errexit -o nounset
+
+if [ -t 1 ]; then
+    TITLE=$(printf "\e[97;1;4m") # White, bold, underline
+    RESET=$(printf "\e[0m")
+else
+    TITLE=''
+    RESET=''
+fi
+
+NL='
+'
+
+# Helper to handle critical errors
+fail() {
+    echo "$exe: $1" >&2
+    exit "${2:-246}"
+}
+
+# Parse any parameters
+action=''
+exact=''
+exe=${0##*/}
+error=''
+
+set_action() {
+    if [ -n "$action" ]; then
+        set_error "The '--$action' and '--$1' arguments are incompatible"
+    fi
+
+    action=$1
+}
+
+set_error() {
+    if [ -n "$error" ]; then
+        error=$1
+    fi
+}
+
+while [ $# -gt 0 ]; do
+    case $1 in
+        --completion)
+            set_action completion
+            shift
+            ;;
+        --print)
+            set_action print
+            shift
+            ;;
+        --exact)
+            exact=true
+            shift
+            ;;
+        --prefix)
+            exact=false
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *) break ;;
+    esac
+done
+
+if [ -n "$error" ]; then
+    fail "$error"
+fi
+
+# Completion script
+if [ "$action" = "completion" ]; then
+    echo '_bin() { TODO; }' # TODO
+    echo 'complete -F _bin bin'
+    exit
+fi
+
+# Helper method
+findup() (
+    while ! test "$@"; do
+        if [ "$PWD" = "/" ]; then
+            return 1
+        fi
+        cd ..
+    done
+    echo "$PWD"
+)
+
+# Look for a .binconfig file
+binconfig=
+if root=$(findup -f .binconfig); then
+    binconfig="$root/.binconfig"
+fi
+
+# Helper to parse .binconfig
+parse_config() {
+    _section=$1
+    _option=$2
+    _default=${3:-}
+
+    _current_section='*'
+
+    if [ -n "$binconfig" ]; then
+        while IFS= read -r line; do
+            if _new_section=$(expr + "$line" : '^\[\(.\+\)]$'); then
+                _current_section=$_new_section
+                continue
+            fi
+
+            if [ "$_current_section" != "$_section" ]; then
+                continue
+            fi
+
+            if _value=$(expr + "$line" : "^$_option=\(.*\)$"); then
+                echo "$_value"
+                return
+            fi
+        done <"$binconfig"
+    fi
+
+    if [ $# -ge 3 ]; then
+        echo "$_default"
+    else
+        return 1
+    fi
+}
+
+# Locate the bin/ directory
+if [ -n "$binconfig" ]; then
+    directory="$root/$(parse_config '*' dir bin)"
+elif root=$(findup -d bin); then
+    directory="$root/bin"
+else
+    fail "'bin' directory not found"
+fi
+
+# Read 'exact' from config if not given at the command line
+if [ -z "$exact" ]; then
+    exact=$(parse_config '*' exact false)
+fi
+
+# Check if the command given is a subdirectory
+parent_command=''
+
+while [ $# -gt 0 ] && [ -d "$directory/${1:-}" ]; do
+    directory="$directory/$1"
+    parent_command="$parent_command$1 "
+    shift
+done
+
+# Run the given executable, if any
+if [ $# -gt 0 ]; then
+    command=$1
+    shift
+
+    # Look for exact matches
+    if [ -f "$directory/$command" ]; then
+        exec "$directory/$command" "$@"
+    fi
+
+    # Look for almost-exact matches with a unique extension
+    found_any=false
+    found_multiple=false
+
+    for executable in "$directory/$command."*; do
+        if [ ! -f "$executable" ]; then
+            continue
+        fi
+
+        if $found_any; then
+            found_multiple=true
+            break
+        fi
+
+        found_any=true
+    done
+
+    if $found_any && ! $found_multiple; then
+        exec "$executable" "$@"
+    fi
+
+    # Look for partial matches
+    found_any=false
+    found_multiple=false
+
+    for executable in "$directory/$command"*; do
+        if [ ! -f "$executable" ]; then
+            continue
+        fi
+
+        if $found_any; then
+            found_multiple=true
+            break
+        fi
+
+        found_any=true
+    done
+
+    if ! $found_any; then
+        fail "Executable '$parent_command$command' not found"
+    fi
+
+    if ! $found_multiple && ! $exact; then
+        exec "$executable" "$@"
+    fi
+
+    match_prefix="$command"
+else
+    match_prefix=''
+fi
+
+# Helpers to check partial matches
+str_starts_with() {
+    _haystack=$1
+    _needle=$2
+
+    case "$_haystack" in
+        "$_needle"*) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+str_contains() {
+    _haystack=$1
+    _needle=$2
+
+    case "$_haystack" in
+        *"$_needle"*) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+# Find all the commands available
+commands=''
+non_executable_files=''
+
+find_commands() {
+    # Can't use local vars with recursion in POSIX
+    # _prefix=$1
+    # _directory=$2
+    # _match_prefix=$3
+
+    # Loop through the directory to find commands
+    for _file in "$2/"*; do
+        if [ ! -e "$_file" ]; then
+            continue
+        fi
+
+        _name=${_file##*/} # Remove path
+
+        if ! str_starts_with "$_name" "${3:-}"; then
+            : # Skip non-matches
+        elif str_starts_with "$_name" '_'; then
+            : # Skip files starting with "_"
+        elif [ -d "$_file" ]; then
+            find_commands "${1}${_name} " "$_file"
+        elif [ ! -x "$_file" ]; then
+            non_executable_files="${non_executable_files}${_file}${NL}"
+        elif str_contains "$_name" ' ' >/dev/null; then
+            # Spaces in the name
+            commands="${commands}${1}'${_name}'${NL}"
+        else
+            commands="${commands}${1}${_name}${NL}"
+        fi
+    done
+}
+
+find_commands "$parent_command" "$directory" "$match_prefix"
+
+# Remove the extensions, as long as they are unique
+remove_extension() {
+    # Can't use ${command%%.*} because it could remove too much ("a.b c" => "a" instead of "a.b")
+    # Can't use ${command%.*} because it could remove too little ("a.b.c" => "a.b" instead of "a")
+    _command="$1"
+
+    while _new=$(expr + "$_command" : '^\(.*\)\.[a-zA-Z0-9]\+$'); do
+        _command=$_new
+    done
+
+    echo "$_command"
+}
+
+has_duplicate() {
+    _short=$1
+    _long=$2
+
+    while IFS= read -r _command; do
+        case "$_command" in
+            # Ignore a match to itself
+            "$_long") continue ;;
+                # Matched to the short command, but not the long one
+            "$_short") return 0 ;;
+            "$_short."*) return 0 ;;
+        esac
+    done <<END
+$commands
+END
+
+    # No matches found
+    return 1
+}
+
+unique_commands=''
+
+while IFS= read -r command; do
+    short=$(remove_extension "$command")
+    if has_duplicate "$short" "$command"; then
+        unique_commands="${unique_commands}${command}${NL}"
+    else
+        unique_commands="${unique_commands}${short}${NL}"
+    fi
+done <<END
+$commands
+END
+
+# Calculate the maximum length of a command
+maxlength=0
+while IFS= read -r command; do
+    if expr ${#command} '>' $maxlength >/dev/null; then
+        maxlength=${#command}
+    fi
+done <<END
+$unique_commands
+END
+
+# Output the list
+if [ -n "$match_prefix" ]; then
+    echo "${TITLE}Matching commands${RESET}"
+elif [ -n "$parent_command" ]; then
+    echo "${TITLE}Available subcommands${RESET}"
+else
+    echo "${TITLE}Available commands${RESET}"
+fi
+
+while IFS= read -r command; do
+    if [ -z "$command" ]; then
+        continue
+    fi
+    if help=$(parse_config "$command" help); then
+        printf "%s %-${maxlength}s    %s\n" "$exe" "$command" "$help"
+    else
+        printf "%s %s\n" "$exe" "$command"
+    fi
+done <<END
+$unique_commands
+END
+
+# List non-executable files, if any
+if [ -n "$non_executable_files" ]; then
+    echo
+    echo "Not executable:"
+    echo $non_executable_files
+fi

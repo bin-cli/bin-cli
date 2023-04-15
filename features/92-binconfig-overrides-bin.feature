@@ -1,5 +1,5 @@
 Feature: .binconfig overrides bin/
-  This isn't explained, but (1) it's consistent with how it works when 'root='
+  This isn't explained, but (1) it's consistent with how it works when 'dir='
   is specified, and (2) .binconfig is only supposed to be in the root directory
   (or the bin/ directory).
 
@@ -10,7 +10,7 @@ Feature: .binconfig overrides bin/
     When I run 'bin hello'
     Then the exit code is 127
     And there is no output
-    And the error is "Executable 'hello' not found in /project/root/bin"
+    And the error is "bin: Executable 'hello' not found in /project/root/bin"
 
   Scenario: Directories below .binconfig are not searched when .binconfig exists
     Given an empty file '/project/.binconfig'

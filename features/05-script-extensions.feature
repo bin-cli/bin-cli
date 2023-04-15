@@ -2,11 +2,7 @@ Feature: Script extensions
   https://github.com/bin-cli/bin#script-extensions
 
   Background:
-    Given a script '/project/bin/sample1.sh' with content:
-      """sh
-      #!/usr/bin/env bash
-      echo 'Hello, World!'
-      """
+    Given a script '/project/bin/sample1.sh' that outputs 'Hello, World!'
     Given a script '/project/bin/sample2.py'
     Given a script '/project/bin/sample3.rb'
 

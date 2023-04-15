@@ -1,0 +1,9 @@
+#!/bin/env bash
+set -o errexit -o nounset -o pipefail
+cd "$(dirname "$0")/.."
+
+# For now, this is just a simple copy. I expect to add further build steps in
+# the future, to generate the man page, set the version, etc.
+
+mkdir -p dist
+cp src/bin dist/bin

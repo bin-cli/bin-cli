@@ -20,7 +20,7 @@ Given('a script {string} with content:', async function (file, content) {
 
 Given('a script {string} that outputs {string}', async function (file, message) {
     requireAbsolutePath(file);
-    await outputFile(this.jailDir + file, `#!/bin/sh\necho <<<'END'\n${message}\nEND\n`, { mode: 0o777 });
+    await outputFile(this.jailDir + file, `#!/bin/sh\ncat <<'END'\n${message}\nEND\n`, { mode: 0o777 });
 });
 
 Given('an empty file {string}', async function (file) {

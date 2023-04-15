@@ -6,27 +6,27 @@ Feature: Root directory sanity checks
 
   Scenario: The 'root' option cannot be an absolute path when set in .binconfig
     Given a script '/project/scripts/hello' that outputs 'Hello, World!'
-    And a file '/project/.binconfig' with content 'root=/project/scripts'
+    And a file '/project/.binconfig' with content 'dir=/project/scripts'
     When I run 'bin hello'
     Then the exit code is 246
     And there is no output
-    And the error is "The option 'root' cannot be an absolute path in /project/.binconfig line 1"
+    And the error is "bin: The option 'root' cannot be an absolute path in /project/.binconfig line 1"
 
   Scenario: The 'root' option cannot point to a parent directory in .binconfig
     Given a script '/project/scripts/hello' that outputs 'Hello, World!'
-    And a file '/project/root/.binconfig' with content 'root=../scripts'
+    And a file '/project/root/.binconfig' with content 'dir=../scripts'
     And the working directory is '/project/root'
     When I run 'bin hello'
     Then the exit code is 246
     And there is no output
-    And the error is "The option 'root' cannot point to a directory outside /project in /project/.binconfig line 1"
+    And the error is "bin: The option 'root' cannot point to a directory outside /project in /project/.binconfig line 1"
 
   Scenario: The 'root' option cannot point to a symlink to a parent directory in .binconfig
     Given a script '/project/scripts/hello' that outputs 'Hello, World!'
     And a symlink '/project/root/symlink' pointing to '/project/scripts'
-    And a file '/project/root/.binconfig' with content 'root=symlink'
+    And a file '/project/root/.binconfig' with content 'dir=symlink'
     And the working directory is '/project/root'
     When I run 'bin hello'
     Then the exit code is 246
     And there is no output
-    And the error is "The option 'root' cannot point to a symlink to a directory outside /project in /project/.binconfig line 1"
+    And the error is "bin: The option 'root' cannot point to a symlink to a directory outside /project in /project/.binconfig line 1"

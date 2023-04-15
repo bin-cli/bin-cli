@@ -14,7 +14,7 @@ Given('the working directory is {string}', async function (directory) {
 When('I run {string}', function (command) {
     command = quote([
         'fakechroot',
-        'fakeroot',
+        // 'fakeroot',
         'chroot',
         this.jailDir,
         '/bin/sh',
@@ -25,9 +25,10 @@ When('I run {string}', function (command) {
     this.runResult = spawnSync(command, {
         env: {
             HOME: '/home/user',
-            PATH: ['/usr/local/bin', '/usr/bin', '/bin'].join(':'),
+            PATH: '/usr/local/bin:/usr/bin:/bin',
         },
         shell: true,
+        timeout: 1_000,
     });
 
     if (this.runResult.error) {
@@ -36,8 +37,9 @@ When('I run {string}', function (command) {
 });
 
 Then('it is successful', function () {
-    assert.equal(this.runResult.status, 0);
+    // Check stderr before status because that is generally more useful for debugging
     assert.equal(this.runResult.stderr.toString(), '');
+    assert.equal(this.runResult.status, 0);
 });
 
 Then('the exit code is {int}', function (expected) {

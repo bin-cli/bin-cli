@@ -143,7 +143,7 @@ Feature: Aliases
     When I run 'bin'
     Then the exit code is 246
     And there is no output
-    And the error is "The alias 'two' conflicts with an existing command in /project/.binconfig line 2"
+    And the error is "bin: The alias 'two' conflicts with an existing command in /project/.binconfig line 2"
 
   Scenario: Defining an alias that conflicts with another alias causes an error
     Given a script '/project/bin/one'
@@ -159,4 +159,4 @@ Feature: Aliases
     When I run 'bin'
     Then the exit code is 246
     And there is no output
-    And the error is "The alias 'number' conflicts with another alias in /project/.binconfig line 5"
+    And the error is "bin: The alias 'number' conflicts with another alias in /project/.binconfig line 5"

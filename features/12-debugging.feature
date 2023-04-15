@@ -4,7 +4,7 @@ Feature: Debugging
   Scenario: Passing --debug returns detailed debugging information about shims
     Given a file '/project/.binconfig' with content:
       """
-      root=scripts
+      dir=scripts
 
       [one]
       help=One
@@ -64,4 +64,4 @@ Feature: Debugging
       When I run 'bin --print php -v'
       Then the exit code is 127
       And there is no output
-      And the error is "Executable 'php' not found in /project/bin"
+      And the error is "bin: Executable 'php' not found in /project/bin"

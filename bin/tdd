@@ -5,7 +5,10 @@ cd "$(dirname "$0")/.."
 while true; do
     clear
 
-    npx cucumber-js --fail-fast --publish-quiet || true
+    (
+        bin/build
+        npx cucumber-js --fail-fast --publish-quiet
+    ) || true
 
     inotifywait \
         -e create \
@@ -14,5 +17,5 @@ while true; do
         -e attrib \
         -e delete \
         -qq \
-        -r dist features
+        -r features src
 done

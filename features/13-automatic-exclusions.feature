@@ -34,7 +34,7 @@ Feature: Automatic exclusions
     When I run 'bin .hidden'
     Then the exit code is 127
     And there is no output
-    And the error is "Executable names may not start with '.'"
+    And the error is "bin: Executable names may not start with '.'"
 
   Scenario: Files that are not executable are listed as warnings
     Given a script '/project/bin/executable'
@@ -55,10 +55,10 @@ Feature: Automatic exclusions
     When I run 'bin not-executable'
     Then the exit code is 126
     And there is no output
-    And the error is "'/project/bin/not-executable' is not executable (chmod +x)"
+    And the error is "bin: '/project/bin/not-executable' is not executable (chmod +x)"
 
   Scenario: Non-executable files are not listed in the project root
-    Given a file '/project/.binconfig' with content 'root=.'
+    Given a file '/project/.binconfig' with content 'dir=.'
     And a script '/project/executable'
     And an empty file '/project/not-executable'
     When I run 'bin'
@@ -70,7 +70,7 @@ Feature: Automatic exclusions
       """
 
   Scenario: Common non-executable file types are not listed in the project root even if they are executable
-    Given a file '/project/.binconfig' with content 'root=.'
+    Given a file '/project/.binconfig' with content 'dir=.'
     And a script '/project/executable1.sh'
     And a script '/project/executable2.json'
     And a script '/project/executable3.md'
@@ -86,7 +86,7 @@ Feature: Automatic exclusions
       """
 
   Scenario: Common non-executable file types can still be run manually
-    Given a file '/project/.binconfig' with content 'root=.'
+    Given a file '/project/.binconfig' with content 'dir=.'
     And a script '/project/executable.json' that outputs 'Executable'
     When I run 'bin executable'
     Then it is successful
@@ -98,7 +98,7 @@ Feature: Automatic exclusions
     When I run 'bin hello'
     Then the exit code is 127
     And there is no output
-    And the error is "Could not found 'bin' directory or '.binconfig' file from <workdir>"
+    And the error is "bin: Could not found 'bin' directory or '.binconfig' file from <workdir>"
 
     Examples:
       | bin            | workdir                |
@@ -115,7 +115,7 @@ Feature: Automatic exclusions
     When I run 'bin hello'
     Then the exit code is 127
     And there is no output
-    And the error is "Could not found 'bin' directory or '.binconfig' file from <workdir>"
+    And the error is "bin: Could not found 'bin' directory or '.binconfig' file from <workdir>"
 
     Examples:
       | bin            | config                | workdir                |
@@ -132,7 +132,7 @@ Feature: Automatic exclusions
     When I run 'bin hello'
     Then the exit code is 127
     And there is no output
-    And the error is "Could not found 'bin' directory or '.binconfig' file from <workdir>"
+    And the error is "bin: Could not found 'bin' directory or '.binconfig' file from <workdir>"
 
     Examples:
       | bin            | config                    | workdir                |
