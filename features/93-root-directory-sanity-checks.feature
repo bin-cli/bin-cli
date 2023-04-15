@@ -19,7 +19,7 @@ Feature: Root directory sanity checks
     When I run 'bin hello'
     Then the exit code is 246
     And there is no output
-    And the error is "The option 'root' cannot point to a directory outside /home/project in /project/.binconfig line 1"
+    And the error is "The option 'root' cannot point to a directory outside /project in /project/.binconfig line 1"
 
   Scenario: The 'root' option cannot point to a symlink to a parent directory in .binconfig
     Given a script '/project/scripts/hello' that outputs 'Hello, World!'
@@ -29,4 +29,4 @@ Feature: Root directory sanity checks
     When I run 'bin hello'
     Then the exit code is 246
     And there is no output
-    And the error is "The option 'root' cannot point to a symlink to a directory outside /home/project in /project/.binconfig line 1"
+    And the error is "The option 'root' cannot point to a symlink to a directory outside /project in /project/.binconfig line 1"

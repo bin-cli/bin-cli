@@ -28,8 +28,8 @@ Before({ name: 'Create test jail' }, async function () {
     await copy(`${this.rootDir}/dist/bin`, `${this.jailDir}/usr/bin/bin`);
 
     // Create the default working directory
-    await ensureDir(`${this.jailDir}/home/project`);
-    this.workingDir = '/home/project';
+    await ensureDir(`${this.jailDir}/project`);
+    this.workingDir = '/project';
 });
 
 After({ name: 'Clear jail directory', tags: 'not @exit' }, async function () {
