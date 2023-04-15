@@ -74,33 +74,27 @@ There are [a few more optional features](#other-features), but that's all you re
 
 ### Installation
 
-#### Interactive installer
-
-```bash
-curl https://bin-cli.com/install | bash -
-```
-
-This will ask you whether to use `sudo` or not, which installation method to use, and where to install it to (as appropriate). It won't make any changes without confirming them with you first.
-
-#### APT
-
 *TODO*
 
-#### Manual download
+### Tab completion
 
-*TODO*
-
-### Upgrading
-
-To upgrade, run:
+Add this to your `~/.bashrc` (or `~/.bash_completion`) script:
 
 ```bash
-bin --upgrade
+eval "$(bin --completion)"
 ```
 
-*Bin* will attempt to detect the installation method used and run the appropriate command(s) to upgrade itself.
+Or you can lazy-load it by putting it in `~/.local/share/bash-completion/completions/bin`.
 
-Alternatively, re-run the installer (see above).
+You may want to wrap it in a conditional, in case *Bin* is not installed:
+
+```bash
+if command -v bin &>/dev/null; then
+    eval "$(bin --completion)"
+fi
+```
+
+(**Note:** Only `bash` is supported at the moment. I may add `zsh` and others in the future.)
 
 ### Creating scripts
 
@@ -255,28 +249,6 @@ You can run them with or without the extension:
 $ bin sample1
 $ bin sample1.sh
 ```
-
-### Tab completion
-
-If you installed *Bin* via APT, a tab completion script will be installed automatically (in `/usr/share/bash-completion/completions/`).
-
-If not, you can add this to your `~/.bashrc` (or `~/.bash_completion`) script:
-
-```bash
-eval "$(bin --completion)"
-```
-
-Or you can lazy-load it by putting it in `~/.local/share/bash-completion/completions/bin`.
-
-You may want to wrap it in a conditional, in case *Bin* is not installed:
-
-```bash
-if command -v bin &>/dev/null; then
-    eval "$(bin --completion)"
-fi
-```
-
-(**Note:** Only `bash` is supported at the moment. I may add `zsh` and others in the future.)
 
 ### Unique prefix matching
 
@@ -710,23 +682,12 @@ Options that can be used with a command:
 Options that do something special:
   --completion          Output a tab completion script for the current shell
   --debug               Display debugging information instead of running a command
-  --help                Display this help
+  --help, -h            Display this help
   --print               Output the command that would have been run, instead of running it
   --shell SHELL         Override the shell to use for '--completion' -- only 'bash' is currently supported
-  --upgrade             Attempt to upgrade Bin to the latest version (aliases: --self-update, --update)
-  --version             Display the current version number and exit
+  --version, -v         Display the current version number and exit
 
 Any options must be given before the command, because everything after the command will be passed as parameters to the script.
 ```
 
 <!-- END CLI REFERENCE -->
-
-The following options are for internal use (in unit tests), and may change without warning:
-
-```
-  --list-aliases        List defined aliases
-  --list-all            List all defined commands and aliases
-  --list-commands       List defined commands
-  --list-prefixes       List all unique prefixes
-  --print-root          Print the full path to the directory that was determined to be the script root
-```

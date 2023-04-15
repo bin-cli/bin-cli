@@ -1,0 +1,18 @@
+#!/bin/env bash
+set -o errexit -o nounset -o pipefail
+cd "$(dirname "$0")/.."
+
+while true; do
+    clear
+
+    npx cucumber-js --fail-fast --publish-quiet || true
+
+    inotifywait \
+        -e create \
+        -e modify \
+        -e move \
+        -e attrib \
+        -e delete \
+        -qq \
+        -r dist features
+done

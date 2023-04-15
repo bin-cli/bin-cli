@@ -1,0 +1,25 @@
+#!/bin/env bash
+set -o errexit -o nounset -o pipefail
+cd "$(dirname "$0")/.."
+
+RESET="\e[0m"
+LCYAN="\e[96m"
+
+echo -e "${LCYAN}Installing fakechroot (requires root access)...${RESET}"
+if command -v fakechroot &>/dev/null; then
+    echo 'Already installed.'
+else
+    sudo apt install fakechroot
+fi
+
+echo
+echo -e "${LCYAN}Installing inotifywait (requires root access)...${RESET}"
+if command -v inotifywait &>/dev/null; then
+    echo 'Already installed.'
+else
+    sudo apt install inotify-tools
+fi
+
+echo
+echo -e "${LCYAN}Installing/updating Node modules...${RESET}"
+npm ci

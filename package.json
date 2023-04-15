@@ -1,0 +1,7 @@
+{
+  "devDependencies": {
+    "@cucumber/cucumber": "^8.11.1",
+    "fs-extra": "^10.1.0",
+    "shell-quote": "^1.8.1"
+  }
+}
