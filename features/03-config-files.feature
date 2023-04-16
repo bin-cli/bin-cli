@@ -1,8 +1,7 @@
-Feature: .binconfig overrides bin/
-  This isn't explained, but (1) it's consistent with how it works when 'dir='
-  is specified, and (2) .binconfig is only supposed to be in the root directory
-  (or the bin/ directory).
+Feature: Config files
+  https://github.com/bin-cli/bin#config-files
 
+  @undocumented
   Scenario: Directories above .binconfig are not searched when .binconfig exists
     Given an empty file '/project/root/.binconfig'
     And a script '/project/bin/hello' that outputs 'Hello, World!'
@@ -12,6 +11,7 @@ Feature: .binconfig overrides bin/
     And there is no output
     And the error is "bin: Executable 'hello' not found in /project/root/bin"
 
+  @undocumented
   Scenario: Directories below .binconfig are not searched when .binconfig exists
     Given an empty file '/project/.binconfig'
     And a script '/project/bin/hello' that outputs 'Right'

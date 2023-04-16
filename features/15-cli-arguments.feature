@@ -20,3 +20,14 @@ Feature: CLI arguments
     When I run 'bin -v'
     Then it is successful
     And the output contains 'Bin version '
+
+  @undocumented
+  Scenario Template: The <arg1> and <arg2> arguments are incompatible
+    When I run 'bin <arg1> <arg2>'
+    Then the exit code is 246
+    And there is no output
+    And the error is "bin: The '<arg1>' and '<arg2>' arguments are incompatible"
+
+    Examples:
+      | arg1         | arg2    |
+      | --completion | --print |

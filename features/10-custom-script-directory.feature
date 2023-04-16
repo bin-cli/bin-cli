@@ -69,3 +69,67 @@ Feature: Custom script directory
     And the output contains '_bin_scr()'
     And the output contains '--dir scripts'
     And the output contains 'complete -F _bin_scr scr'
+
+  @undocumented
+  Scenario: The 'root' option cannot be an absolute path when set in .binconfig
+    Given a script '/project/scripts/hello' that outputs 'Hello, World!'
+    And a file '/project/.binconfig' with content 'dir=/project/scripts'
+    When I run 'bin hello'
+    Then the exit code is 246
+    And there is no output
+    And the error is "bin: The option 'root' cannot be an absolute path in /project/.binconfig line 1"
+
+  @undocumented
+  Scenario: The 'root' option cannot point to a parent directory in .binconfig
+    Given a script '/project/scripts/hello' that outputs 'Hello, World!'
+    And a file '/project/root/.binconfig' with content 'dir=../scripts'
+    And the working directory is '/project/root'
+    When I run 'bin hello'
+    Then the exit code is 246
+    And there is no output
+    And the error is "bin: The option 'root' cannot point to a directory outside /project in /project/.binconfig line 1"
+
+  @undocumented
+  Scenario: The 'root' option cannot point to a symlink to a parent directory in .binconfig
+    Given a script '/project/scripts/hello' that outputs 'Hello, World!'
+    And a symlink '/project/root/symlink' pointing to '/project/scripts'
+    And a file '/project/root/.binconfig' with content 'dir=symlink'
+    And the working directory is '/project/root'
+    When I run 'bin hello'
+    Then the exit code is 246
+    And there is no output
+    And the error is "bin: The option 'root' cannot point to a symlink to a directory outside /project in /project/.binconfig line 1"
+
+  @undocumented
+  Scenario: When --dir matches .binconfig, .binconfig should be parsed as normal
+    Given a file '/project/.binconfig' with content:
+      """
+      dir=scripts
+
+      [hello]
+      help=Hello, World!
+      """
+    And a script 'scripts/hello'
+    When I run 'bin --dir=scripts'
+    Then it is successful
+    And the output is:
+      """
+      Available commands
+      bin hello    Hello, World!
+      """
+
+  @undocumented
+  Scenario: When --dir doesn't match .binconfig, .binconfig should be ignored
+    Given a file '/project/.binconfig' with content:
+      """
+      [hello]
+      help=Hello, World!
+      """
+    And a script 'scripts/hello'
+    When I run 'bin --dir=scripts'
+    Then it is successful
+    And the output is:
+      """
+      Available commands
+      bin hello
+      """
