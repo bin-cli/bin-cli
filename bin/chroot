@@ -14,4 +14,4 @@ cp /bin/{bash,cat,ls} tmp/bin/
 # Enter the jail - using Bash rather than Dash by default, for user-friendliness
 export HOME=/home/user
 export PATH=/usr/local/bin:/usr/bin:/bin
-exec fakechroot chroot tmp "${@:-bash}"
+exec fakechroot chroot tmp sh -c "cd /project && ${*:-bash}"
