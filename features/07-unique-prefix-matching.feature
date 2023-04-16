@@ -45,3 +45,10 @@ Feature: Unique prefix matching
     When I run 'bin --prefix hel'
     Then it is successful
     And the output is 'Hello, World!'
+
+  Scenario: Unique prefix matching works for directories as well as commands
+    Given a script '/project/bin/deploy/live' that outputs 'Copying to production...'
+    And a script '/project/bin/deploy/staging' that outputs 'Copying to staging...'
+    When I run 'bin d l'
+    Then it is successful
+    And the output is 'Copying to production...'

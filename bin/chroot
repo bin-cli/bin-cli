@@ -9,7 +9,7 @@ if [[ ! -x tmp/bin/sh ]]; then
 fi
 
 # Copy some additional executables that are useful
-cp /bin/{bash,cat,ls} tmp/bin/
+cp /bin/ls tmp/bin/
 
 # Enter the jail - using Bash rather than Dash by default, for user-friendliness
 export HOME=/home/user

@@ -64,4 +64,4 @@ Feature: Debugging
       When I run 'bin --print php -v'
       Then the exit code is 127
       And there is no output
-      And the error is "bin: Executable 'php' not found in /project/bin"
+      And the error is 'bin: Command "php" not found in /project/bin'

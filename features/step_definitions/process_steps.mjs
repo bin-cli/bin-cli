@@ -1,7 +1,7 @@
 import {Given, Then, When} from '@cucumber/cucumber';
 import {strict as assert} from 'assert';
 import {spawnSync} from 'child_process';
-import {ensureDir} from 'fs-extra';
+import {ensureDir, outputFile} from 'fs-extra';
 import {quote} from 'shell-quote';
 import requireAbsolutePath from '../support/requireAbsolutePath.mjs';
 
@@ -11,7 +11,7 @@ Given('the working directory is {string}', async function (directory) {
     this.workingDir = directory;
 });
 
-When('I run {string}', function (command) {
+When('I run {string}', async function (command) {
     command = quote([
         'fakechroot',
         // 'fakeroot',
@@ -22,23 +22,38 @@ When('I run {string}', function (command) {
         quote(['cd', this.workingDir]) + ' && ' + command,
     ]);
 
-    this.runResult = spawnSync(command, {
+    const result = spawnSync(command, {
         env: {
             HOME: '/home/user',
             PATH: '/usr/local/bin:/usr/bin:/bin',
         },
         shell: true,
+        stdio: ['pipe', 'pipe', 'pipe', 'pipe'],
         timeout: 1_000,
     });
 
-    if (this.runResult.error) {
-        throw this.runResult.error;
+    if (result.error) {
+        throw result.error;
     }
+
+    const status = result.status;
+
+    // Write the output to files to be displayed by the 'bin/tdd' script if the test fails
+    const stdout = result.stdout.toString();
+    await outputFile(this.jailDir + '/stdout.txt', stdout);
+
+    const stderr = result.stderr.toString();
+    await outputFile(this.jailDir + '/stderr.txt', stderr);
+
+    const debugLog = result.output[3].toString();
+    await outputFile(this.jailDir + '/debug.txt', debugLog);
+
+    this.runResult = { status, stdout, stderr };
 });
 
 Then('it is successful', function () {
     // Check stderr before status because that is generally more useful for debugging
-    assert.equal(this.runResult.stderr.toString(), '');
+    assert.equal(this.runResult.stderr, '');
     assert.equal(this.runResult.status, 0);
 });
 
@@ -47,30 +62,30 @@ Then('the exit code is {int}', function (expected) {
 });
 
 Then('there is no output', function () {
-    assert.equal(this.runResult.stdout.toString(), '');
+    assert.equal(this.runResult.stdout, '');
 });
 
 Then('the output is:', function (expected) {
-    assert.equal(this.runResult.stdout.toString(), `${expected}\n`);
+    assert.equal(this.runResult.stdout, `${expected}\n`);
 });
 
 Then('the output is {string}', function (expected) {
-    assert.equal(this.runResult.stdout.toString(), `${expected}\n`);
+    assert.equal(this.runResult.stdout, `${expected}\n`);
 });
 
 Then('the output contains {string}', function (expected) {
-    const actual = this.runResult.stdout.toString();
+    const actual = this.runResult.stdout;
     assert(actual.includes(expected), `Expected string to contain "${expected}":\n\n${actual}`);
 });
 
 Then('there is no error', function () {
-    assert.equal(this.runResult.stderr.toString(), '');
+    assert.equal(this.runResult.stderr, '');
 });
 
 Then('the error is:', function (expected) {
-    assert.equal(this.runResult.stderr.toString(), `${expected}\n`);
+    assert.equal(this.runResult.stderr, `${expected}\n`);
 });
 
 Then('the error is {string}', function (expected) {
-    assert.equal(this.runResult.stderr.toString(), `${expected}\n`);
+    assert.equal(this.runResult.stderr, `${expected}\n`);
 });

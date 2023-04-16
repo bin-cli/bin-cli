@@ -9,7 +9,7 @@ Feature: Config files
     When I run 'bin hello'
     Then the exit code is 127
     And there is no output
-    And the error is "bin: Executable 'hello' not found in /project/root/bin"
+    And the error is 'bin: Command "hello" not found in /project/root/bin'
 
   @undocumented
   Scenario: Directories below .binconfig are not searched when .binconfig exists

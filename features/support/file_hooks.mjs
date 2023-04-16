@@ -1,5 +1,5 @@
 import {After, Before} from '@cucumber/cucumber';
-import {copy, emptyDir, ensureDir} from 'fs-extra';
+import {copy, createSymlink, emptyDir, ensureDir} from 'fs-extra';
 import {dirname} from 'path';
 import {fileURLToPath} from 'url';
 
@@ -13,9 +13,11 @@ Before({ name: 'Create test jail' }, async function () {
     // Create a chroot jail to better mimic a regular filesystem and avoid accidental dependencies
     await ensureDir(`${this.jailDir}/usr/bin`);
 
-    for (const exe of ['cat', 'dash', 'expr', 'sh']) {
+    for (const exe of ['bash', 'cat', 'env']) {
         await copy(`/bin/${exe}`, `${this.jailDir}/bin/${exe}`);
     }
+
+    await createSymlink('bash', `${this.jailDir}/bin/sh`);
 
     // Copy the 'bin' executable into it
     await copy(`${this.rootDir}/dist/bin`, `${this.jailDir}/usr/bin/bin`);

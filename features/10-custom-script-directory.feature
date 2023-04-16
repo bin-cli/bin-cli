@@ -16,7 +16,7 @@ Feature: Custom script directory
     When I run 'bin hello'
     Then the exit code is 127
     And there is no output
-    And the error is "bin: Executable 'hello' not found in /project/scripts"
+    And the error is 'bin: Command "hello" not found in /project/root/scripts'
 
   Scenario: Directories below .binconfig are not searched when root is specified in .binconfig
     Given a file '/project/.binconfig' with content 'dir=scripts'

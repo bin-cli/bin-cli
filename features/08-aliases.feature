@@ -132,7 +132,7 @@ Feature: Aliases
     Then it is successful
     And the output is 'Copying to production...'
 
-  Scenario: Defining an alias that conflicts with a script causes an error
+  Scenario: Defining an alias that conflicts with a command causes an error
     Given a script '/project/bin/one'
     And a script '/project/bin/two'
     And a file '/project/.binconfig' with content:
@@ -151,12 +151,12 @@ Feature: Aliases
     And a file '/project/.binconfig' with content:
       """
       [one]
-      alias=number
+      alias=three
 
       [two]
-      alias=number
+      alias=three
       """
     When I run 'bin'
     Then the exit code is 246
     And there is no output
-    And the error is "bin: The alias 'number' conflicts with another alias in /project/.binconfig line 5"
+    And the error is "bin: The alias 'three' conflicts with an existing alias in /project/.binconfig line 5 (originally defined in /project/.binconfig line 2)"

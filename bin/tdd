@@ -2,6 +2,11 @@
 set -o errexit -o nounset -o pipefail
 cd "$(dirname "$0")/.."
 
+RESET="\e[0m"
+BOLD="\e[1m"
+UNDERLINE="\e[4m"
+LWHITE="\e[97m"
+
 while true; do
     clear
 
@@ -9,6 +14,24 @@ while true; do
         bin/build
         npx cucumber-js --fail-fast --publish-quiet
     ) || true
+
+    if [[ -f tmp/stdout.txt ]]; then
+        echo
+        echo -e "${LWHITE}${BOLD}${UNDERLINE}Output${RESET}"
+        cat tmp/stdout.txt
+    fi
+
+    if [[ -f tmp/stderr.txt ]]; then
+        echo
+        echo -e "${LWHITE}${BOLD}${UNDERLINE}Errors${RESET}"
+        cat tmp/stderr.txt
+    fi
+
+    if [[ -f tmp/debug.txt ]]; then
+        echo
+        echo -e "${LWHITE}${BOLD}${UNDERLINE}Debug log${RESET}"
+        cat tmp/debug.txt
+    fi
 
     inotifywait \
         -e create \

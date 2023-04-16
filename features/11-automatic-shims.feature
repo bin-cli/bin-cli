@@ -7,7 +7,7 @@ Feature: Automatic shims
     When I run 'bin php'
     Then the exit code is 127
     And there is no output
-    And the error is "bin: Executable 'php' not found in /project/bin"
+    And the error is 'bin: Command "php" not found in /project/bin'
 
   Scenario: When specifying --shim, the global command is used as a fallback
     Given an empty directory 'bin'
@@ -28,8 +28,7 @@ Feature: Automatic shims
     When I run 'bin --shim hello-world'
     Then the exit code is 127
     And there is no output
-    And the error is "bin: Executable 'hello-world' not found in /project/bin"
-
+    And the error is 'bin: Command "hello-world" not found in /project/bin'
 
   Scenario: Specifying --fallback disables unique prefix matching
     Given a script '/project/bin/hello-world-123'

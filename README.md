@@ -461,7 +461,7 @@ $ bin --print sample hello world
 $ bin --print --shim php -v
 php -v
 $ bin --print php -v
-'php' not found in /project/bin/
+bin: Command "php" not found in /project/bin
 ```
 
 ### Automatic exclusions
