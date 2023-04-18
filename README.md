@@ -141,7 +141,7 @@ alias=hi
 help=Say "Hello, World!"
 ```
 
-They should be placed in the project root directory:
+They should be placed in the project root directory, alongside the `bin/` directory:
 
 ```
 repo/
