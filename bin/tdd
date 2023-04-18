@@ -40,5 +40,5 @@ while true; do
         -e attrib \
         -e delete \
         -qq \
-        -r features src
+        -r bin/build features src
 done

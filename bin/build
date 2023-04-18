@@ -6,4 +6,8 @@ cd "$(dirname "$0")/.."
 # the future, to generate the man page, set the version, etc.
 
 mkdir -p dist
-cp src/bin dist/bin
+
+for file in src/*.bash; do
+    cat "$file"
+    echo
+done > dist/bin
