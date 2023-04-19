@@ -38,13 +38,16 @@ has_duplicate() {
     return 1
 }
 
+debug "Determining unique command names for listing"
 unique_commands=()
 
 for command in "${list_commands[@]}"; do
     short=$(remove_extension "$command")
     if has_duplicate "$short" "$command"; then
+        debug "  \"$command\" => \"$short\" is not unique - using full command name"
         unique_commands+=("$command")
     else
+        debug "  \"$command\" => \"$short\""
         unique_commands+=("$short")
     fi
 done
@@ -56,6 +59,8 @@ for command in "${unique_commands[@]}"; do
         maxlength=${#command}
     fi
 done
+
+debug "Maximum matching command length is $maxlength"
 
 # Output the list
 get_command_aliases() {
@@ -77,6 +82,8 @@ get_command_aliases() {
         echo "aliases: ${command_aliases:2}"
     fi
 }
+
+debug_exit "Would list matching commands"
 
 echo "$TITLE$list_title$RESET"
 

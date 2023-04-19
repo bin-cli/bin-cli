@@ -11,9 +11,11 @@ Feature: Debugging
 
       [two]
       help=Two
+      aliases=deux, dos
 
-      [Three]
+      [three]
       help=Three
+      alias=333
       """
     And a script '/project/scripts/one'
     And a script '/project/scripts/two'
@@ -26,24 +28,43 @@ Feature: Debugging
     When I run 'bin --debug --shim php -v'
     Then it is successful
     And the output is:
-      # TODO: Work out the exact output... And how to handle the version number...
       """
       Bin version 1.2.3
-      Working directory is /project/public/
-      Looking for a root config file
-        /project/public/.binconfig - not found
-        /project/.binconfig - found
+      Working directory is /project/public
+      Looking for a .binconfig file
+        /project/public - not found
+        /project - found
+      Checking /project/.binconfig for a 'dir' setting
+        Found dir=scripts
+        Using 'scripts' from the config file
       Parsing /project/.binconfig
-        Root set to /project/scripts/
-        Found config for 3 commands
-      Searching /project/scripts/ for scripts
-        Found 1 subdirectory
-        Found 5 commands in this directory
-      Searching /project/scripts/subdir/ for scripts
-      [...]
-      Looking for a script or alias matching 'php' - not found
-      Looking for scripts and aliases with the prefix 'php' - 0 found
-      Falling back to external 'php' because the --shim option was enabled
+        Found [one] section
+          Registered help for "one"
+        Found [two] section
+          Registered help for "two"
+          Registered alias "deux"
+          Registered alias "dos"
+        Found [three] section
+          Registered help for "three"
+          Registered alias "333"
+      'exact' defaulted to 'false'
+      Bin directory set to '/project/scripts' from config file
+      Searching '/project/scripts' for scripts
+        Registered command "five"
+        Registered command "four"
+        Registered command "one"
+        Searching subdirectory '/project/scripts/subdir'
+        Registered command "subdir six"
+        Registered command "three"
+        Registered command "two"
+      Processing aliases
+      Processing positional parameters
+        Looking for command "php" (exact)
+          There were 0 matches - not running command
+        Looking for command "php" (with-extension)
+          There were 0 matches - not running command
+        Looking for command "php " (prefix)
+      No command found - using shim
       Would execute: php -v
       """
 
@@ -54,13 +75,13 @@ Feature: Debugging
       And the output is '/project/bin/sample/hello world'
 
     Scenario: Passing --print displays the command that would have been run (2)
-      Given an empty directory 'bin'
+      Given an empty directory '/project/bin'
       When I run 'bin --print --shim php -v'
       Then it is successful
       And the output is 'php -v'
 
     Scenario: Passing --print displays the command that would have been run (3)
-      Given an empty directory 'bin'
+      Given an empty directory '/project/bin'
       When I run 'bin --print php -v'
       Then the exit code is 127
       And there is no output

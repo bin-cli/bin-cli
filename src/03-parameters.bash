@@ -1,7 +1,12 @@
 action=''
+bin_dirname=''
+debug=false
 exact=''
 exe=${0##*/}
 error=''
+fallback=''
+shim=false
+version=false
 
 set_action() {
     if [[ -n $action ]]; then
@@ -25,6 +30,14 @@ while [[ $# -gt 0 ]]; do
             set_action completion
             shift
             ;;
+        --debug)
+            debug=true
+            shift
+            ;;
+        --dir)
+            bin_dirname=$2
+            shift 2
+            ;;
         --exact)
             exact=true
             shift
@@ -33,12 +46,24 @@ while [[ $# -gt 0 ]]; do
             exe=$2
             shift 2
             ;;
+        --fallback)
+            fallback=$2
+            shift 2
+            ;;
         --prefix)
             exact=false
             shift
             ;;
         --print)
             set_action print
+            shift
+            ;;
+        --shim)
+            shim=true
+            shift
+            ;;
+        --version)
+            version=true
             shift
             ;;
         --)

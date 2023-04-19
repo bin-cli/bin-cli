@@ -30,6 +30,7 @@ process_aliases() {
                 suffix=${command:${#target}}
                 aliases+=("$alias$suffix")
                 alias_to_command[$alias$suffix]="$target$suffix"
+                debug "    Registered alias \"$alias$suffix\""
             fi
         done
     done

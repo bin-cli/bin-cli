@@ -436,7 +436,7 @@ If something doesn't seem to be working (or you're not sure why it works the way
 $ bin --debug --shim php -v
 Bin version 1.2.3
 Working directory is /project/public/
-Looking for a root config file
+Looking for a .binconfig file
   /project/public/.binconfig - not found
   /project/.binconfig - found
 Parsing /project/.binconfig

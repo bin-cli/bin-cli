@@ -77,7 +77,7 @@ Feature: Custom script directory
     When I run 'bin hello'
     Then the exit code is 246
     And there is no output
-    And the error is "bin: The option 'root' cannot be an absolute path in /project/.binconfig line 1"
+    And the error is "bin: The option 'dir' cannot be an absolute path in /project/.binconfig line 1"
 
   @undocumented
   Scenario: The 'root' option cannot point to a parent directory in .binconfig
@@ -87,7 +87,7 @@ Feature: Custom script directory
     When I run 'bin hello'
     Then the exit code is 246
     And there is no output
-    And the error is "bin: The option 'root' cannot point to a directory outside /project in /project/.binconfig line 1"
+    And the error is "bin: The option 'dir' cannot point to a directory outside /project/root in /project/root/.binconfig line 1"
 
   @undocumented
   Scenario: The 'root' option cannot point to a symlink to a parent directory in .binconfig
@@ -98,7 +98,7 @@ Feature: Custom script directory
     When I run 'bin hello'
     Then the exit code is 246
     And there is no output
-    And the error is "bin: The option 'root' cannot point to a symlink to a directory outside /project in /project/.binconfig line 1"
+    And the error is "bin: The option 'dir' cannot point to a directory outside /project/root in /project/root/.binconfig line 1"
 
   @undocumented
   Scenario: When --dir matches .binconfig, .binconfig should be parsed as normal
@@ -109,8 +109,8 @@ Feature: Custom script directory
       [hello]
       help=Hello, World!
       """
-    And a script 'scripts/hello'
-    When I run 'bin --dir=scripts'
+    And a script '/project/scripts/hello'
+    When I run 'bin --dir scripts'
     Then it is successful
     And the output is:
       """
@@ -125,8 +125,8 @@ Feature: Custom script directory
       [hello]
       help=Hello, World!
       """
-    And a script 'scripts/hello'
-    When I run 'bin --dir=scripts'
+    And a script '/project/scripts/hello'
+    When I run 'bin --dir scripts'
     Then it is successful
     And the output is:
       """

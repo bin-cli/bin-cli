@@ -33,6 +33,8 @@ find_matching_commands() {
     local type=$1
     local target=$2
 
+    debug "  Looking for command \"$target\" ($type)"
+
     local -A commands_matching_aliases
     local command
 
@@ -40,12 +42,17 @@ find_matching_commands() {
         if matches "$type" "$target" "$alias"; then
             command=${alias_to_command[$alias]}
             commands_matching_aliases[$command]=true
+            debug "    Found matching alias \"$alias\" for command \"$command\""
         fi
     done
 
     matching_commands=()
     for command in "${commands[@]}"; do
-        if ${commands_matching_aliases[$command]-false} || matches "$type" "$target" "$command"; then
+        if ${commands_matching_aliases[$command]-false}; then
+            debug "    Found matching command \"$command\" (from alias)"
+            matching_commands+=("$command")
+        elif matches "$type" "$target" "$command"; then
+            debug "    Found matching command \"$command\""
             matching_commands+=("$command")
         fi
     done
