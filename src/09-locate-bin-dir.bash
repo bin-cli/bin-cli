@@ -16,10 +16,13 @@ elif [[ $bin_dirname = '/'* ]]; then
     # Absolute path
     bin_directory="$bin_dirname"
     debug "Bin directory set to '$bin_directory' (absolute) from CLI"
-elif root=$(findup -d "$bin_dirname"); then
-    # If there is no .binconfig, look for a bin/ directory instead (or other name specified with --dir)
-    bin_directory="${root%%/}/$bin_dirname"
-    debug "Bin directory set to '$bin_directory'"
 else
-    fail "'$bin_dirname' directory not found" 127
+    debug "Looking for a $bin_dirname/ directory in"
+    if root=$(findup -d "$bin_dirname"); then
+        # If there is no .binconfig, look for a bin/ directory instead (or other name specified with --dir)
+        bin_directory="${root%%/}/$bin_dirname"
+        debug "Bin directory set to '$bin_directory'"
+    else
+        fail "'$bin_dirname' directory not found" 127
+    fi
 fi

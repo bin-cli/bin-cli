@@ -5,7 +5,7 @@ debug "Working directory is $PWD"
 
 # Initial search & parse to find the dir= setting only
 # That way we don't need to "undo" everything we did if it doesn't match
-debug "Looking for a .binconfig file"
+debug "Looking for a .binconfig file in"
 
 if root=$(findup -f .binconfig); then
     binconfig="$root/.binconfig"

@@ -12,7 +12,11 @@ Given('the working directory is {string}', async function (directory) {
 });
 
 When('I run {string}', async function (command) {
-    command = quote([
+
+    // Write the command to a file to be displayed by the 'bin/tdd' script if the test fails
+    await outputFile(this.jailDir + '/command.txt', `cd ${this.workingDir}\n${command}\n`);
+
+    const fullCommand = quote([
         'fakechroot',
         // 'fakeroot',
         'chroot',
@@ -22,7 +26,7 @@ When('I run {string}', async function (command) {
         quote(['cd', this.workingDir]) + ' && ' + command,
     ]);
 
-    const result = spawnSync(command, {
+    const result = spawnSync(fullCommand, {
         env: {
             HOME: '/home/user',
             PATH: '/usr/local/bin:/usr/bin:/bin',

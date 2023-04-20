@@ -18,6 +18,53 @@ Feature: Automatic exclusions
     Then it is successful
     And the output is 'Hidden script'
 
+  Scenario: Subcommands starting with '_' are excluded from listings
+    Given a script '/project/bin/sub/visible'
+    And a script '/project/bin/sub/_hidden'
+    When I run 'bin sub'
+    Then it is successful
+    And the output is:
+      """
+      Available subcommands
+      bin sub visible
+      """
+
+  Scenario: Subcommands starting with '_' can be executed
+    Given a script '/project/bin/sub/_hidden' that outputs 'Hidden script'
+    When I run 'bin sub _hidden'
+    Then it is successful
+    And the output is 'Hidden script'
+
+  @undocumented
+  Scenario: Directories starting with '_' are excluded from listings
+    Given a script '/project/bin/visible'
+    And a script '/project/bin/_sub/child'
+    When I run 'bin'
+    Then it is successful
+    And the output is:
+      """
+      Available commands
+      bin visible
+      """
+
+  @undocumented
+  Scenario: Commands in directories starting with '_' can be executed
+    Given a script '/project/bin/_sub/child' that outputs 'Hidden script'
+    When I run 'bin _sub child'
+    Then it is successful
+    And the output is 'Hidden script'
+
+  @undocumented
+  Scenario: Commands in directories starting with '_' are listed when the directory name is given
+    Given a script '/project/bin/_sub/child'
+    When I run 'bin _sub'
+    Then it is successful
+    And the output is:
+      """
+      Available subcommands
+      bin _sub child
+      """
+
   Scenario: Scripts starting with '.' are excluded from listings
     Given a script '/project/bin/visible'
     And a script '/project/bin/.hidden'
@@ -32,9 +79,9 @@ Feature: Automatic exclusions
   Scenario: Scripts starting with '.' cannot be executed
     Given a script '/project/bin/.hidden'
     When I run 'bin .hidden'
-    Then the exit code is 127
+    Then the exit code is 246
     And there is no output
-    And the error is "bin: Executable names may not start with '.'"
+    And the error is "bin: Command names may not start with '.'"
 
   Scenario: Files that are not executable are listed as warnings
     Given a script '/project/bin/executable'

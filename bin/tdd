@@ -5,7 +5,10 @@ cd "$(dirname "$0")/.."
 RESET="\e[0m"
 BOLD="\e[1m"
 UNDERLINE="\e[4m"
-LWHITE="\e[97m"
+LRED="\e[91m"
+LGREEN="\e[92m"
+LMAGENTA="\e[95m"
+LCYAN="\e[96m"
 
 while true; do
     clear
@@ -15,21 +18,27 @@ while true; do
         npx cucumber-js --fail-fast --publish-quiet
     ) || true
 
+    if [[ -f tmp/command.txt ]]; then
+        echo
+        echo -e "${LMAGENTA}${BOLD}${UNDERLINE}Command${RESET}"
+        cat tmp/command.txt
+    fi
+
     if [[ -f tmp/stdout.txt ]]; then
         echo
-        echo -e "${LWHITE}${BOLD}${UNDERLINE}Output${RESET}"
+        echo -e "${LGREEN}${BOLD}${UNDERLINE}Output${RESET}"
         cat tmp/stdout.txt
     fi
 
     if [[ -f tmp/stderr.txt ]]; then
         echo
-        echo -e "${LWHITE}${BOLD}${UNDERLINE}Errors${RESET}"
+        echo -e "${LRED}${BOLD}${UNDERLINE}Errors${RESET}"
         cat tmp/stderr.txt
     fi
 
     if [[ -f tmp/debug.txt ]]; then
         echo
-        echo -e "${LWHITE}${BOLD}${UNDERLINE}Debug log${RESET}"
+        echo -e "${LCYAN}${BOLD}${UNDERLINE}Debug log${RESET}"
         cat tmp/debug.txt
     fi
 

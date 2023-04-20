@@ -31,7 +31,7 @@ Feature: Debugging
       """
       Bin version 1.2.3
       Working directory is /project/public
-      Looking for a .binconfig file
+      Looking for a .binconfig file in
         /project/public - not found
         /project - found
       Checking /project/.binconfig for a 'dir' setting
@@ -60,10 +60,37 @@ Feature: Debugging
       Processing aliases
       Processing positional parameters
         Looking for command "php" (exact)
+          No match for "deux"
+          No match for "dos"
+          No match for "333"
+          No match for "five"
+          No match for "four"
+          No match for "one"
+          No match for "subdir six"
+          No match for "three"
+          No match for "two"
           There were 0 matches - not running command
         Looking for command "php" (with-extension)
+          No match for "deux"
+          No match for "dos"
+          No match for "333"
+          No match for "five"
+          No match for "four"
+          No match for "one"
+          No match for "subdir six"
+          No match for "three"
+          No match for "two"
           There were 0 matches - not running command
-        Looking for command "php " (prefix)
+        Looking for command "php" (subcommands)
+          No match for "deux"
+          No match for "dos"
+          No match for "333"
+          No match for "five"
+          No match for "four"
+          No match for "one"
+          No match for "subdir six"
+          No match for "three"
+          No match for "two"
       No command found - using shim
       Would execute: php -v
       """

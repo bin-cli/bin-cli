@@ -42,12 +42,21 @@ debug "Determining unique command names for listing"
 unique_commands=()
 
 for command in "${list_commands[@]}"; do
+    if is_hidden_command "$command" "${entered_command:1}"; then
+        debug "  \"$command\" is hidden - skipping"
+        continue
+    fi
+
     short=$(remove_extension "$command")
-    if has_duplicate "$short" "$command"; then
-        debug "  \"$command\" => \"$short\" is not unique - using full command name"
+
+    if [[ "$short" = "$command" ]]; then
+        debug "  \"$command\" can't be shortened"
+        unique_commands+=("$command")
+    elif has_duplicate "$short" "$command"; then
+        debug "  \"$short\" is not unique - using full command name \"$command\""
         unique_commands+=("$command")
     else
-        debug "  \"$command\" => \"$short\""
+        debug "  \"$command\" shortened to \"$short\""
         unique_commands+=("$short")
     fi
 done
@@ -83,7 +92,7 @@ get_command_aliases() {
     fi
 }
 
-debug_exit "Would list matching commands"
+debug_exit "Would list ${#unique_commands[@]} matching command(s)"
 
 echo "$TITLE$list_title$RESET"
 
@@ -102,10 +111,14 @@ for command in "${unique_commands[@]}"; do
     fi
 done
 
+if [[ ${#unique_commands[@]} -eq 0 ]]; then
+    echo 'None found'
+fi
+
 # List non-executable files, if any
 if [[ ${#non_executable_files[@]} -gt 0 ]]; then
     echo
-    echo "Not executable:"
+    echo "Warning: The following files are not executable (chmod +x):"
     for file in "${non_executable_files[@]}"; do
         echo "$file"
     done
