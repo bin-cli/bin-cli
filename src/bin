@@ -1,0 +1,884 @@
+#!/bin/env bash
+set -o errexit -o nounset -o pipefail
+
+################################################################################
+# Bin - A simple task runner        Copyright (c) 2023 Dave James Miller       #
+# https://bin-cli.com/              MIT License                                #
+################################################################################
+
+#===============================================================================
+# Constants
+#===============================================================================
+
+# Version (set by build script - don't change in source file)
+VERSION=1.2.3
+
+# ANSI codes
+if [[ -t 1 ]]; then
+    TITLE=$(printf "\e[97;1;4m") # White, bold, underline
+    ALIASES=$(printf "\e[90m") # Grey
+    RESET=$(printf "\e[0m")
+else
+    TITLE=''
+    ALIASES=''
+    RESET=''
+fi
+
+# The debug output always goes to a terminal, but indirectly
+DEBUG_LINE=$(printf "\e[90m")
+DEBUG_RESET=$(printf "\e[0m")
+
+# Exit codes
+ERR_NOT_EXECUTABLE=126
+ERR_NOT_FOUND=127
+ERR_GENERIC=246
+
+#===============================================================================
+# Output helpers
+#===============================================================================
+
+# This is a bit of a hack so we can use 'debug' from 'findup' without writing to stdout
+exec 4>&1
+
+debug() {
+    # Display debug data when using --debug (only after parsing parameters)
+    if ${debug-}; then
+        echo "$@" >&4
+    fi
+
+    # Output debug data to FD 3 when using the 'bin tdd' script in development
+    if { true >&3; } 2>/dev/null; then
+        local lines="${BASH_LINENO[*]}"
+        lines=${lines% 0}
+        echo "$@" "$DEBUG_LINE[line ${lines// /, }]$DEBUG_RESET" >&3
+    fi
+}
+
+debug_exit() {
+    debug "$@"
+    if $debug; then
+        exit
+    fi
+}
+
+fail() {
+    local message=$1
+    local code=${2-$ERR_GENERIC}
+
+    debug "Failed with message: $message"
+    debug_exit "Exit code: $code"
+
+    echo "$exe: $message" >&2
+    exit "$code"
+}
+
+bug() {
+    local lines="${BASH_LINENO[*]}"
+    lines=${lines% 0}
+    fail "BUG: $1 on line ${lines// /, }"
+}
+
+#===============================================================================
+# Parse parameters
+#===============================================================================
+
+action=''
+bin_dirname=''
+debug=false
+exact=''
+exe=${0##*/}
+error=''
+fallback=''
+shim=false
+version=false
+
+set_action() {
+    if [[ -n $action ]]; then
+        # Don't exit immediately because --exe may come after the parameter with the error
+        set_error "The '--$action' and '--$1' arguments are incompatible"
+    fi
+
+    action=$1
+}
+
+set_error() {
+    # Only display the first error encountered, as if we had exited immediately
+    if [[ -n $error ]]; then
+        error=$1
+    fi
+}
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --completion)
+            set_action completion
+            shift
+            ;;
+        --debug)
+            debug=true
+            shift
+            ;;
+        --dir)
+            bin_dirname=$2
+            shift 2
+            ;;
+        --exact)
+            exact=true
+            shift
+            ;;
+        --exe)
+            exe=$2
+            shift 2
+            ;;
+        --fallback)
+            fallback=$2
+            shift 2
+            ;;
+        --prefix)
+            exact=false
+            shift
+            ;;
+        --print)
+            set_action print
+            shift
+            ;;
+        --shim)
+            shim=true
+            shift
+            ;;
+        --version)
+            version=true
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+        --*)
+            fail "Invalid option '$1'"
+            ;;
+        *) break ;;
+    esac
+done
+
+if [[ -n $error ]]; then
+    fail "$error"
+fi
+
+#===============================================================================
+# Display version information
+#===============================================================================
+
+debug "Bin version $VERSION"
+
+if $version; then
+    debug_exit "Would print version number"
+    echo "Bin version $VERSION"
+    exit
+fi
+
+#===============================================================================
+# Tab completion
+#===============================================================================
+
+if [[ $action = 'completion' ]]; then
+    if [[ $exe = 'bin' ]]; then
+        echo '_bin() { TODO; }' # TODO
+        echo 'complete -F _bin bin'
+    else
+        echo "_bin_$exe() { TODO --dir ${bin_dirname-bin}; }" # TODO
+        echo "complete -F _bin_$exe $exe"
+    fi
+    exit
+fi
+
+#===============================================================================
+# Alias helpers
+#===============================================================================
+
+aliases=()
+declare -A alias_to_command
+declare -A alias_sources
+
+register_alias() {
+    local alias=$1
+    local command=$2
+    local source=$3
+
+    if [[ -n ${alias_to_command[$alias]-} ]]; then
+        fail "The alias '$alias' conflicts with an existing alias in $source (originally defined in ${alias_sources[$alias]})"
+    fi
+
+    aliases+=("$alias")
+    alias_to_command[$alias]=$command
+    alias_sources[$alias]=$source
+}
+
+process_aliases() {
+    for alias in "${aliases[@]}"; do
+        # Check for conflicts
+        if [[ -n "${command_to_executable[$alias]-}" ]]; then
+            fail "The alias '$alias' conflicts with an existing command in ${alias_sources[$alias]}"
+        fi
+
+        # Expand aliases to cover subcommands (e.g. if 'deploy'='push' then 'deploy live'='push live')
+        target=${alias_to_command[$alias]}
+        for command in "${commands[@]}"; do
+            if [[ "$command" = "$target "* ]]; then
+                suffix=${command:${#target}}
+                aliases+=("$alias$suffix")
+                alias_to_command[$alias$suffix]="$target$suffix"
+                debug "    Registered alias \"$alias$suffix\""
+            fi
+        done
+    done
+}
+
+#===============================================================================
+# Directory search helper
+#===============================================================================
+
+findup() (
+    while true; do
+        if test "$@"; then
+            debug "  $PWD - found"
+            echo "$PWD"
+            return 0
+        else
+            debug "  $PWD - not found"
+        fi
+
+        if [[ $PWD = '/' ]]; then
+            return 1
+        fi
+
+        cd ..
+
+    done
+)
+
+#===============================================================================
+# Locate config file
+#===============================================================================
+
+binconfig=''
+declare -A help
+
+debug "Working directory is $PWD"
+
+# Initial search & parse to find the dir= setting only
+# That way we don't need to "undo" everything we did if it doesn't match
+debug "Looking for a .binconfig file in"
+
+if root=$(findup -f .binconfig); then
+    binconfig="$root/.binconfig"
+    bin_dirname_from_config=''
+
+    debug "Checking $binconfig for a 'dir' setting"
+
+    line=0
+    while IFS='=' read -r key value; do
+        (( line+=1 ))
+
+        if [[ $key = '' || $key = '#'* ]]; then
+            # Skip blank lines & comments
+            :
+        elif [[ $key =~ ^\[(.+)]$ ]]; then
+            # [command]
+            debug "  Reached section $key - giving up"
+            break
+        elif [[ $key = 'dir' ]]; then
+            # dir=scripts
+            debug "  Found $key=$value"
+            bin_dirname_from_config=$value
+            break
+        fi
+    done < "$binconfig"
+
+    if [[ -z $bin_dirname_from_config ]]; then
+        debug "  Not found"
+    fi
+
+    if [[ $bin_dirname_from_config = /* ]]; then
+        fail "The option 'dir' cannot be an absolute path in $binconfig line $line"
+    elif [[ "$(realpath "$root/$bin_dirname_from_config")/" != "$root/"* ]]; then
+        fail "The option 'dir' cannot point to a directory outside $root in $binconfig line $line"
+    elif [[ -z $bin_dirname ]]; then
+        # If no directory was given at the command line, use the one from the config file
+        debug "  Using '$bin_dirname_from_config' from the config file"
+        bin_dirname=$bin_dirname_from_config
+    elif [[ "$bin_dirname_from_config" != "$bin_dirname" ]]; then
+        # If the directory given at the command line doesn't match the config file,
+        # ignore the rest of the config file, and don't treat this as the root
+        debug "  The config file setting '$bin_dirname_from_config' doesn't match the CLI setting '$bin_dirname' - ignoring config file"
+        binconfig=''
+    fi
+fi
+
+#===============================================================================
+# Parse config file
+#===============================================================================
+
+if [[ -n $binconfig ]]; then
+    debug "Parsing $binconfig"
+
+    command=''
+
+    line=0
+    while IFS='=' read -r key value; do
+        (( line+=1 ))
+
+        if [[ $key = '' || $key = '#'* ]]; then
+            # Skip blank lines & comments
+            :
+        elif [[ $key =~ ^\[(.+)]$ ]]; then
+            # [command]
+            command=${BASH_REMATCH[1]}
+            debug "  Found [$command] section"
+        elif [[ -z $command && $key = 'dir' ]]; then
+            # Already handled
+            :
+        elif [[ -z $command && $key = 'exact' ]]; then
+            # exact=true
+            if [[ -z $exact ]]; then
+                exact=$value
+                debug "  Set 'exact' to $exact"
+            else
+                debug "  Ignoring 'exact=$value' because it has already been set (in the CLI or config file)"
+            fi
+        elif [[ -z $command ]]; then
+            # Unknown keys don't trigger an error for forwards compatibility
+            debug "  Unknown key '$key'"
+        elif [[ ( $key = 'alias' || $key = 'aliases' ) ]]; then
+            # alias=blah
+            # aliases=blah1, blah2
+            IFS=',' read -ra line_aliases <<< "$value"
+            for alias in "${line_aliases[@]}"; do
+                alias=${alias// }
+                register_alias "$alias" "$command" "$binconfig line $line"
+                debug "    Registered alias \"$alias\""
+            done
+        elif [[ $key = 'help' ]]; then
+            # help=Description
+            help[$command]=$value
+            debug "    Registered help for \"$command\""
+        else
+            debug "    Unknown key '$key'"
+        fi
+    done < "$binconfig"
+fi
+
+# Default values, if not given at the command line or in the config file
+if [[ -z $bin_dirname ]]; then
+    bin_dirname=bin
+    debug "'dir' defaulted to '$bin_dirname'"
+fi
+
+if [[ -z $exact ]]; then
+    exact=false
+    debug "'exact' defaulted to '$exact'"
+fi
+
+#===============================================================================
+# Locate the bin/ directory
+#===============================================================================
+
+is_root_dir=false
+
+if [[ -n $binconfig ]]; then
+
+    # If a .binconfig file exists, that takes precedence
+    if [[ ${bin_dirname%%/} = '.' ]]; then
+        # Special case for the root directory (see docs)
+        bin_directory=$root
+        is_root_dir=true
+        debug "Bin directory set to '$bin_directory' (root) from config file"
+    else
+        bin_directory="${root%%/}/$bin_dirname"
+        debug "Bin directory set to '$bin_directory' from config file"
+    fi
+
+    if [[ ! -d $bin_directory ]]; then
+        fail "Found '$binconfig', but '$bin_directory/' directory is missing"
+    fi
+
+elif [[ $bin_dirname = '/'* ]]; then
+
+    # Absolute path given at the command line
+    bin_directory="$bin_dirname"
+    debug "Bin directory set to '$bin_directory' (absolute) from CLI"
+
+    if [[ ! -d $bin_directory ]]; then
+        fail "Specified directory '$bin_directory/' is missing"
+    fi
+
+else
+
+    # If there is no .binconfig, look for a bin/ directory instead (or other name specified with --dir)
+    debug "Looking for a $bin_dirname/ directory in"
+    if root=$(findup -d "$bin_dirname"); then
+        bin_directory="${root%%/}/$bin_dirname"
+        debug "Bin directory set to '$bin_directory'"
+    else
+        fail "Could not find '$bin_dirname/' directory or '.binconfig' file starting from '$PWD'" $ERR_NOT_FOUND
+    fi
+
+    # Check for special cases that we only allow with a matching .binconfig file
+    if [[
+        $bin_directory = '/bin' ||
+        $bin_directory = '/usr/bin' ||
+        $bin_directory = '/usr/local/bin' ||
+        $bin_directory = '/snap/bin' ||
+        $bin_directory = "$HOME/bin"
+    ]]; then
+        fail "Could not find '$bin_dirname/' directory or '.binconfig' file starting from '$PWD' (ignored '$bin_directory')" $ERR_NOT_FOUND
+    fi
+
+fi
+
+#===============================================================================
+# Find and register available commands
+#===============================================================================
+
+commands=()
+non_executable_files=()
+
+declare -A command_to_executable
+
+register_commands() {
+    local directory=$1
+    local prefix=${2-}
+
+    local file
+    local name
+
+    # Loop through the directory to find commands
+    for file in "$directory/"*; do
+        if [[ ! -e $file ]]; then
+            continue
+        fi
+
+        name=${file##*/} # Remove path
+
+        if [[ -d $file ]]; then
+            # Ignore subdirectories if scripts are in the root directory,
+            # because it could take a long time to search a large tree, and it's
+            # unlikely someone who keeps scripts in the root would also have
+            # some in subdirectories
+            if $is_root_dir; then
+                debug "  Ignored subdirectory '$file'"
+            else
+                debug "  Searching subdirectory '$file'"
+                register_commands "$file" "$prefix$name "
+            fi
+        elif [[ ! -x $file ]]; then
+            if ! $is_root_dir; then
+                non_executable_files+=("$file")
+            fi
+            debug "  Ignored non-executable file '$file'"
+        elif [[ "$name" == *' '* ]]; then
+            # Spaces in the name
+            commands+=("$prefix'$name'")
+            command_to_executable["$prefix'$name'"]=$file
+            debug "  Registered command \"$prefix'$name'\""
+        else
+            commands+=("$prefix$name")
+            command_to_executable["$prefix$name"]=$file
+            debug "  Registered command \"$prefix$name\""
+        fi
+    done
+}
+
+debug "Searching '$bin_directory' for scripts"
+register_commands "$bin_directory"
+
+debug "Processing aliases"
+process_aliases
+
+#===============================================================================
+# Helpers to match input to commands
+#===============================================================================
+
+in_array() {
+    local needle=$1
+    shift
+
+    for value in "$@"; do
+        if [[ "$value" = "$needle" ]]; then
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+command_matches() {
+    local type=$1
+    local target=$2
+    local command=$3
+
+    # Check for a match of the given type
+    if [[ $type = exact ]]; then
+        [[ "$command" = "$target" ]]
+    elif [[ $type = with-extension ]]; then
+        [[ "$command" = "$target".* ]]
+    elif [[ $type = subcommands ]]; then
+        [[ "$command" = "$target "* ]]
+    elif [[ $type = prefix ]]; then
+        [[ "$command" = "$target"* ]]
+    else
+        bug "Invalid \$type '$type' passed to command_matches()"
+    fi
+
+    # If it doesn't match, return false
+    # shellcheck disable=SC2181
+    if [[ $? -gt 0 ]]; then
+        debug "    No match for \"$command\""
+        return 1
+    fi
+
+    # If we're looking for subcommands, we want all of them at this point
+    if [[ $type = subcommands ]]; then
+        return 0
+    fi
+
+    # If it does match, we still need to filter out hidden subcommands
+    if is_hidden_command "$command" "$target"; then
+        debug "    Ignored hidden subcommand \"$command\""
+        return 1
+    fi
+
+    return 0
+}
+
+is_hidden_command() {
+    local command=$1
+    local target=${2-}
+
+    # We can't just match on $command, because it may be the parent command that is hidden
+    prefix_length=${#target}
+    if [[ $prefix_length -gt 0 ]]; then
+        command="${command:$prefix_length}"
+    else
+        command=" $command"
+    fi
+
+    # Technically this would break on a command containing a space followed by an underscore,
+    # like 'a _b' - but that's such an edge case I'm not going to complicate this any more!
+    [[ $command = *" _"* || $command = *" '_"* ]]
+}
+
+matching_commands=()
+
+find_matching_commands() {
+    local type=$1
+    local target=$2
+
+    debug "  Looking for command \"$target\" ($type)"
+
+    local -A commands_matching_aliases
+    local command
+
+    for alias in "${aliases[@]}"; do
+        if command_matches "$type" "$target" "$alias"; then
+            command=${alias_to_command[$alias]}
+            commands_matching_aliases[$command]=true
+            debug "    Found matching alias \"$alias\" for command \"$command\""
+        fi
+    done
+
+    matching_commands=()
+    for command in "${commands[@]}"; do
+        if ${commands_matching_aliases[$command]-false}; then
+            debug "    Found matching command \"$command\" (from alias)"
+            matching_commands+=("$command")
+        elif command_matches "$type" "$target" "$command"; then
+            debug "    Found matching command \"$command\""
+            matching_commands+=("$command")
+        fi
+    done
+}
+
+matching_commands_shared_prefix() {
+    local prefix=$1
+    local prefix_length=${#prefix}
+
+    local shared_next_command=''
+
+    for command in "${matching_commands[@]}"; do
+        # Remove the common prefix
+        local remaining=${command:$prefix_length}
+
+        if [[ ! $remaining = *' '* ]]; then
+            continue
+        fi
+
+        local next_command=${remaining/ *}
+
+        if [[ -z $shared_next_command ]]; then
+            shared_next_command=$next_command
+        elif [[ "$next_command" != "$shared_next_command" ]]; then
+            # Not unique
+            return 1
+        fi
+    done
+
+    if [[ -n $shared_next_command ]]; then
+        echo "$prefix$shared_next_command"
+    else
+        # No subcommands found
+        return 1
+    fi
+}
+
+#===============================================================================
+# Parse parameters and run the command
+#===============================================================================
+
+run_command() {
+    if [[ $action = 'print' ]]; then
+        debug_exit "Would print:" "$@"
+        echo "$@"
+        exit
+    else
+        debug_exit "Would execute:" "$@"
+        exec "$@"
+    fi
+}
+
+run_command_if_only_one_match() {
+    if [[ ${#matching_commands[@]} -eq 1 ]]; then
+        command=${matching_commands[0]}
+        executable=${command_to_executable[$command]}
+        export BIN_COMMAND="$exe$entered_command"
+        run_command "$executable" "$@"
+    else
+        debug "    There were ${#matching_commands[@]} matches - not running command"
+    fi
+}
+
+# If no command is given, we will list all available commands
+list_title='Available commands'
+list_commands=("${commands[@]}")
+
+# Loop through each argument until we find a matching command
+debug "Processing positional parameters"
+current_directory=$bin_directory
+entered_command=''
+
+while [[ $# -gt 0 ]]; do
+    command=$1
+    shift
+
+    # Build up the entered command in canonical format
+    if [[ $command = *' '* ]]; then
+        entered_command+=" '$command'"
+    else
+        entered_command+=" $command"
+    fi
+
+    # Check if there's an exact match - run it if so
+    find_matching_commands exact "${entered_command:1}"
+    run_command_if_only_one_match "$@"
+
+    # Check if there's an almost-exact match with an added extension - run it if so
+    find_matching_commands with-extension "${entered_command:1}"
+    run_command_if_only_one_match "$@"
+
+    # Check if there are any subcommands - move on to the next argument if so
+    find_matching_commands subcommands "${entered_command:1}"
+
+    if [[ ${#matching_commands[@]} -gt 0 ]]; then
+        current_directory="$current_directory/$command"
+        list_title='Available subcommands'
+        list_commands=("${matching_commands[@]}")
+        continue
+    fi
+
+    # If we haven't matched anything yet, check whether we should run a fallback instead
+    if $shim; then
+        debug "No command found - using shim"
+        # We want word splitting here - commands with spaces are quoted
+        # shellcheck disable=SC2086
+        run_command ${entered_command:1} "$@"
+    elif [[ -n $fallback ]]; then
+        debug "No command found - using fallback"
+        # We want word splitting here - the fallback command may contain spaces to separate arguments
+        # shellcheck disable=SC2086
+        run_command $fallback "$@"
+    fi
+
+    # Check if there are any prefix matches
+    # We need to check even with --exact so we can list them
+    find_matching_commands prefix "${entered_command:1}"
+
+    if parent=$(matching_commands_shared_prefix "${entered_command:1}"); then
+        # If all matching commands have the same parent command, pretend
+        # the user typed the full parent command, then continue parsing
+        current_directory="$current_directory/$parent"
+        entered_command=" $parent"
+        list_title='Available subcommands'
+        list_commands=("${matching_commands[@]}")
+        continue
+    fi
+
+    if $exact; then
+        debug "    Not running match (if any) because 'exact' is $exact"
+    else
+        run_command_if_only_one_match "$@"
+    fi
+
+    # If there were no prefix matches, stop searching
+    if [[ ${#matching_commands[@]} -eq 0 ]]; then
+        if $is_root_dir && [[ -d "$current_directory/$command" ]]; then
+            fail "Subcommands are not supported with the config option 'dir=$bin_dirname'"
+        fi
+        if [[ $command = .* && -e "$current_directory/$command" ]]; then
+            fail "Command names may not start with '.'"
+        fi
+        if [[ -f "$current_directory/$command" && ! -x "$current_directory/$command" ]]; then
+            fail "'$current_directory/$command' is not executable (chmod +x)" $ERR_NOT_EXECUTABLE
+        fi
+        fail "Command \"${entered_command:1}\" not found in $bin_directory" $ERR_NOT_FOUND
+    fi
+
+    # Otherwise display the list of matches
+    list_title='Matching commands'
+    list_commands=("${matching_commands[@]}")
+    break
+done
+
+#===============================================================================
+# List available/matching commands
+#===============================================================================
+
+# Remove the extensions, as long as they are unique
+remove_extension() {
+    # Can't use ${command%%.*} because it could remove too much ("a.b c" => "a" instead of "a.b")
+    # Can't use ${command%.*} because it could remove too little ("a.b.c" => "a.b" instead of "a")
+    local command="$1"
+
+    while [[ "$command" =~ (.*?)(\.[a-zA-Z0-9]+)+ ]]; do
+        command=${BASH_REMATCH[1]}
+    done
+
+    echo "$command"
+}
+
+has_duplicate() {
+    local short=$1
+    local long=$2
+
+    local command
+
+    for command in "${commands[@]}"; do
+        case "$command" in
+            # Ignore a match to itself
+            "$long") continue ;;
+            # Matched to the short command, but not the long one
+            "$short") return 0 ;;
+            "$short."*) return 0 ;;
+        esac
+    done
+
+    for alias in "${aliases[@]}"; do
+        case "$alias" in
+            "$short") return 0 ;;
+            "$short."*) return 0 ;;
+        esac
+    done
+
+    # No matches found
+    return 1
+}
+
+debug "Determining unique command names for listing"
+unique_commands=()
+
+for command in "${list_commands[@]}"; do
+    if $is_root_dir && [[ ${command_to_executable[$command]} =~ \.(json|md|txt|yaml|yml)$ ]]; then
+        debug "  Ignored common non-executable file type '${command_to_executable[$command]}' in root directory"
+        continue
+    fi
+
+    if is_hidden_command "$command" "${entered_command:1}"; then
+        debug "  \"$command\" is hidden - skipping"
+        continue
+    fi
+
+    short=$(remove_extension "$command")
+
+    if [[ "$short" = "$command" ]]; then
+        debug "  \"$command\" can't be shortened"
+        unique_commands+=("$command")
+    elif has_duplicate "$short" "$command"; then
+        debug "  \"$short\" is not unique - using full command name \"$command\""
+        unique_commands+=("$command")
+    else
+        debug "  \"$command\" shortened to \"$short\""
+        unique_commands+=("$short")
+    fi
+done
+
+# Calculate the maximum length of a command in the list so we can align the help text
+maxlength=0
+for command in "${unique_commands[@]}"; do
+    if [[ ${#command} -gt $maxlength ]]; then
+        maxlength=${#command}
+    fi
+done
+
+debug "Maximum matching command length is $maxlength"
+
+# Output the list
+get_command_aliases() {
+    local command=$1
+    local command_aliases=''
+    local command_alias_count=0
+
+    for alias in "${aliases[@]}"; do
+        local target=${alias_to_command[$alias]}
+        if [[ "$target" = "$command" ]]; then
+            (( command_alias_count+=1 ))
+            command_aliases+=", $alias"
+        fi
+    done
+
+    if [[ $command_alias_count -eq 1 ]]; then
+        echo "alias: ${command_aliases:2}"
+    elif [[ $command_alias_count -gt 1 ]]; then
+        echo "aliases: ${command_aliases:2}"
+    fi
+}
+
+debug_exit "Would list ${#unique_commands[@]} matching command(s)"
+
+echo "$TITLE$list_title$RESET"
+
+for command in "${unique_commands[@]}"; do
+    command_help=${help[$command]-}
+    command_aliases=$(get_command_aliases "$command")
+
+    if [[ -n $command_help && -n $command_aliases ]]; then
+        printf "%s %-${maxlength}s    %s\n" "$exe" "$command" "$command_help $ALIASES($command_aliases)$RESET"
+    elif [[ -n $command_help ]]; then
+        printf "%s %-${maxlength}s    %s\n" "$exe" "$command" "$command_help"
+    elif [[ -n $command_aliases ]]; then
+        printf "%s %-${maxlength}s    %s\n" "$exe" "$command" "$ALIASES($command_aliases)$RESET"
+    else
+        printf "%s %s\n" "$exe" "$command"
+    fi
+done
+
+if [[ ${#unique_commands[@]} -eq 0 ]]; then
+    echo 'None found'
+fi
+
+# List non-executable files, if any
+if [[ ${#non_executable_files[@]} -gt 0 ]]; then
+    echo
+    echo "Warning: The following files are not executable (chmod +x):"
+    for file in "${non_executable_files[@]}"; do
+        echo "$file"
+    done
+fi
