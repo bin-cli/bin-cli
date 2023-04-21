@@ -42,6 +42,11 @@ debug "Determining unique command names for listing"
 unique_commands=()
 
 for command in "${list_commands[@]}"; do
+    if $is_root_dir && [[ ${command_to_executable[$command]} =~ \.(json|md|txt|yaml|yml)$ ]]; then
+        debug "  Ignored common non-executable file type '${command_to_executable[$command]}' in root directory"
+        continue
+    fi
+
     if is_hidden_command "$command" "${entered_command:1}"; then
         debug "  \"$command\" is hidden - skipping"
         continue

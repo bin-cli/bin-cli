@@ -100,9 +100,9 @@ while [[ $# -gt 0 ]]; do
             fail "Command names may not start with '.'"
         fi
         if [[ -f "$current_directory/$command" && ! -x "$current_directory/$command" ]]; then
-            fail "'$current_directory/$command' is not executable (chmod +x)" 126
+            fail "'$current_directory/$command' is not executable (chmod +x)" $ERR_NOT_EXECUTABLE
         fi
-        fail "Command \"${entered_command:1}\" not found in $bin_directory" 127
+        fail "Command \"${entered_command:1}\" not found in $bin_directory" $ERR_NOT_FOUND
     fi
 
     # Otherwise display the list of matches

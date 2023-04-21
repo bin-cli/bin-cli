@@ -145,7 +145,7 @@ Feature: Automatic exclusions
     When I run 'bin hello'
     Then the exit code is 127
     And there is no output
-    And the error is "bin: Could not found 'bin' directory or '.binconfig' file from <workdir>"
+    And the error is "bin: Could not find 'bin/' directory or '.binconfig' file starting from '<workdir>' (ignored '<bin>')"
 
     Examples:
       | bin            | workdir                |
@@ -156,13 +156,12 @@ Feature: Automatic exclusions
       | /home/user/bin | /home/user/example     |
 
   Scenario Template: Common bin directories are not ignored if there is a .binconfig directory in the parent directory
-    Given a script '<bin>/hello'
+    Given a script '<bin>/hello' that outputs 'Hello, World!'
     And an empty file '<config>'
     And the working directory is '<workdir>'
     When I run 'bin hello'
-    Then the exit code is 127
-    And there is no output
-    And the error is "bin: Could not found 'bin' directory or '.binconfig' file from <workdir>"
+    Then it is successful
+    And the output is 'Hello, World!'
 
     Examples:
       | bin            | config                | workdir                |
@@ -171,20 +170,3 @@ Feature: Automatic exclusions
       | /snap/bin      | /snap/.binconfig      | /snap/example          |
       | /usr/local/bin | /usr/local/.binconfig | /usr/local/bin/example |
       | /home/user/bin | /home/user/.binconfig | /home/user/example     |
-
-  Scenario Template: Common bin directories are not ignored if there is a .binconfig directory in the bin directory
-    Given a script '<bin>/hello'
-    And an empty file '<config>'
-    And the working directory is '<workdir>'
-    When I run 'bin hello'
-    Then the exit code is 127
-    And there is no output
-    And the error is "bin: Could not found 'bin' directory or '.binconfig' file from <workdir>"
-
-    Examples:
-      | bin            | config                    | workdir                |
-      | /bin           | /bin/.binconfig           | /example               |
-      | /usr/bin       | /usr/bin/.binconfig       | /usr/example           |
-      | /snap/bin      | /snap/bin/.binconfig      | /snap/example          |
-      | /usr/local/bin | /usr/local/bin/.binconfig | /usr/local/bin/example |
-      | /home/user/bin | /home/user/bin/.binconfig | /home/user/example     |

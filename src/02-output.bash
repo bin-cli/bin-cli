@@ -36,12 +36,19 @@ debug_exit() {
     fi
 }
 
-fail() {
-    debug "Failed with message: $1"
-    debug_exit "Exit code: ${2-246}"
+ERR_NOT_EXECUTABLE=126
+ERR_NOT_FOUND=127
+ERR_GENERIC=246
 
-    echo "$exe: $1" >&2
-    exit "${2-246}"
+fail() {
+    local message=$1
+    local code=${2-$ERR_GENERIC}
+
+    debug "Failed with message: $message"
+    debug_exit "Exit code: $code"
+
+    echo "$exe: $message" >&2
+    exit "$code"
 }
 
 bug() {
