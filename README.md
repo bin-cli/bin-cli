@@ -358,7 +358,7 @@ However, subcommands will <u>not</u> be supported, because that would require se
 You can also set the root directory at the command line, which will override the config file:
 
 ```bash
-$ bin --root scripts
+$ bin --dir scripts
 ```
 
 In this case, it will search the parent directories as normal, and ignore the `root` setting in any `.binconfig` files it finds.
@@ -366,20 +366,20 @@ In this case, it will search the parent directories as normal, and ignore the `r
 This is mostly useful when defining a custom alias, to support repositories you don't control:
 
 ```bash
-alias scr='bin --exe scr --root scripts'
+alias scr='bin --exe scr --dir scripts'
 ```
 
 It can also be an absolute path - e.g. if you have some global scripts that you don't want to add to `$PATH`:
 
 ```bash
-alias dev="bin --exe dev --root $HOME/scripts/dev"
+alias dev="bin --exe dev --dir $HOME/scripts/dev"
 ```
 
 You can set up [tab completion](#tab-completion) too:
 
 ```bash
-eval "$(bin --completion --exe scr --root scripts)"
-eval "$(bin --completion --exe dev --root $HOME/scripts/dev)"
+eval "$(bin --completion --exe scr --dir scripts)"
+eval "$(bin --completion --exe dev --dir $HOME/scripts/dev)"
 ```
 
 ### Automatic shims
@@ -655,11 +655,11 @@ For more complex scripts, you may want to implement parameter parsing and help t
 Usage: bin [OPTIONS] [--] [COMMAND] [ARGUMENTS...]
 
 Options that can be used with a command:
+  --dir DIR             Specify the directory name to search for (overrides .binconfig)
   --exact               Disable unique prefix matching
   --exe NAME            Override the executable name displayed in the command list
   --fallback COMMAND    If the command is not found, run the given global command (implies '--exact')
   --prefix              Enable unique prefix matching (overrides .binconfig)
-  --root DIR            Specify the directory name to search for (overrides .binconfig)
   --shim                If the command is not found, run the global command with the same name (implies '--exact')
 
 Options that do something special:

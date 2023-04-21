@@ -12,7 +12,7 @@ Feature: Aliasing `b` to `bin`
       b hello
       """
 
-  Scenario: The executable name can be overridden with --exe
+  Scenario: The executable name can be overridden with environment variable BIN_EXE
     Given a script '/project/bin/hello'
     When I run 'bin --exe b'
     Then it is successful

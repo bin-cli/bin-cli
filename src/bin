@@ -37,12 +37,12 @@ ERR_GENERIC=246
 # Output helpers
 #===============================================================================
 
-# This is a bit of a hack so we can use 'debug' from 'findup' without writing to stdout
+# This is a bit of a hack so we can use 'debug' inside functions where stdout is redirected
 exec 4>&1
 
 debug() {
     # Display debug data when using --debug (only after parsing parameters)
-    if ${debug-}; then
+    if ${debug-false}; then
         echo "$@" >&4
     fi
 
@@ -56,7 +56,7 @@ debug() {
 
 debug_exit() {
     debug "$@"
-    if $debug; then
+    if ${debug-false}; then
         exit
     fi
 }
@@ -82,6 +82,28 @@ bug() {
 # Parse parameters
 #===============================================================================
 
+help() {
+    echo "Usage: bin [OPTIONS] [--] [COMMAND] [ARGUMENTS...]"
+    echo
+    echo "Options that can be used with a command:"
+    echo "  --dir DIR             Specify the directory name to search for (overrides .binconfig)"
+    echo "  --exact               Disable unique prefix matching"
+    echo "  --exe NAME            Override the executable name displayed in the command list"
+    echo "  --fallback COMMAND    If the command is not found, run the given global command (implies '--exact')"
+    echo "  --prefix              Enable unique prefix matching (overrides .binconfig)"
+    echo "  --shim                If the command is not found, run the global command with the same name (implies '--exact')"
+    echo
+    echo "Options that do something special:"
+    echo "  --completion          Output a tab completion script for the current shell"
+    echo "  --debug               Display debugging information instead of running a command"
+    echo "  --help, -h            Display this help"
+    echo "  --print               Output the command that would have been run, instead of running it"
+    echo "  --shell SHELL         Override the shell to use for '--completion' -- only 'bash' is currently supported"
+    echo "  --version, -v         Display the current version number and exit"
+    echo
+    echo "Any options must be given before the command, because everything after the command will be passed as parameters to the script."
+}
+
 action=''
 bin_dirname=''
 debug=false
@@ -90,11 +112,9 @@ exe=${0##*/}
 error=''
 fallback=''
 shim=false
-version=false
 
 set_action() {
     if [[ -n $action ]]; then
-        # Don't exit immediately because --exe may come after the parameter with the error
         set_error "The '--$action' and '--$1' arguments are incompatible"
     fi
 
@@ -102,8 +122,9 @@ set_action() {
 }
 
 set_error() {
-    # Only display the first error encountered, as if we had exited immediately
-    if [[ -n $error ]]; then
+    # Don't exit immediately because '--exe' may come after the parameter with the error
+    # But only display the first error encountered, as if we had exited immediately
+    if [[ -z $error ]]; then
         error=$1
     fi
 }
@@ -134,6 +155,10 @@ while [[ $# -gt 0 ]]; do
             fallback=$2
             shift 2
             ;;
+        --help|-h)
+            set_action help
+            shift
+            ;;
         --prefix)
             exact=false
             shift
@@ -146,15 +171,15 @@ while [[ $# -gt 0 ]]; do
             shim=true
             shift
             ;;
-        --version)
-            version=true
+        --version|-v)
+            set_action version
             shift
             ;;
         --)
             shift
             break
             ;;
-        --*)
+        -*)
             fail "Invalid option '$1'"
             ;;
         *) break ;;
@@ -166,12 +191,18 @@ if [[ -n $error ]]; then
 fi
 
 #===============================================================================
-# Display version information
+# Display help / version information
 #===============================================================================
 
 debug "Bin version $VERSION"
 
-if $version; then
+if [[ $action = 'help' ]]; then
+    debug_exit 'Would output help text'
+    help
+    exit
+fi
+
+if [[ $action = 'version' ]]; then
     debug_exit "Would print version number"
     echo "Bin version $VERSION"
     exit
