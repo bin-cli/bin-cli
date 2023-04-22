@@ -7,8 +7,7 @@ Feature: Config files
     And a script '/project/bin/hello' that outputs 'Hello, World!'
     And the working directory is '/project/root'
     When I run 'bin hello'
-    Then the exit code is 246
-    And there is no output
+    Then it fails with exit code 246
     And the error is "bin: Found '/project/root/.binconfig', but '/project/root/bin/' directory is missing"
 
   @undocumented

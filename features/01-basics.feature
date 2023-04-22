@@ -2,31 +2,19 @@ Feature: Basics
   https://github.com/bin-cli/bin#how-it-works
 
   Scenario: A script that is in the bin/ directory can be run without parameters
-    Given a script '/project/bin/hello' with content:
-      """sh
-      #!/usr/bin/sh
-      echo "Hello, ${1:-World}! [$#]"
-      """
+    Given a script '/project/bin/hello' that outputs "Hello, ${1:-World}! [$#]"
     When I run 'bin hello'
     Then it is successful
     And the output is 'Hello, World! [0]'
 
   Scenario: Scripts can be run with one parameter passed through
-    Given a script '/project/bin/hello' with content:
-      """sh
-      #!/usr/bin/sh
-      echo "Hello, ${1:-World}! [$#]"
-      """
+    Given a script '/project/bin/hello' that outputs "Hello, ${1:-World}! [$#]"
     When I run 'bin hello everybody'
     Then it is successful
     And the output is 'Hello, everybody! [1]'
 
   Scenario: Scripts can be run with multiple parameters passed through
-    Given a script '/project/bin/hello' with content:
-      """sh
-      #!/usr/bin/sh
-      echo "Hello, ${1:-World}! [$#]"
-      """
+    Given a script '/project/bin/hello' that outputs "Hello, ${1:-World}! [$#]"
     When I run 'bin hello everybody two three four'
     Then it is successful
     And the output is 'Hello, everybody! [4]'
@@ -65,8 +53,7 @@ Feature: Basics
       exit 123
       """
     When I run 'bin fail'
-    Then the exit code is 123
-    And there is no output
+    Then it fails with exit code 123
     And there is no error
 
   @undocumented

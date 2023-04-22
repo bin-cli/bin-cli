@@ -1,5 +1,5 @@
-import {AfterAll, BeforeAll} from '@cucumber/cucumber';
-import {emptyDir, exists, outputFile} from 'fs-extra';
+import {AfterAll, Before, BeforeAll} from '@cucumber/cucumber';
+import {emptyDir, exists} from 'fs-extra';
 import * as paths from './paths.mjs';
 import {spawnSync} from 'child_process';
 import {quote} from 'shell-quote';
@@ -14,6 +14,10 @@ export function nextId() {
 
 BeforeAll(async function () {
     await emptyDir(paths.coverage);
+});
+
+Before({tags: '@disable-kcov', name: 'Disable kcov'}, function () {
+    this.kcov = false;
 });
 
 AfterAll(async function () {
@@ -46,7 +50,7 @@ AfterAll(async function () {
     ]);
 
     const result = spawnSync(command, {
-        shell: true
+        shell: true,
     });
 
     if (result.error) {

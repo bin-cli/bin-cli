@@ -14,10 +14,6 @@ Given('the working directory is {string}', async function (directory) {
     this.workingDir = directory;
 });
 
-Given('kcov is disabled', function () {
-    this.kcov = false;
-});
-
 When('I run {string}', async function (command) {
 
     // Write the command to a file to be displayed by the 'bin/tdd' script if the test fails
@@ -97,6 +93,11 @@ Then('it is successful', function () {
     assert.equal(this.runResult.stderr, '');
     assert.equal(this.runResult.status, 0);
 });
+
+Then('it fails with exit code {int}', function (expected) {
+    assert.equal(this.runResult.stdout, '');
+    assert.equal(this.runResult.status, expected);
+})
 
 Then('the exit code is {int}', function (expected) {
     assert.equal(this.runResult.status, expected);

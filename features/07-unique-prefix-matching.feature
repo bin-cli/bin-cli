@@ -57,14 +57,10 @@ Feature: Unique prefix matching
 
   Scenario: Unique prefix matching works correctly with a single script in the directory
     # There is a risk that it is executed too soon because "d" is a unique prefix
-    Given a script '/project/bin/deploy/live' with content:
-      """
-      #!/usr/bin/bash
-      echo "Deploy $1"
-      """
+    Given a script '/project/bin/deploy/live' that outputs "Deploy: $1"
     When I run 'bin d l --force'
     Then it is successful
-    And the output is 'Deploy --force'
+    And the output is 'Deploy: --force'
 
   Scenario: Unique prefix matching works for directories when there are multiple matches
     Given a script '/project/bin/deploy/live'

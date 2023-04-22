@@ -5,8 +5,7 @@ Feature: Automatic shims
     Given an empty directory '/project/bin'
     And a script '/usr/bin/php' that outputs 'Hello from PHP'
     When I run 'bin php'
-    Then the exit code is 127
-    And there is no output
+    Then it fails with exit code 127
     And the error is 'bin: Command "php" not found in /project/bin'
 
   Scenario: When specifying --shim, the global command is used as a fallback

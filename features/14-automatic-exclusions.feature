@@ -111,8 +111,7 @@ Feature: Automatic exclusions
   Scenario: Scripts starting with '.' cannot be executed
     Given a script '/project/bin/.hidden'
     When I run 'bin .hidden'
-    Then the exit code is 246
-    And there is no output
+    Then it fails with exit code 246
     And the error is "bin: Command names may not start with '.'"
 
   Scenario: Files that are not executable are listed as warnings
@@ -132,8 +131,7 @@ Feature: Automatic exclusions
   Scenario: Files that are not executable cannot be executed
     Given an empty file '/project/bin/not-executable'
     When I run 'bin not-executable'
-    Then the exit code is 126
-    And there is no output
+    Then it fails with exit code 126
     And the error is "bin: '/project/bin/not-executable' is not executable (chmod +x)"
 
   Scenario: Non-executable files are not listed in the project root
@@ -175,8 +173,7 @@ Feature: Automatic exclusions
     Given a script '<bin>/hello'
     And the working directory is '<workdir>'
     When I run 'bin hello'
-    Then the exit code is 127
-    And there is no output
+    Then it fails with exit code 127
     And the error is "bin: Could not find 'bin/' directory or '.binconfig' file starting from '<workdir>' (ignored '<bin>')"
 
     Examples:

@@ -14,8 +14,7 @@ Feature: Custom script directory
     And a script '/project/scripts/hello'
     And the working directory is '/project/root'
     When I run 'bin hello'
-    Then the exit code is 246
-    And there is no output
+    Then it fails with exit code 246
     And the error is "bin: Found '/project/root/.binconfig', but '/project/root/scripts/' directory is missing"
 
   Scenario: Directories below .binconfig are not searched when root is specified in .binconfig
@@ -38,8 +37,7 @@ Feature: Custom script directory
     Given a file '/project/.binconfig' with content 'dir=.'
     And a script '/project/hello/world'
     When I run 'bin hello world'
-    Then the exit code is 246
-    And there is no output
+    Then it fails with exit code 246
     And the error is "bin: Subcommands are not supported with the config option 'dir=.'"
 
   Scenario: The root directory can be configured with --dir
@@ -75,8 +73,7 @@ Feature: Custom script directory
     Given a script '/project/scripts/hello' that outputs 'Hello, World!'
     And a file '/project/.binconfig' with content 'dir=/project/scripts'
     When I run 'bin hello'
-    Then the exit code is 246
-    And there is no output
+    Then it fails with exit code 246
     And the error is "bin: The option 'dir' cannot be an absolute path in /project/.binconfig line 1"
 
   @undocumented
@@ -85,8 +82,7 @@ Feature: Custom script directory
     And a file '/project/root/.binconfig' with content 'dir=../scripts'
     And the working directory is '/project/root'
     When I run 'bin hello'
-    Then the exit code is 246
-    And there is no output
+    Then it fails with exit code 246
     And the error is "bin: The option 'dir' cannot point to a directory outside /project/root in /project/root/.binconfig line 1"
 
   @undocumented
@@ -96,22 +92,19 @@ Feature: Custom script directory
     And a file '/project/root/.binconfig' with content 'dir=symlink'
     And the working directory is '/project/root'
     When I run 'bin hello'
-    Then the exit code is 246
-    And there is no output
+    Then it fails with exit code 246
     And the error is "bin: The option 'dir' cannot point to a directory outside /project/root in /project/root/.binconfig line 1"
 
   @undocumented
   Scenario: When --dir is a relative path, that directory is not expected to exist
     When I run 'bin --dir scripts hello'
-    Then the exit code is 127
-    And there is no output
+    Then it fails with exit code 127
     And the error is "bin: Could not find 'scripts/' directory or '.binconfig' file starting from '/project'"
 
   @undocumented
   Scenario: When --dir is an absolute path, that directory is expected to exist
     When I run 'bin --dir /missing hello'
-    Then the exit code is 246
-    And there is no output
+    Then it fails with exit code 246
     And the error is "bin: Specified directory '/missing/' is missing"
 
   @undocumented

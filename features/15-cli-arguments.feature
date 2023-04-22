@@ -29,15 +29,13 @@ Feature: CLI arguments
 
   Scenario: An invalid argument causes an error
     When I run 'bin --invalid'
-    Then the exit code is 246
-    And there is no output
+    Then it fails with exit code 246
     And the error is "bin: Invalid option '--invalid'"
 
   @undocumented
   Scenario Template: The <arg1> and <arg2> arguments are incompatible
     When I run 'bin <arg1> <arg2>'
-    Then the exit code is 246
-    And there is no output
+    Then it fails with exit code 246
     And the error is "bin: The '<arg1>' and '<arg2>' arguments are incompatible"
 
     # I haven't bothered to list all combinations here, just a few combinations

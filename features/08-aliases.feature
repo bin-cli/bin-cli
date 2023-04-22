@@ -141,8 +141,7 @@ Feature: Aliases
       alias=two
       """
     When I run 'bin'
-    Then the exit code is 246
-    And there is no output
+    Then it fails with exit code 246
     And the error is "bin: The alias 'two' conflicts with an existing command in /project/.binconfig line 2"
 
   Scenario: Defining an alias that conflicts with another alias causes an error
@@ -157,6 +156,5 @@ Feature: Aliases
       alias=three
       """
     When I run 'bin'
-    Then the exit code is 246
-    And there is no output
+    Then it fails with exit code 246
     And the error is "bin: The alias 'three' conflicts with an existing alias in /project/.binconfig line 5 (originally defined in /project/.binconfig line 2)"
