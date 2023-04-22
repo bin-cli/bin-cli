@@ -282,7 +282,7 @@ process_aliases() {
                 suffix=${command:${#target}}
                 aliases+=("$alias$suffix")
                 alias_to_command[$alias$suffix]="$target$suffix"
-                debug "    Registered alias \"$alias$suffix\""
+                debug "    Registered alias '$alias$suffix'"
             fi
         done
     done
@@ -410,12 +410,12 @@ if [[ -n $binconfig ]]; then
             for alias in "${line_aliases[@]}"; do
                 alias=${alias// /}
                 register_alias "$alias" "$command" "$binconfig line $line"
-                debug "    Registered alias \"$alias\""
+                debug "    Registered alias '$alias'"
             done
         elif [[ $key = 'help' ]]; then
             # help=Description
             help[$command]=$value
-            debug "    Registered help for \"$command\""
+            debug "    Registered help for '$command'"
         else
             # Unknown keys don't trigger an error for forwards compatibility (command)
             debug "    Unknown key '$key'"
@@ -508,6 +508,7 @@ register_commands() {
         fi
 
         name=${file##*/} # Remove path
+        name=${name// /-} # Spaces to dashes
 
         if [[ -d $file ]]; then
             # Ignore subdirectories if scripts are in the root directory,
@@ -518,27 +519,17 @@ register_commands() {
                 debug "  Ignored subdirectory '$file'"
             else
                 debug "  Searching subdirectory '$file'"
-                if [[ "$name" == *' '* ]]; then
-                    # Spaces in the name
-                    register_commands "$file" "$prefix'$name' "
-                else
-                    register_commands "$file" "$prefix$name "
-                fi
+                register_commands "$file" "$prefix$name "
             fi
         elif [[ ! -x $file ]]; then
             if ! $is_root_dir; then
                 non_executable_files+=("$file")
             fi
             debug "  Ignored non-executable file '$file'"
-        elif [[ "$name" == *' '* ]]; then
-            # Spaces in the name
-            commands+=("$prefix'$name'")
-            command_to_executable["$prefix'$name'"]=$file
-            debug "  Registered command \"$prefix'$name'\""
         else
             commands+=("$prefix$name")
             command_to_executable["$prefix$name"]=$file
-            debug "  Registered command \"$prefix$name\""
+            debug "  Registered command '$prefix$name'"
         fi
     done
 }
@@ -574,7 +565,7 @@ command_matches() {
     # If it doesn't match, return false
     # shellcheck disable=SC2181
     if [[ $? -gt 0 ]]; then
-        debug "    No match for \"$command\""
+        debug "    No match for '$command'"
         return 1
     fi
 
@@ -604,7 +595,7 @@ find_matching_commands() {
     local type=$1
     local target=$2
 
-    debug "  Looking for command \"$target\" ($type)"
+    debug "  Looking for command '$target' ($type)"
 
     local -A commands_matching_aliases
     local command
@@ -613,17 +604,17 @@ find_matching_commands() {
         if command_matches "$type" "$target" "$alias"; then
             command=${alias_to_command[$alias]}
             commands_matching_aliases[$command]=true
-            debug "    Found matching alias \"$alias\" for command \"$command\""
+            debug "    Found matching alias '$alias' for command '$command'"
         fi
     done
 
     matching_commands=()
     for command in "${commands[@]}"; do
         if ${commands_matching_aliases[$command]-false}; then
-            debug "    Found matching command \"$command\" (from alias)"
+            debug "    Found matching command '$command' (from alias)"
             matching_commands+=("$command")
         elif command_matches "$type" "$target" "$command"; then
-            debug "    Found matching command \"$command\""
+            debug "    Found matching command '$command'"
             matching_commands+=("$command")
         fi
     done
@@ -745,7 +736,7 @@ while [[ $# -gt 0 ]]; do
     if ! $exact && parent=$(matching_commands_shared_prefix "${entered_command:1}"); then
         # If all matching commands have the same parent command, pretend
         # the user typed the full parent command, then continue parsing
-        debug "  Expanding partial match to \"$parent\""
+        debug "  Expanding partial match to '$parent'"
         current_directory="$current_directory/$parent"
         entered_command=" $parent"
         list_title='Matching commands'
@@ -770,7 +761,7 @@ while [[ $# -gt 0 ]]; do
         if [[ -f "$current_directory/$command" && ! -x "$current_directory/$command" ]]; then
             fail "'$current_directory/$command' is not executable (chmod +x)" $ERR_NOT_EXECUTABLE
         fi
-        fail "Command \"${entered_command:1}\" not found in $bin_directory" $ERR_NOT_FOUND
+        fail "Command '${entered_command:1}' not found in $bin_directory" $ERR_NOT_FOUND
     fi
 
     # Otherwise display the list of matches
@@ -832,20 +823,20 @@ for command in "${list_commands[@]}"; do
     fi
 
     if is_hidden_command "$command" "${entered_command:1}"; then
-        debug "  \"$command\" is hidden - skipping"
+        debug "  '$command' is hidden - skipping"
         continue
     fi
 
     short=$(remove_extension "$command")
 
     if [[ "$short" = "$command" ]]; then
-        debug "  \"$command\" can't be shortened"
+        debug "  '$command' can't be shortened"
         unique_commands+=("$command")
     elif has_duplicate "$short" "$command"; then
-        debug "  \"$short\" is not unique - using full command name \"$command\""
+        debug "  '$short' is not unique - using full command name '$command'"
         unique_commands+=("$command")
     else
-        debug "  \"$command\" shortened to \"$short\""
+        debug "  '$command' shortened to '$short'"
         unique_commands+=("$short")
     fi
 done
