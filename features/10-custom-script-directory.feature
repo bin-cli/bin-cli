@@ -88,7 +88,7 @@ Feature: Custom script directory
   @undocumented
   Scenario: The 'root' option cannot point to a symlink to a parent directory in .binconfig
     Given a script '/project/scripts/hello' that outputs 'Hello, World!'
-    And a symlink '/project/root/symlink' pointing to '/project/scripts'
+    And a symlink '/project/root/symlink' pointing to '../scripts'
     And a file '/project/root/.binconfig' with content 'dir=symlink'
     And the working directory is '/project/root'
     When I run 'bin hello'

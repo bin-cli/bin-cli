@@ -142,7 +142,7 @@ Feature: Aliases
       """
     When I run 'bin'
     Then it fails with exit code 246
-    And the error is "bin: The alias 'two' conflicts with an existing command in /project/.binconfig line 2"
+    And the error is "bin: The alias 'two' defined in /project/.binconfig line 2 conflicts with an existing command"
 
   Scenario: Defining an alias that conflicts with another alias causes an error
     Given a script '/project/bin/one'
@@ -157,4 +157,48 @@ Feature: Aliases
       """
     When I run 'bin'
     Then it fails with exit code 246
-    And the error is "bin: The alias 'three' conflicts with an existing alias in /project/.binconfig line 5 (originally defined in /project/.binconfig line 2)"
+    And the error is "bin: The alias 'three' defined in /project/.binconfig line 5 conflicts with the alias defined in /project/.binconfig line 2"
+
+  Scenario: An alias can be defined by a symlink
+    Given a script '/project/bin/deploy' that outputs 'Copying to production...'
+    And a symlink '/project/bin/publish' pointing to 'deploy'
+    When I run 'bin'
+    Then it is successful
+    And the output is:
+      """
+      Available commands
+      bin deploy    (alias: publish)
+      """
+
+  Scenario: A directory alias can be defined by a symlink
+    Given a script '/project/bin/deploy/live'
+    And a script '/project/bin/deploy/staging'
+    And a symlink '/project/bin/publish' pointing to 'deploy'
+    When I run 'bin'
+    Then it is successful
+    And the output is:
+      """
+      Available commands
+      bin deploy live       (alias: publish live)
+      bin deploy staging    (alias: publish staging)
+      """
+
+  Scenario: Defining an alias that conflicts with a symlink alias causes an error
+    Given a script '/project/bin/one'
+    And a script '/project/bin/two'
+    And a symlink '/project/bin/three' pointing to 'one'
+    And a file '/project/.binconfig' with content:
+      """
+      [two]
+      alias=three
+      """
+    When I run 'bin'
+    Then it fails with exit code 246
+    And the error is "bin: The alias 'three' defined in /project/bin/three conflicts with the alias defined in /project/.binconfig line 2"
+
+  Scenario: A symlink alias must be relative not absolute
+    Given a script '/project/bin/one'
+    And a symlink '/project/bin/two' pointing to '/project/bin/one'
+    When I run 'bin'
+    Then it fails with exit code 246
+    And the error is "bin: The symlink '/project/bin/two' must use a relative path, not absolute ('/project/bin/one')"

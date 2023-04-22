@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -o errexit -o nounset -o pipefail
+shopt -s nullglob
 
 ################################################################################
 # Bin - A simple task runner        Copyright (c) 2023 Dave James Miller       #
@@ -252,27 +253,61 @@ fi
 
 aliases=()
 declare -A alias_to_command
+declare -A alias_to_executable
 declare -A alias_sources
 
-register_alias() {
+register_command_alias() {
     local alias=$1
     local command=$2
     local source=$3
 
-    if [[ -n ${alias_to_command[$alias]-} ]]; then
-        fail "The alias '$alias' conflicts with an existing alias in $source (originally defined in ${alias_sources[$alias]})"
+    if [[ -n ${alias_sources[$alias]-} ]]; then
+        fail "The alias '$alias' defined in $source conflicts with the alias defined in ${alias_sources[$alias]}"
     fi
 
     aliases+=("$alias")
     alias_to_command[$alias]=$command
     alias_sources[$alias]=$source
+
+    debug "  Registered alias '$alias' for command '$command'"
+}
+
+register_executable_alias() {
+    local alias=$1
+    local executable=$2
+    local source=$3
+
+    if [[ -n ${alias_sources[$alias]-} ]]; then
+        fail "The alias '$alias' defined in $source conflicts with the alias defined in ${alias_sources[$alias]}"
+    fi
+
+    aliases+=("$alias")
+    alias_to_executable[$alias]=$executable
+    alias_sources[$alias]=$source
+
+    debug "  Registered alias '$alias' for executable '$executable'"
 }
 
 process_aliases() {
+    # Match symlink aliases with their commands
+    debug "Processing symlink aliases"
+
+    local alias
+    for alias in "${!alias_to_executable[@]}"; do
+        local executable=${alias_to_executable[$alias]-}
+        if [[ -n $executable ]]; then
+            local command=${executable_to_command[$executable]-}
+            alias_to_command[$alias]=$command
+            debug "  Registered alias '$alias' for executable '$executable' to command '$command'"
+        fi
+    done
+
+    debug "Processing directory aliases and checking for conflicts"
+
     for alias in "${aliases[@]}"; do
         # Check for conflicts
         if [[ -n "${command_to_executable[$alias]-}" ]]; then
-            fail "The alias '$alias' conflicts with an existing command in ${alias_sources[$alias]}"
+            fail "The alias '$alias' defined in ${alias_sources[$alias]} conflicts with an existing command"
         fi
 
         # Expand aliases to cover subcommands (e.g. if 'deploy'='push' then 'deploy live'='push live')
@@ -282,7 +317,7 @@ process_aliases() {
                 suffix=${command:${#target}}
                 aliases+=("$alias$suffix")
                 alias_to_command[$alias$suffix]="$target$suffix"
-                debug "    Registered alias '$alias$suffix'"
+                debug "    Registered alias '$alias$suffix' for command '$target$suffix'"
             fi
         done
     done
@@ -355,7 +390,7 @@ if root=$(findup -f .binconfig); then
 
     if [[ $bin_dirname_from_config = /* ]]; then
         fail "The option 'dir' cannot be an absolute path in $binconfig line $line"
-    elif [[ "$(realpath "$root/$bin_dirname_from_config")/" != "$root/"* ]]; then
+    elif [[ "$(realpath "$root/$bin_dirname_from_config")/" != "$(realpath "$root")/"* ]]; then
         fail "The option 'dir' cannot point to a directory outside $root in $binconfig line $line"
     elif [[ -z $bin_dirname ]]; then
         # If no directory was given at the command line, use the one from the config file
@@ -409,7 +444,7 @@ if [[ -n $binconfig ]]; then
             IFS=',' read -ra line_aliases <<<"$value"
             for alias in "${line_aliases[@]}"; do
                 alias=${alias// /}
-                register_alias "$alias" "$command" "$binconfig line $line"
+                register_command_alias "$alias" "$command" "$binconfig line $line"
                 debug "    Registered alias '$alias'"
             done
         elif [[ $key = 'help' ]]; then
@@ -493,6 +528,7 @@ commands=()
 non_executable_files=()
 
 declare -A command_to_executable
+declare -A executable_to_command
 
 register_commands() {
     local directory=$1
@@ -500,17 +536,22 @@ register_commands() {
 
     local file
     local name
+    local target
 
     # Loop through the directory to find commands
     for file in "$directory/"*; do
-        if [[ ! -e $file ]]; then
-            continue
-        fi
+        realfile="$(realpath "$file")"
 
         name=${file##*/} # Remove path
         name=${name// /-} # Spaces to dashes
 
-        if [[ -d $file ]]; then
+        if [[ -L $file ]]; then
+            target=$(readlink "$file")
+            if [[ $target = /* ]]; then
+                fail "The symlink '$file' must use a relative path, not absolute ('$target')"
+            fi
+            register_executable_alias "$prefix$name" "$realfile" "$file"
+        elif [[ -d $file ]]; then
             # Ignore subdirectories if scripts are in the root directory,
             # because it could take a long time to search a large tree, and it's
             # unlikely someone who keeps scripts in the root would also have
@@ -518,6 +559,8 @@ register_commands() {
             if $is_root_dir; then
                 debug "  Ignored subdirectory '$file'"
             else
+                debug "  Registered subdirectory '$file' to parent command '$prefix$name'"
+                executable_to_command[$realfile]="$prefix$name"
                 debug "  Searching subdirectory '$file'"
                 register_commands "$file" "$prefix$name "
             fi
@@ -528,8 +571,9 @@ register_commands() {
             debug "  Ignored non-executable file '$file'"
         else
             commands+=("$prefix$name")
-            command_to_executable["$prefix$name"]=$file
-            debug "  Registered command '$prefix$name'"
+            command_to_executable["$prefix$name"]=$realfile
+            executable_to_command[$realfile]="$prefix$name"
+            debug "  Registered command '$prefix$name' for executable '$realfile'"
         fi
     done
 }
@@ -537,7 +581,6 @@ register_commands() {
 debug "Searching '$bin_directory' for scripts"
 register_commands "$bin_directory"
 
-debug "Processing aliases"
 process_aliases
 
 #===============================================================================
@@ -671,7 +714,7 @@ run_command_if_only_one_match() {
     if [[ ${#matching_commands[@]} -eq 1 ]]; then
         command=${matching_commands[0]}
         executable=${command_to_executable[$command]}
-        export BIN_COMMAND="$exe$entered_command"
+        export BIN_COMMAND="$exe$full_command"
         run_command "$executable" "$@"
     else
         debug "    There were ${#matching_commands[@]} matches - not running command"
@@ -685,32 +728,28 @@ list_commands=("${commands[@]}")
 # Loop through each argument until we find a matching command
 debug "Processing positional parameters"
 current_directory=$bin_directory
-entered_command=''
+full_command=''
 
 while [[ $# -gt 0 ]]; do
-    command=$1
+    subcommand=$1
     shift
 
     # Build up the entered command in canonical format
-    if [[ $command = *' '* ]]; then
-        entered_command+=" '$command'"
-    else
-        entered_command+=" $command"
-    fi
+    full_command+=" $subcommand"
 
     # Check if there's an exact match - run it if so
-    find_matching_commands exact "${entered_command:1}"
+    find_matching_commands exact "${full_command:1}"
     run_command_if_only_one_match "$@"
 
     # Check if there's an almost-exact match with an added extension - run it if so
-    find_matching_commands with-extension "${entered_command:1}"
+    find_matching_commands with-extension "${full_command:1}"
     run_command_if_only_one_match "$@"
 
     # Check if there are any subcommands - move on to the next argument if so
-    find_matching_commands subcommands "${entered_command:1}"
+    find_matching_commands subcommands "${full_command:1}"
 
     if [[ ${#matching_commands[@]} -gt 0 ]]; then
-        current_directory="$current_directory/$command"
+        current_directory="$current_directory/$subcommand"
         list_title='Available subcommands'
         list_commands=("${matching_commands[@]}")
         continue
@@ -721,7 +760,7 @@ while [[ $# -gt 0 ]]; do
         debug "No command found - using shim"
         # We want word splitting here - commands with spaces are quoted
         # shellcheck disable=SC2086
-        run_command ${entered_command:1} "$@"
+        run_command ${full_command:1} "$@"
     elif [[ -n $fallback ]]; then
         debug "No command found - using fallback"
         # We want word splitting here - the fallback command may contain spaces to separate arguments
@@ -731,14 +770,14 @@ while [[ $# -gt 0 ]]; do
 
     # Check if there are any prefix matches
     # We need to check even with --exact so we can list them
-    find_matching_commands prefix "${entered_command:1}"
+    find_matching_commands prefix "${full_command:1}"
 
-    if ! $exact && parent=$(matching_commands_shared_prefix "${entered_command:1}"); then
+    if ! $exact && parent=$(matching_commands_shared_prefix "${full_command:1}"); then
         # If all matching commands have the same parent command, pretend
         # the user typed the full parent command, then continue parsing
         debug "  Expanding partial match to '$parent'"
         current_directory="$current_directory/$parent"
-        entered_command=" $parent"
+        full_command=" $parent"
         list_title='Matching commands'
         list_commands=("${matching_commands[@]}")
         continue
@@ -752,16 +791,16 @@ while [[ $# -gt 0 ]]; do
 
     # If there were no prefix matches, stop searching
     if [[ ${#matching_commands[@]} -eq 0 ]]; then
-        if $is_root_dir && [[ -d "$current_directory/$command" ]]; then
+        if $is_root_dir && [[ -d "$current_directory/$subcommand" ]]; then
             fail "Subcommands are not supported with the config option 'dir=$bin_dirname'"
         fi
-        if [[ $command = .* && -e "$current_directory/$command" ]]; then
+        if [[ $subcommand = .* && -e "$current_directory/$subcommand" ]]; then
             fail "Command names may not start with '.'"
         fi
-        if [[ -f "$current_directory/$command" && ! -x "$current_directory/$command" ]]; then
-            fail "'$current_directory/$command' is not executable (chmod +x)" $ERR_NOT_EXECUTABLE
+        if [[ -f "$current_directory/$subcommand" && ! -x "$current_directory/$subcommand" ]]; then
+            fail "'$current_directory/$subcommand' is not executable (chmod +x)" $ERR_NOT_EXECUTABLE
         fi
-        fail "Command '${entered_command:1}' not found in $bin_directory" $ERR_NOT_FOUND
+        fail "Command '${full_command:1}' not found in $bin_directory" $ERR_NOT_FOUND
     fi
 
     # Otherwise display the list of matches
@@ -822,7 +861,7 @@ for command in "${list_commands[@]}"; do
         continue
     fi
 
-    if is_hidden_command "$command" "${entered_command:1}"; then
+    if is_hidden_command "$command" "${full_command:1}"; then
         debug "  '$command' is hidden - skipping"
         continue
     fi

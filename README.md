@@ -290,7 +290,18 @@ alias=stage
 
 Here, `bin push live` and `bin publish` would both be aliases for `bin deploy live`.
 
-Aliases are listed alongside the help text when you run `bin` with no parameters (or with an ambiguous prefix). For example:
+Alternatively, you can use symlinks to define aliases:
+
+```bash
+$ cd bin
+$ ln -s deploy push
+$ ln -s deploy/live publish
+$ ln -s deploy/staging stage
+```
+
+Be sure to use relative targets, not absolute ones, so they work in any location. (Absolute targets will be rejected, for safety.)
+
+In either case, aliases are listed alongside the help text when you run `bin` with no parameters (or with a non-unique prefix). For example:
 
 ```bash
 $ bin

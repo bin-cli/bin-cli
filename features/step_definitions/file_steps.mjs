@@ -1,8 +1,12 @@
 import {Given} from '@cucumber/cucumber';
-import {createSymlink, ensureDir, outputFile} from 'fs-extra';
-import {dirname, relative} from 'path';
+import * as fs from 'fs';
+import {ensureDir, outputFile} from 'fs-extra';
+import {dirname} from 'path';
+import {promisify} from 'util';
 import requireAbsolutePath from '../support/requireAbsolutePath.mjs';
 import * as paths from '../support/paths.mjs';
+
+const symlink = promisify(fs.symlink);
 
 Given('an empty directory {string}', async function (directory) {
     requireAbsolutePath(directory);
@@ -41,6 +45,7 @@ Given('a file {string} with content {string}', async function (file, content) {
 
 Given('a symlink {string} pointing to {string}', async function (link, target) {
     requireAbsolutePath(link);
-    requireAbsolutePath(target);
-    await createSymlink(relative(dirname(paths.jail + link), paths.jail + target), paths.jail + link);
+    await ensureDir(dirname(paths.jail + link));
+    // Can't use createSymlink() from 'fs-extra' because it requires target to exist locally
+    await symlink(target, paths.jail + link);
 });
