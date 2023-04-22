@@ -20,3 +20,32 @@ Feature: Config files
     When I run 'bin hello'
     Then it is successful
     And the output is 'Right'
+
+  @undocumented
+  Scenario: Both '#' and ';' denote comments
+    Given a file '/project/.binconfig' with content:
+      """
+      ; Comment 1
+      # Comment 2
+
+      dir=scripts
+      """
+    And a script '/project/scripts/hello' that outputs 'Hello, World!'
+    When I run 'bin hello'
+    Then it is successful
+    And the output is 'Hello, World!'
+
+  @undocumented
+  Scenario: Unknown keys are ignored for forwards compatibility
+    Given a file '/project/.binconfig' with content:
+      """
+      ignored=global
+      dir=scripts
+
+      [command]
+      ignored=command
+      """
+    And a script '/project/scripts/hello' that outputs 'Hello, World!'
+    When I run 'bin hello'
+    Then it is successful
+    And the output is 'Hello, World!'

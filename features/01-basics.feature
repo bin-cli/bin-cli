@@ -82,6 +82,17 @@ Feature: Basics
     And the error is 'Something is wrong'
 
   @undocumented
+  Scenario: If there are no scripts, it outputs "None found"
+    Given an empty directory '/project/bin'
+    When I run 'bin'
+    Then it is successful
+    And the output is:
+      """
+      Available commands
+      None found
+      """
+
+  @undocumented
   Scenario: Filenames may contain spaces
     Given a script '/project/bin/hello world' that outputs 'Hello, World!'
     When I run 'bin "hello world"'

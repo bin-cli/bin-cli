@@ -15,12 +15,16 @@ VERSION=1.2.3
 
 # ANSI codes
 if [[ -t 1 ]]; then
+    # kcov-ignore-start: There is never a terminal connected during unit tests
     TITLE=$(printf "\e[97;1;4m") # White, bold, underline
-    ALIASES=$(printf "\e[90m") # Grey
+    WARNING=$(printf "\e[33m")
+    GREY=$(printf "\e[90m")
     RESET=$(printf "\e[0m")
+    # kcov-ignore-end
 else
     TITLE=''
-    ALIASES=''
+    WARNING=''
+    GREY=''
     RESET=''
 fi
 
@@ -32,6 +36,23 @@ DEBUG_RESET=$(printf "\e[0m")
 ERR_NOT_EXECUTABLE=126
 ERR_NOT_FOUND=127
 ERR_GENERIC=246
+
+#===============================================================================
+# General helpers
+#===============================================================================
+
+in_array() {
+    local needle=$1
+    shift
+
+    for value in "$@"; do
+        if [[ "$value" = "$needle" ]]; then
+            return 0
+        fi
+    done
+
+    return 1
+}
 
 #===============================================================================
 # Output helpers
@@ -47,7 +68,7 @@ debug() {
     fi
 
     # Output debug data to FD 3 when using the 'bin tdd' script in development
-    if { true >&3; } 2>/dev/null; then
+    if { true >&3; } 2>/dev/null; then # kcov-ignore-line: Usage not detected
         local lines="${BASH_LINENO[*]}"
         lines=${lines% 0}
         echo "$@" "$DEBUG_LINE[line ${lines// /, }]$DEBUG_RESET" >&3
@@ -73,9 +94,11 @@ fail() {
 }
 
 bug() {
+    # kcov-ignore-start: This should never be needed!
     local lines="${BASH_LINENO[*]}"
     lines=${lines% 0}
     fail "BUG: $1 on line ${lines// /, }"
+    # kcov-ignore-end
 }
 
 #===============================================================================
@@ -155,7 +178,7 @@ while [[ $# -gt 0 ]]; do
             fallback=$2
             shift 2
             ;;
-        --help|-h)
+        --help | -h)
             set_action help
             shift
             ;;
@@ -171,7 +194,7 @@ while [[ $# -gt 0 ]]; do
             shim=true
             shift
             ;;
-        --version|-v)
+        --version | -v)
             set_action version
             shift
             ;;
@@ -309,9 +332,9 @@ if root=$(findup -f .binconfig); then
 
     line=0
     while IFS='=' read -r key value; do
-        (( line+=1 ))
+        ((line += 1))
 
-        if [[ $key = '' || $key = '#'* ]]; then
+        if [[ $key = '' || $key = '#'* || $key = ';'* ]]; then
             # Skip blank lines & comments
             :
         elif [[ $key =~ ^\[(.+)]$ ]]; then
@@ -324,7 +347,7 @@ if root=$(findup -f .binconfig); then
             bin_dirname_from_config=$value
             break
         fi
-    done < "$binconfig"
+    done <"$binconfig" # kcov-ignore-line: Usage not detected
 
     if [[ -z $bin_dirname_from_config ]]; then
         debug "  Not found"
@@ -357,9 +380,9 @@ if [[ -n $binconfig ]]; then
 
     line=0
     while IFS='=' read -r key value; do
-        (( line+=1 ))
+        ((line += 1))
 
-        if [[ $key = '' || $key = '#'* ]]; then
+        if [[ $key = '' || $key = '#'* || $key = ';'* ]]; then
             # Skip blank lines & comments
             :
         elif [[ $key =~ ^\[(.+)]$ ]]; then
@@ -378,14 +401,14 @@ if [[ -n $binconfig ]]; then
                 debug "  Ignoring 'exact=$value' because it has already been set (in the CLI or config file)"
             fi
         elif [[ -z $command ]]; then
-            # Unknown keys don't trigger an error for forwards compatibility
+            # Unknown keys don't trigger an error for forwards compatibility (global)
             debug "  Unknown key '$key'"
-        elif [[ ( $key = 'alias' || $key = 'aliases' ) ]]; then
+        elif [[ ($key = 'alias' || $key = 'aliases') ]]; then
             # alias=blah
             # aliases=blah1, blah2
-            IFS=',' read -ra line_aliases <<< "$value"
+            IFS=',' read -ra line_aliases <<<"$value"
             for alias in "${line_aliases[@]}"; do
-                alias=${alias// }
+                alias=${alias// /}
                 register_alias "$alias" "$command" "$binconfig line $line"
                 debug "    Registered alias \"$alias\""
             done
@@ -394,9 +417,10 @@ if [[ -n $binconfig ]]; then
             help[$command]=$value
             debug "    Registered help for \"$command\""
         else
+            # Unknown keys don't trigger an error for forwards compatibility (command)
             debug "    Unknown key '$key'"
         fi
-    done < "$binconfig"
+    done <"$binconfig" # kcov-ignore-line: Usage not detected
 fi
 
 # Default values, if not given at the command line or in the config file
@@ -455,13 +479,7 @@ else
     fi
 
     # Check for special cases that we only allow with a matching .binconfig file
-    if [[
-        $bin_directory = '/bin' ||
-        $bin_directory = '/usr/bin' ||
-        $bin_directory = '/usr/local/bin' ||
-        $bin_directory = '/snap/bin' ||
-        $bin_directory = "$HOME/bin"
-    ]]; then
+    if in_array $bin_directory '/bin' '/usr/bin' '/usr/local/bin' '/snap/bin' "$HOME/bin"; then
         fail "Could not find '$bin_dirname/' directory or '.binconfig' file starting from '$PWD' (ignored '$bin_directory')" $ERR_NOT_FOUND
     fi
 
@@ -530,19 +548,6 @@ process_aliases
 # Helpers to match input to commands
 #===============================================================================
 
-in_array() {
-    local needle=$1
-    shift
-
-    for value in "$@"; do
-        if [[ "$value" = "$needle" ]]; then
-            return 0
-        fi
-    done
-
-    return 1
-}
-
 command_matches() {
     local type=$1
     local target=$2
@@ -558,24 +563,13 @@ command_matches() {
     elif [[ $type = prefix ]]; then
         [[ "$command" = "$target"* ]]
     else
-        bug "Invalid \$type '$type' passed to command_matches()"
+        bug "Invalid \$type '$type' passed to command_matches()" # kcov-ignore-line: This should never be happen
     fi
 
     # If it doesn't match, return false
     # shellcheck disable=SC2181
     if [[ $? -gt 0 ]]; then
         debug "    No match for \"$command\""
-        return 1
-    fi
-
-    # If we're looking for subcommands, we want all of them at this point
-    if [[ $type = subcommands ]]; then
-        return 0
-    fi
-
-    # If it does match, we still need to filter out hidden subcommands
-    if is_hidden_command "$command" "$target"; then
-        debug "    Ignored hidden subcommand \"$command\""
         return 1
     fi
 
@@ -644,7 +638,7 @@ matching_commands_shared_prefix() {
             continue
         fi
 
-        local next_command=${remaining/ *}
+        local next_command=${remaining/ */}
 
         if [[ -z $shared_next_command ]]; then
             shared_next_command=$next_command
@@ -743,12 +737,13 @@ while [[ $# -gt 0 ]]; do
     # We need to check even with --exact so we can list them
     find_matching_commands prefix "${entered_command:1}"
 
-    if parent=$(matching_commands_shared_prefix "${entered_command:1}"); then
+    if ! $exact && parent=$(matching_commands_shared_prefix "${entered_command:1}"); then
         # If all matching commands have the same parent command, pretend
         # the user typed the full parent command, then continue parsing
+        debug "  Expanding partial match to \"$parent\""
         current_directory="$current_directory/$parent"
         entered_command=" $parent"
-        list_title='Available subcommands'
+        list_title='Matching commands'
         list_commands=("${matching_commands[@]}")
         continue
     fi
@@ -806,17 +801,16 @@ has_duplicate() {
         case "$command" in
             # Ignore a match to itself
             "$long") continue ;;
-            # Matched to the short command, but not the long one
+                # Matched to the short command, but not the long one
             "$short") return 0 ;;
             "$short."*) return 0 ;;
         esac
     done
 
     for alias in "${aliases[@]}"; do
-        case "$alias" in
-            "$short") return 0 ;;
-            "$short."*) return 0 ;;
-        esac
+        if [[ "$alias" = "$short" ]]; then
+            return 0
+        fi
     done
 
     # No matches found
@@ -870,7 +864,7 @@ get_command_aliases() {
     for alias in "${aliases[@]}"; do
         local target=${alias_to_command[$alias]}
         if [[ "$target" = "$command" ]]; then
-            (( command_alias_count+=1 ))
+            ((command_alias_count += 1))
             command_aliases+=", $alias"
         fi
     done
@@ -891,24 +885,24 @@ for command in "${unique_commands[@]}"; do
     command_aliases=$(get_command_aliases "$command")
 
     if [[ -n $command_help && -n $command_aliases ]]; then
-        printf "%s %-${maxlength}s    %s\n" "$exe" "$command" "$command_help $ALIASES($command_aliases)$RESET"
+        printf "%s %-${maxlength}s    %s\n" "$exe" "$command" "$command_help $GREY($command_aliases)$RESET"
     elif [[ -n $command_help ]]; then
         printf "%s %-${maxlength}s    %s\n" "$exe" "$command" "$command_help"
     elif [[ -n $command_aliases ]]; then
-        printf "%s %-${maxlength}s    %s\n" "$exe" "$command" "$ALIASES($command_aliases)$RESET"
+        printf "%s %-${maxlength}s    %s\n" "$exe" "$command" "$GREY($command_aliases)$RESET"
     else
         printf "%s %s\n" "$exe" "$command"
     fi
 done
 
 if [[ ${#unique_commands[@]} -eq 0 ]]; then
-    echo 'None found'
+    echo "${GREY}None found${RESET}"
 fi
 
 # List non-executable files, if any
 if [[ ${#non_executable_files[@]} -gt 0 ]]; then
     echo
-    echo "Warning: The following files are not executable (chmod +x):"
+    echo "${WARNING}Warning: The following files are not executable (chmod +x):${RESET}"
     for file in "${non_executable_files[@]}"; do
         echo "$file"
     done

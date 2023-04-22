@@ -18,7 +18,7 @@ Feature: Automatic exclusions
     Then it is successful
     And the output is 'Hidden script'
 
-  Scenario: Subcommands starting with '_' are excluded from listings
+  Scenario: Subcommands starting with '_' are excluded from listings of subcommands
     Given a script '/project/bin/sub/visible'
     And a script '/project/bin/sub/_hidden'
     When I run 'bin sub'
@@ -29,13 +29,33 @@ Feature: Automatic exclusions
       bin sub visible
       """
 
+  Scenario: Subcommands starting with '_' are not executed even if they are the only match
+    Given a script '/project/bin/sub/_hidden'
+    When I run 'bin s'
+    Then it is successful
+    And the output is:
+      """
+      Matching commands
+      None found
+      """
+
+  Scenario: Subcommands starting with '_' are excluded from listings of partial matches
+    Given a script '/project/bin/sub/visible'
+    And a script '/project/bin/sub/_hidden'
+    When I run 'bin --exact s'
+    Then it is successful
+    And the output is:
+      """
+      Matching commands
+      bin sub visible
+      """
+
   Scenario: Subcommands starting with '_' can be executed
     Given a script '/project/bin/sub/_hidden' that outputs 'Hidden script'
     When I run 'bin sub _hidden'
     Then it is successful
     And the output is 'Hidden script'
 
-  @undocumented
   Scenario: Directories starting with '_' are excluded from listings
     Given a script '/project/bin/visible'
     And a script '/project/bin/_sub/child'
@@ -47,7 +67,6 @@ Feature: Automatic exclusions
       bin visible
       """
 
-  @undocumented
   Scenario: Commands in directories starting with '_' can be executed
     Given a script '/project/bin/_sub/child' that outputs 'Hidden script'
     When I run 'bin _sub child'
@@ -57,11 +76,24 @@ Feature: Automatic exclusions
   @undocumented
   Scenario: Commands in directories starting with '_' are listed when the directory name is given
     Given a script '/project/bin/_sub/child'
+    Given a script '/project/bin/_sub/_hidden'
     When I run 'bin _sub'
     Then it is successful
     And the output is:
       """
       Available subcommands
+      bin _sub child
+      """
+
+  @undocumented
+  Scenario: Commands in directories starting with '_' are listed when the prefix is given
+    Given a script '/project/bin/_sub/child'
+    And a script '/project/bin/_sub/_hidden'
+    When I run 'bin _'
+    Then it is successful
+    And the output is:
+      """
+      Matching commands
       bin _sub child
       """
 

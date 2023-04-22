@@ -101,6 +101,20 @@ Feature: Custom script directory
     And the error is "bin: The option 'dir' cannot point to a directory outside /project/root in /project/root/.binconfig line 1"
 
   @undocumented
+  Scenario: When --dir is a relative path, that directory is not expected to exist
+    When I run 'bin --dir scripts hello'
+    Then the exit code is 127
+    And there is no output
+    And the error is "bin: Could not find 'scripts/' directory or '.binconfig' file starting from '/project'"
+
+  @undocumented
+  Scenario: When --dir is an absolute path, that directory is expected to exist
+    When I run 'bin --dir /missing hello'
+    Then the exit code is 246
+    And there is no output
+    And the error is "bin: Specified directory '/missing/' is missing"
+
+  @undocumented
   Scenario: When --dir matches .binconfig, .binconfig should be parsed as normal
     Given a file '/project/.binconfig' with content:
       """

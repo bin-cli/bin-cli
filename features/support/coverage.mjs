@@ -36,6 +36,8 @@ AfterAll(async function () {
         '-c',
         [
             'kcov',
+            '--exclude-line=kcov-ignore-line',
+            '--exclude-region=kcov-ignore-start:kcov-ignore-end',
             '--path-strip-level=0',
             '--merge',
             `/coverage/merged`,
