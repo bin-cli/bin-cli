@@ -518,7 +518,12 @@ register_commands() {
                 debug "  Ignored subdirectory '$file'"
             else
                 debug "  Searching subdirectory '$file'"
-                register_commands "$file" "$prefix$name "
+                if [[ "$name" == *' '* ]]; then
+                    # Spaces in the name
+                    register_commands "$file" "$prefix'$name' "
+                else
+                    register_commands "$file" "$prefix$name "
+                fi
             fi
         elif [[ ! -x $file ]]; then
             if ! $is_root_dir; then
