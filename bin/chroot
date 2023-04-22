@@ -9,7 +9,7 @@ if [[ ! -x jail/usr/bin/sh ]]; then
 fi
 
 # Copy some additional executables that are useful
-cp /usr/bin/{ls,rm} jail/usr/bin/
+cp /usr/bin/{cat,ls,rm} jail/usr/bin/
 
 # Enter the jail - using Bash rather than Dash by default, for user-friendliness
 export HOME=/home/user
