@@ -4,7 +4,7 @@ Feature: Basics
   Scenario: A script that is in the bin/ directory can be run without parameters
     Given a script '/project/bin/hello' with content:
       """sh
-      #!/bin/sh
+      #!/usr/bin/sh
       echo "Hello, ${1:-World}! [$#]"
       """
     When I run 'bin hello'
@@ -14,7 +14,7 @@ Feature: Basics
   Scenario: Scripts can be run with one parameter passed through
     Given a script '/project/bin/hello' with content:
       """sh
-      #!/bin/sh
+      #!/usr/bin/sh
       echo "Hello, ${1:-World}! [$#]"
       """
     When I run 'bin hello everybody'
@@ -24,7 +24,7 @@ Feature: Basics
   Scenario: Scripts can be run with multiple parameters passed through
     Given a script '/project/bin/hello' with content:
       """sh
-      #!/bin/sh
+      #!/usr/bin/sh
       echo "Hello, ${1:-World}! [$#]"
       """
     When I run 'bin hello everybody two three four'
@@ -61,7 +61,7 @@ Feature: Basics
   Scenario: The exit code from the command is passed through
     Given a script '/project/bin/fail' with content:
       """sh
-      #!/bin/sh
+      #!/usr/bin/sh
       exit 123
       """
     When I run 'bin fail'
@@ -73,7 +73,7 @@ Feature: Basics
   Scenario: The error from the command is passed through
     Given a script '/project/bin/warn' with content:
       """sh
-      #!/bin/sh
+      #!/usr/bin/sh
       echo "Something is wrong" >&2
       """
     When I run 'bin warn'

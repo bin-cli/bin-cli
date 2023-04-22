@@ -1,4 +1,5 @@
 /.idea/
+/coverage/
 /dist/
+/jail/
 /node_modules/
-/tmp/

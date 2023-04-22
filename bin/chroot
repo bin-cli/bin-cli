@@ -1,17 +1,17 @@
-#!/bin/env bash
+#!/usr/bin/env bash
 set -o errexit -o nounset -o pipefail
 cd "$(dirname "$0")/.."
 
 # Check that the jail exists
-if [[ ! -x tmp/bin/sh ]]; then
+if [[ ! -x jail/usr/bin/sh ]]; then
     echo "The test jail doesn't exist - try running bin/test with a test tagged '@exit'" >&2
     exit 1
 fi
 
 # Copy some additional executables that are useful
-cp /bin/ls tmp/bin/
+cp /usr/bin/{ls,rm} jail/usr/bin/
 
 # Enter the jail - using Bash rather than Dash by default, for user-friendliness
 export HOME=/home/user
-export PATH=/usr/local/bin:/usr/bin:/bin
-exec fakechroot chroot tmp sh -c "cd /project && ${*:-bash}"
+export PATH=/usr/bin
+exec fakechroot chroot jail sh -c "cd /project; ${*:-bash}"

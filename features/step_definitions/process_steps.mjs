@@ -1,35 +1,67 @@
 import {Given, Then, When} from '@cucumber/cucumber';
 import {strict as assert} from 'assert';
 import {spawnSync} from 'child_process';
-import {ensureDir, outputFile} from 'fs-extra';
+import {ensureDir, exists, outputFile} from 'fs-extra';
 import {quote} from 'shell-quote';
 import requireAbsolutePath from '../support/requireAbsolutePath.mjs';
+import {move} from 'fs-extra/lib/move/index.js';
+import * as paths from '../support/paths.mjs';
+import * as coverage from '../support/coverage.mjs';
 
 Given('the working directory is {string}', async function (directory) {
     requireAbsolutePath(directory);
-    await ensureDir(this.jailDir + directory);
+    await ensureDir(paths.jail + directory);
     this.workingDir = directory;
+});
+
+Given('kcov is disabled', function () {
+    this.kcov = false;
 });
 
 When('I run {string}', async function (command) {
 
     // Write the command to a file to be displayed by the 'bin/tdd' script if the test fails
-    await outputFile(this.jailDir + '/command.txt', `cd ${this.workingDir}\n${command}\n`);
+    await outputFile(paths.jail + '/command.txt', `cd ${this.workingDir}\n${command}\n`);
 
-    const fullCommand = quote([
+    // Use kcov to measure code coverage
+    let kcovId;
+
+    if (this.kcov) {
+        await ensureDir(`${paths.jail}/coverage`);
+
+        kcovId = coverage.nextId();
+
+        command = [
+            'kcov',
+            '--bash-parser=/usr/bin/bash',
+            // Using --collect-only doesn't work in kcov 38
+            // https://github.com/SimonKagstrom/kcov/issues/342
+            // '--collect-only',
+            // --debug-force-bash-stderr seems to be required to pass through the stdout/stderr
+            // https://github.com/SimonKagstrom/kcov/issues/362#issuecomment-962489973
+            '--debug-force-bash-stderr',
+            '--include-path=/usr/bin/bin',
+            '--path-strip-level=0',
+            `/coverage/result-${kcovId}`,
+        ].join(' ') + ' ' + command;
+    }
+
+    // Use chroot to create a self-contained environment not affected by the local system contents
+    // Use fakechroot so it works as a normal user, rather than requiring sudo
+    command = quote([
         'fakechroot',
-        // 'fakeroot',
+        // 'fakeroot', // Not needed, and breaks kcov
         'chroot',
-        this.jailDir,
-        '/bin/sh',
+        paths.jail,
+        '/usr/bin/sh',
         '-c',
         quote(['cd', this.workingDir]) + ' && ' + command,
     ]);
 
-    const result = spawnSync(fullCommand, {
+    const result = spawnSync(command, {
         env: {
             HOME: '/home/user',
-            PATH: '/usr/local/bin:/usr/bin:/bin',
+            PATH: '/usr/bin',
         },
         shell: true,
         stdio: ['pipe', 'pipe', 'pipe', 'pipe'],
@@ -44,15 +76,20 @@ When('I run {string}', async function (command) {
 
     // Write the output to files to be displayed by the 'bin/tdd' script if the test fails
     const stdout = result.stdout.toString();
-    await outputFile(this.jailDir + '/stdout.txt', stdout);
+    await outputFile(`${paths.jail}/stdout.txt`, stdout);
 
     const stderr = result.stderr.toString();
-    await outputFile(this.jailDir + '/stderr.txt', stderr);
+    await outputFile(`${paths.jail}/stderr.txt`, stderr);
 
     const debugLog = result.output[3].toString();
-    await outputFile(this.jailDir + '/debug.txt', debugLog);
+    await outputFile(`${paths.jail}/debug.txt`, debugLog);
 
-    this.runResult = { status, stdout, stderr };
+    this.runResult = {status, stdout, stderr};
+
+    // Stash the code coverage results for merging later
+    if (this.kcov && await exists(`${paths.jail}/coverage/result-${kcovId}`)) {
+        await move(`${paths.jail}/coverage/result-${kcovId}`, `${paths.coverage}/result-${kcovId}`);
+    }
 });
 
 Then('it is successful', function () {

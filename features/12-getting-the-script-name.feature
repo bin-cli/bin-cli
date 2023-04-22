@@ -4,7 +4,7 @@ Feature: Getting the script name
   Background:
     Given a script '/project/bin/sample' with content:
       """sh
-      #!/bin/sh
+      #!/usr/bin/sh
       echo "Usage: ${BIN_COMMAND:-$0} [...]"
       """
 

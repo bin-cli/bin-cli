@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/usr/bin/env bash
 set -o errexit -o nounset -o pipefail
 cd "$(dirname "$0")/.."
 
@@ -18,28 +18,28 @@ while true; do
         npx cucumber-js --fail-fast --publish-quiet
     ) || true
 
-    if [[ -f tmp/command.txt ]]; then
+    if [[ -f jail/command.txt ]]; then
         echo
         echo -e "${LMAGENTA}${BOLD}${UNDERLINE}Command${RESET}"
-        cat tmp/command.txt
+        cat jail/command.txt
     fi
 
-    if [[ -f tmp/stdout.txt ]]; then
+    if [[ -f jail/stdout.txt ]]; then
         echo
         echo -e "${LGREEN}${BOLD}${UNDERLINE}Output${RESET}"
-        cat tmp/stdout.txt
+        cat jail/stdout.txt
     fi
 
-    if [[ -f tmp/stderr.txt ]]; then
+    if [[ -f jail/stderr.txt ]]; then
         echo
         echo -e "${LRED}${BOLD}${UNDERLINE}Errors${RESET}"
-        cat tmp/stderr.txt
+        cat jail/stderr.txt
     fi
 
-    if [[ -f tmp/debug.txt ]]; then
+    if [[ -f jail/debug.txt ]]; then
         echo
         echo -e "${LCYAN}${BOLD}${UNDERLINE}Debug log${RESET}"
-        cat tmp/debug.txt
+        cat jail/debug.txt
     fi
 
     inotifywait \
