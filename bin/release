@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+set -o errexit -o nounset -o pipefail
+cd "$(dirname "$0")/.."
+
+# This is a quick and temporary script until I have time to set up GitHub Actions
+
+RESET="\e[0m"
+LRED="\e[91m"
+LCYAN="\e[96m"
+
+version=${1-}
+
+if [[ -z $version || $version = '--help' || $version = '-h' ]]; then
+    echo "Usage: ${BIN_COMMAND-$0} <version>"
+    exit
+fi
+
+if [[ -n $(git status --porcelain) ]]; then
+    echo -e "${LRED}Error: There are uncommitted local changes${RESET}" >&2
+    exit 1
+fi
+
+if [[ -n $(cd && git status --porcelain) ]]; then
+    echo -e "${LRED}Error: There are uncommitted changes in Dotfiles${RESET}" >&2
+    exit 1
+fi
+
+echo -e "${LCYAN}Building test version...${RESET}"
+bin/build
+echo
+
+echo -e "${LCYAN}Testing...${RESET}"
+bin/test
+echo
+
+echo -e "${LCYAN}Building release version...${RESET}"
+bin/build "$version"
+echo
+
+echo -e "${LCYAN}Tagging in Git...${RESET}"
+git tag "$version"
+git push origin "$version"
+echo
+
+echo -e "${LCYAN}Copying to Dotfiles...${RESET}"
+cp dist/bin ~/.bin/bin
+(
+    cd
+    git add .bin/bin
+    git commit -m "Upgrade to Bin $version"
+    git push
+)
+echo
+
+echo -e "${LCYAN}Manual release${RESET}"
+echo "https://github.com/bin-cli/bin/releases/new?tag=$version"
