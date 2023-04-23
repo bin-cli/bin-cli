@@ -20,9 +20,9 @@ Feature: Unique prefix matching
       bin hi
       """
 
-  Scenario: Unique prefix matching can be disabled in .binconfig
+  Scenario Template: Unique prefix matching can be disabled in .binconfig using 'exact=<value>'
     Given a script '/project/bin/hello'
-    Given a file '/project/.binconfig' with content 'exact=true'
+    And a file '/project/.binconfig' with content 'exact=<value>'
     When I run 'bin hel'
     Then it is successful
     And the output is:
@@ -30,6 +30,29 @@ Feature: Unique prefix matching
       Matching commands
       bin hello
       """
+
+    Examples:
+      | value |
+      | true  |
+      | TRUE  |
+      | on    |
+      | yes   |
+      | 1     |
+
+  Scenario Template: Unique prefix matching can be explicitly enabled in .binconfig using 'exact=<value>'
+    Given a script '/project/bin/hello' that outputs 'Hello, World!'
+    And a file '/project/.binconfig' with content 'exact=<value>'
+    When I run 'bin hel'
+    Then it is successful
+    And the output is 'Hello, World!'
+
+    Examples:
+      | value |
+      | false |
+      | FALSE |
+      | off   |
+      | no    |
+      | 0     |
 
   Scenario: Unique prefix matching can be disabled with --exact
     Given a script '/project/bin/hello'

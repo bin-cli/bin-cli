@@ -443,7 +443,11 @@ if [[ -n $binconfig ]]; then
         elif [[ -z $command && $key = 'exact' ]]; then
             # exact=true
             if [[ -z $exact ]]; then
-                exact=$value
+                if in_array "${value,,}" 'false' 'no' 'off' '0'; then
+                    exact=false
+                else
+                    exact=true
+                fi
                 debug "  Set 'exact' to $exact"
             else
                 debug "  Ignoring 'exact=$value' because it has already been set (in the CLI or config file)"
