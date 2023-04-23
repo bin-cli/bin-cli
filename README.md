@@ -424,7 +424,7 @@ Both of these options imply `--exact` - i.e. [unique prefix matching](#unique-pr
 *Bin* will set the environment variable `$BIN_COMMAND` to the command that was executed, for use in help messages:
 
 ```bash
-echo "Usage: ${BIN_COMMAND:-$0} [...]"
+echo "Usage: ${BIN_COMMAND-$0} [...]"
 ```
 
 For example, if you ran `bin sample -h`, it would be set to `bin sample`, so would output:
@@ -445,7 +445,7 @@ If something doesn't seem to be working (or you're not sure why it works the way
 
 ```bash
 $ bin --debug --shim php -v
-Bin version 1.2.3
+Bin version 1.2.3-dev
 Working directory is /project/public/
 Looking for a .binconfig file in:
   /project/public/.binconfig - not found

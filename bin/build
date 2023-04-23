@@ -2,8 +2,22 @@
 set -o errexit -o nounset -o pipefail
 cd "$(dirname "$0")/.."
 
-# For now, this is just a simple copy. I expect to add further build steps in
-# the future, to generate the man page, set the version, etc.
+default_version='1.2.3-dev'
+version=${1-$default_version}
+
+if [[ $version = '--help' || $version = '-h' ]]; then
+    echo "Usage: ${BIN_COMMAND-$0} [version=$default_version]"
+    exit
+fi
 
 mkdir -p dist
-cp src/bin dist/bin
+
+gawk \
+    "{
+        if (\$0 ~ /VERSION=.*/)
+            print \"VERSION='$version'\"
+        else
+            print
+    }" \
+    src/bin \
+    > dist/bin

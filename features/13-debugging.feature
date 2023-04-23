@@ -29,7 +29,7 @@ Feature: Debugging
     Then it is successful
     And the output is:
       """
-      Bin version 1.2.3
+      Bin version 1.2.3-dev
       Working directory is /project/public
       Looking for a .binconfig file in:
         /project/public - not found

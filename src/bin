@@ -12,7 +12,7 @@ shopt -s nullglob
 #===============================================================================
 
 # Version (set by build script - don't change in source file)
-VERSION=1.2.3
+VERSION='1.2.3-dev'
 
 # ANSI codes
 if [[ -t 1 ]]; then
