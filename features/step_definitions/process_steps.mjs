@@ -14,10 +14,21 @@ Given('the working directory is {string}', async function (directory) {
     this.workingDir = directory;
 });
 
-When('I run {string}', async function (command) {
+async function run(command, env = {}) {
+    // Merge with default environment vars
+    env = {
+        HOME: '/home/user',
+        PATH: '/usr/bin',
+        ...env,
+    };
 
     // Write the command to a file to be displayed by the 'bin/tdd' script if the test fails
-    await outputFile(paths.jail + '/command.txt', `cd ${this.workingDir}\n${command}\n`);
+    let env_string = '';
+    for (let [key, value] of Object.entries(env)) {
+        env_string += `${key}='${value}' \\\n`;
+    }
+
+    await outputFile(paths.jail + '/command.txt', `cd ${this.workingDir}\n${env_string}${command}\n`);
 
     // Use kcov to measure code coverage
     let kcovId;
@@ -55,10 +66,7 @@ When('I run {string}', async function (command) {
     ]);
 
     const result = spawnSync(command, {
-        env: {
-            HOME: '/home/user',
-            PATH: '/usr/bin',
-        },
+        env,
         shell: true,
         stdio: ['pipe', 'pipe', 'pipe', 'pipe'],
         timeout: 1_000,
@@ -86,6 +94,15 @@ When('I run {string}', async function (command) {
     if (this.kcov && await exists(`${paths.jail}/coverage/result-${kcovId}`)) {
         await move(`${paths.jail}/coverage/result-${kcovId}`, `${paths.coverage}/result-${kcovId}`);
     }
+};
+
+When('I run {string}', run);
+
+When('I tab complete {string}', function (input) {
+    const COMP_POINT = input.includes('|') ? input.indexOf('|') : input.length;
+    const COMP_LINE = input.slice(0, COMP_POINT) + input.slice(COMP_POINT + 1);
+
+    return run.call(this, 'bin --complete-bash', {COMP_LINE, COMP_POINT});
 });
 
 Then('it is successful', function () {
@@ -97,7 +114,7 @@ Then('it is successful', function () {
 Then('it fails with exit code {int}', function (expected) {
     assert.equal(this.runResult.stdout, '');
     assert.equal(this.runResult.status, expected);
-})
+});
 
 Then('the exit code is {int}', function (expected) {
     assert.equal(this.runResult.status, expected);

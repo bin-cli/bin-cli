@@ -90,6 +90,10 @@ fail() {
     debug "Failed with message: $message"
     debug_exit "Exit code: $code"
 
+    if [[ $action = 'complete-bash' ]]; then
+        exit
+    fi
+
     echo "$exe: $message" >&2
     exit "$code"
 }
@@ -155,6 +159,10 @@ set_error() {
 
 while [[ $# -gt 0 ]]; do
     case $1 in
+        --complete-bash)
+            set_action complete-bash
+            shift
+            ;;
         --completion)
             set_action completion
             shift
@@ -220,6 +228,10 @@ fi
 
 debug "Bin version $VERSION"
 
+if [[ -n $action ]]; then
+    debug "Action set to '$action'"
+fi
+
 if [[ $action = 'help' ]]; then
     debug_exit 'Would output help text'
     help
@@ -233,17 +245,18 @@ if [[ $action = 'version' ]]; then
 fi
 
 #===============================================================================
-# Tab completion
+# Tab completion script generator
 #===============================================================================
 
 if [[ $action = 'completion' ]]; then
-    if [[ $exe = 'bin' ]]; then
-        echo '_bin() { TODO; }' # TODO
-        echo 'complete -F _bin bin'
-    else
-        echo "_bin_$exe() { TODO --dir ${bin_dirname-bin}; }" # TODO
-        echo "complete -F _bin_$exe $exe"
+    command=("$(realpath "$0")" --complete-bash)
+    if [[ -n $bin_dirname ]]; then
+        command+=("--dir" "'$bin_dirname'")
     fi
+    if [[ $exe != 'bin' ]]; then
+        command+=("--exe" "'$exe'")
+    fi
+    echo "complete -C \"${command[*]}\" -o default $exe"
     exit
 fi
 
@@ -357,7 +370,7 @@ debug "Working directory is $PWD"
 
 # Initial search & parse to find the dir= setting only
 # That way we don't need to "undo" everything we did if it doesn't match
-debug "Looking for a .binconfig file in"
+debug "Looking for a .binconfig file in:"
 
 if root=$(findup -f .binconfig); then
     binconfig="$root/.binconfig"
@@ -505,7 +518,7 @@ elif [[ $bin_dirname = '/'* ]]; then
 else
 
     # If there is no .binconfig, look for a bin/ directory instead (or other name specified with --dir)
-    debug "Looking for a $bin_dirname/ directory in"
+    debug "Looking for a $bin_dirname/ directory in:"
     if root=$(findup -d "$bin_dirname"); then
         bin_directory="${root%%/}/$bin_dirname"
         debug "Bin directory set to '$bin_directory'"
@@ -696,11 +709,39 @@ matching_commands_shared_prefix() {
 }
 
 #===============================================================================
+# Tab completion setup
+#===============================================================================
+
+last_parameter=0
+
+if [[ $action = 'complete-bash' ]]; then
+    debug "Tab completion setup:"
+    debug "  COMP_LINE='$COMP_LINE'"
+    debug "  COMP_POINT=$COMP_POINT"
+
+    # Remove everything after the cursor and assign to numbered variables
+    args=${COMP_LINE:0:$COMP_POINT}
+    debug "  Setting parameters to '$args'"
+    set -- $args
+
+    # Remove the command name
+    debug "  Removing the first parameter '$1'"
+    shift
+
+    # If there is a space at the end, we want to complete the next parameter; otherwise the last one given
+    if [[ $args != *' ' ]]; then
+        last_parameter=1
+    fi
+fi
+
+#===============================================================================
 # Parse parameters and run the command
 #===============================================================================
 
 run_command() {
-    if [[ $action = 'print' ]]; then
+    if [[ $action = 'complete-bash' ]]; then
+        bug "run_command() should not be reached during tab completion" # kcov-ignore-line: This should never be happen
+    elif [[ $action = 'print' ]]; then
         debug_exit "Would print:" "$@"
         echo "$@"
         exit
@@ -730,7 +771,7 @@ debug "Processing positional parameters"
 current_directory=$bin_directory
 full_command=''
 
-while [[ $# -gt 0 ]]; do
+while [[ $# -gt $last_parameter ]]; do
     subcommand=$1
     shift
 
@@ -758,7 +799,7 @@ while [[ $# -gt 0 ]]; do
     # If we haven't matched anything yet, check whether we should run a fallback instead
     if $shim; then
         debug "No command found - using shim"
-        # We want word splitting here - commands with spaces are quoted
+        # We want word splitting here
         # shellcheck disable=SC2086
         run_command ${full_command:1} "$@"
     elif [[ -n $fallback ]]; then
@@ -808,6 +849,60 @@ while [[ $# -gt 0 ]]; do
     list_commands=("${matching_commands[@]}")
     break
 done
+
+#===============================================================================
+# Tab completion output
+#===============================================================================
+
+if [[ $action = 'complete-bash' ]]; then
+
+    # Work out the full prefix we're looking for
+    prefix=''
+    if [[ -n $full_command ]]; then
+        prefix="${full_command:1} "
+    fi
+
+    target="$prefix${1-}"
+
+    debug "Looking for commands and aliases starting with '$target'"
+
+    # Look for commands and aliases that match, and collect the first parameter for each
+    matches=()
+    matching_commands=()
+
+    for command in "${commands[@]}"; do
+        if command_matches prefix "$target" "$command"; then
+            match=${command#$prefix}
+            match=${match/ *}
+            matches+=("$match")
+            matching_commands+=("$command")
+            debug "    Found matching command '$command' => '$match'"
+        fi
+    done
+
+    for alias in "${aliases[@]}"; do
+        if command_matches prefix "$target" "$alias"; then
+            command="${alias_to_command[$alias]}"
+            if in_array "$command" "${matching_commands[@]}"; then
+                debug "    Skipping matching alias '$alias' because the command '$command' has already matched"
+            else
+                match=${alias#$prefix}
+                match=${match/ *}
+                matches+=("$match")
+                matching_commands+=("$command")
+                debug "    Found matching alias '$alias' => '$match' (command='$command')"
+            fi
+        fi
+    done
+
+    # Output the matches and remove duplicates
+    for match in "${matches[@]}"; do
+        echo "$match"
+    done | sort | uniq
+
+    exit
+
+fi
 
 #===============================================================================
 # List available/matching commands

@@ -64,9 +64,10 @@ Feature: Custom script directory
   Scenario: Tab completion supports custom directories
     When I run 'bin --completion --exe scr --dir scripts'
     Then it is successful
-    And the output contains '_bin_scr()'
-    And the output contains '--dir scripts'
-    And the output contains 'complete -F _bin_scr scr'
+    And the output is:
+      """
+      complete -C "/usr/bin/bin --complete-bash --dir 'scripts' --exe 'scr'" -o default scr
+      """
 
   @undocumented
   Scenario: The 'root' option cannot be an absolute path when set in .binconfig

@@ -202,3 +202,48 @@ Feature: Aliases
     When I run 'bin'
     Then it fails with exit code 246
     And the error is "bin: The symlink '/project/bin/two' must use a relative path, not absolute ('/project/bin/one')"
+
+  Scenario: Tab completion works for aliases
+    Given a script '/project/bin/deploy'
+    And a file '/project/.binconfig' with content:
+      """
+      [deploy]
+      alias=publish
+      """
+    When I tab complete 'bin p'
+    Then it is successful
+    And the output is:
+      """
+      publish
+      """
+
+  @undocumented
+  Scenario: If both the command and the alias match, only the command is listed in tab completion
+    Given a script '/project/bin/deploy'
+    And a file '/project/.binconfig' with content:
+      """
+      [deploy]
+      alias=publish
+      """
+    When I tab complete 'bin '
+    Then it is successful
+    And the output is:
+      """
+      deploy
+      """
+
+  @undocumented
+  Scenario: If multiple aliases for the same command match, only one is returned in tab completion
+    Given a script '/project/bin/deploy'
+    And a file '/project/.binconfig' with content:
+      """
+      [deploy]
+      alias=publish
+      alias=push
+      """
+    When I tab complete 'bin p'
+    Then it is successful
+    And the output is:
+      """
+      publish
+      """

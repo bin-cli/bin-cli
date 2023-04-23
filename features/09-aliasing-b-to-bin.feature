@@ -27,5 +27,7 @@ Feature: Aliasing `b` to `bin`
   Scenario: The executable name for tab completion can be overridden with --exe
     When I run 'bin --completion --exe b'
     Then it is successful
-    And the output contains '_bin_b()'
-    And the output contains 'complete -F _bin_b b'
+    And the output is:
+      """
+      complete -C "/usr/bin/bin --complete-bash --exe 'b'" -o default b
+      """

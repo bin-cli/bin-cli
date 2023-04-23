@@ -31,7 +31,7 @@ Feature: Debugging
       """
       Bin version 1.2.3
       Working directory is /project/public
-      Looking for a .binconfig file in
+      Looking for a .binconfig file in:
         /project/public - not found
         /project - found
       Checking /project/.binconfig for a 'dir' setting
