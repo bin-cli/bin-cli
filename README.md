@@ -1,7 +1,5 @@
 # Bin – A simple task runner
 
-*The following is a draft / plan - nothing has actually been implemented yet. Feedback is welcomed.*
-
 ## Introduction
 
 *Bin* is a simple task/script runner, designed to be used in code repositories, with scripts written in any programming language.
@@ -74,17 +72,35 @@ There are [a few more optional features](#other-features), but that's all you re
 
 ### Installation
 
-*TODO*
+System-wide:
+
+```bash
+sudo wget https://bin-cli.com/bin -O /usr/local/bin/bin
+```
+
+Or for the current user only:
+
+```bash
+mkdir -p ~/bin
+wget https://bin-cli.com/bin -O ~/bin/bin
+echo 'PATH="$HOME/bin:$PATH"' >> ~/.bash_profile
+```
 
 ### Tab completion
 
-Add this to your `~/.bashrc` (or `~/.bash_completion`) script:
+Add this:
 
 ```bash
 eval "$(bin --completion)"
 ```
 
-Or you can lazy-load it by putting it in `~/.local/share/bash-completion/completions/bin`.
+To one of the following files:
+
+- `/usr/share/bash-completion/completions/bin` (recommended for system-wide install)
+- `/etc/bash_completion.d/bin`
+- `~/.local/share/bash-completion/completions/bin` (recommended for per-user install)
+- `~/.bash_completion`
+- `~/.bashrc`
 
 You may want to wrap it in a conditional, in case *Bin* is not installed:
 
@@ -94,7 +110,7 @@ if command -v bin &>/dev/null; then
 fi
 ```
 
-(**Note:** Only `bash` is supported at the moment. I may add `zsh` and others in the future.)
+(Only `bash` is supported at the moment. I may add `zsh` and others in the future.)
 
 ### Creating scripts
 
