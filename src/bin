@@ -759,7 +759,7 @@ run_command_if_only_one_match() {
     if [[ ${#matching_commands[@]} -eq 1 ]]; then
         command=${matching_commands[0]}
         executable=${command_to_executable[$command]}
-        export BIN_COMMAND="$exe$full_command"
+        export BIN_COMMAND="$exe $command"
         run_command "$executable" "$@"
     else
         debug "    There were ${#matching_commands[@]} matches - not running command"
