@@ -282,7 +282,7 @@ register_command_alias() {
     alias_to_command[$alias]=$command
     alias_sources[$alias]=$source
 
-    debug "  Registered alias '$alias' for command '$command'"
+    debug "-- Registered alias '$alias' for command '$command'"
 }
 
 register_executable_alias() {
@@ -298,7 +298,7 @@ register_executable_alias() {
     alias_to_executable[$alias]=$executable
     alias_sources[$alias]=$source
 
-    debug "  Registered alias '$alias' for executable '$executable'"
+    debug "-- Registered alias '$alias' for executable '$executable'"
 }
 
 process_aliases() {
@@ -311,7 +311,7 @@ process_aliases() {
         if [[ -n $executable ]]; then
             local command=${executable_to_command[$executable]-}
             alias_to_command[$alias]=$command
-            debug "  Registered alias '$alias' for executable '$executable' to command '$command'"
+            debug "-- Registered alias '$alias' for executable '$executable' to command '$command'"
         fi
     done
 
@@ -330,7 +330,7 @@ process_aliases() {
                 suffix=${command:${#target}}
                 aliases+=("$alias$suffix")
                 alias_to_command[$alias$suffix]="$target$suffix"
-                debug "    Registered alias '$alias$suffix' for command '$target$suffix'"
+                debug "---- Registered alias '$alias$suffix' for command '$target$suffix'"
             fi
         done
     done
@@ -343,11 +343,11 @@ process_aliases() {
 findup() (
     while true; do
         if test "$@"; then
-            debug "  $PWD - found"
+            debug "-- $PWD - found"
             echo "$PWD"
             return 0
         else
-            debug "  $PWD - not found"
+            debug "-- $PWD - not found"
         fi
 
         if [[ $PWD = '/' ]]; then
@@ -387,18 +387,18 @@ if root=$(findup -f .binconfig); then
             :
         elif [[ $key =~ ^\[(.+)]$ ]]; then
             # [command]
-            debug "  Reached section $key - giving up"
+            debug "-- Reached section $key - giving up"
             break
         elif [[ $key = 'dir' ]]; then
             # dir=scripts
-            debug "  Found $key=$value"
+            debug "-- Found $key=$value"
             bin_dirname_from_config=$value
             break
         fi
     done <"$binconfig" # kcov-ignore-line: Usage not detected
 
     if [[ -z $bin_dirname_from_config ]]; then
-        debug "  Not found"
+        debug "-- Not found"
     fi
 
     if [[ $bin_dirname_from_config = /* ]]; then
@@ -407,12 +407,12 @@ if root=$(findup -f .binconfig); then
         fail "The option 'dir' cannot point to a directory outside $root in $binconfig line $line"
     elif [[ -z $bin_dirname ]]; then
         # If no directory was given at the command line, use the one from the config file
-        debug "  Using '$bin_dirname_from_config' from the config file"
+        debug "-- Using '$bin_dirname_from_config' from the config file"
         bin_dirname=$bin_dirname_from_config
     elif [[ "$bin_dirname_from_config" != "$bin_dirname" ]]; then
         # If the directory given at the command line doesn't match the config file,
         # ignore the rest of the config file, and don't treat this as the root
-        debug "  The config file setting '$bin_dirname_from_config' doesn't match the CLI setting '$bin_dirname' - ignoring config file"
+        debug "-- The config file setting '$bin_dirname_from_config' doesn't match the CLI setting '$bin_dirname' - ignoring config file"
         binconfig=''
     fi
 fi
@@ -436,7 +436,7 @@ if [[ -n $binconfig ]]; then
         elif [[ $key =~ ^\[(.+)]$ ]]; then
             # [command]
             command=${BASH_REMATCH[1]}
-            debug "  Found [$command] section"
+            debug "-- Found [$command] section"
         elif [[ -z $command && $key = 'dir' ]]; then
             # Already handled
             :
@@ -448,13 +448,13 @@ if [[ -n $binconfig ]]; then
                 else
                     exact=true
                 fi
-                debug "  Set 'exact' to $exact"
+                debug "-- Set 'exact' to $exact"
             else
-                debug "  Ignoring 'exact=$value' because it has already been set (in the CLI or config file)"
+                debug "-- Ignoring 'exact=$value' because it has already been set (in the CLI or config file)"
             fi
         elif [[ -z $command ]]; then
             # Unknown keys don't trigger an error for forwards compatibility (global)
-            debug "  Unknown key '$key'"
+            debug "-- Unknown key '$key'"
         elif [[ ($key = 'alias' || $key = 'aliases') ]]; then
             # alias=blah
             # aliases=blah1, blah2
@@ -462,15 +462,15 @@ if [[ -n $binconfig ]]; then
             for alias in "${line_aliases[@]}"; do
                 alias=${alias// /}
                 register_command_alias "$alias" "$command" "$binconfig line $line"
-                debug "    Registered alias '$alias'"
+                debug "---- Registered alias '$alias'"
             done
         elif [[ $key = 'help' ]]; then
             # help=Description
             help[$command]=$value
-            debug "    Registered help for '$command'"
+            debug "---- Registered help for '$command'"
         else
             # Unknown keys don't trigger an error for forwards compatibility (command)
-            debug "    Unknown key '$key'"
+            debug "---- Unknown key '$key'"
         fi
     done <"$binconfig" # kcov-ignore-line: Usage not detected
 fi
@@ -574,23 +574,23 @@ register_commands() {
             # unlikely someone who keeps scripts in the root would also have
             # some in subdirectories
             if $is_root_dir; then
-                debug "  Ignored subdirectory '$file'"
+                debug "-- Ignored subdirectory '$file'"
             else
-                debug "  Registered subdirectory '$file' to parent command '$prefix$name'"
+                debug "-- Registered subdirectory '$file' to parent command '$prefix$name'"
                 executable_to_command[$realfile]="$prefix$name"
-                debug "  Searching subdirectory '$file'"
+                debug "-- Searching subdirectory '$file'"
                 register_commands "$file" "$prefix$name "
             fi
         elif [[ ! -x $file ]]; then
             if ! $is_root_dir; then
                 non_executable_files+=("$file")
             fi
-            debug "  Ignored non-executable file '$file'"
+            debug "-- Ignored non-executable file '$file'"
         else
             commands+=("$prefix$name")
             command_to_executable["$prefix$name"]=$realfile
             executable_to_command[$realfile]="$prefix$name"
-            debug "  Registered command '$prefix$name' for executable '$realfile'"
+            debug "-- Registered command '$prefix$name' for executable '$realfile'"
         fi
     done
 }
@@ -625,7 +625,7 @@ command_matches() {
     # If it doesn't match, return false
     # shellcheck disable=SC2181
     if [[ $? -gt 0 ]]; then
-        debug "    No match for '$command'"
+        debug "---- No match for '$command'"
         return 1
     fi
 
@@ -655,7 +655,7 @@ find_matching_commands() {
     local type=$1
     local target=$2
 
-    debug "  Looking for command '$target' ($type)"
+    debug "-- Looking for command '$target' ($type)"
 
     local -A commands_matching_aliases
     local command
@@ -664,17 +664,17 @@ find_matching_commands() {
         if command_matches "$type" "$target" "$alias"; then
             command=${alias_to_command[$alias]}
             commands_matching_aliases[$command]=true
-            debug "    Found matching alias '$alias' for command '$command'"
+            debug "---- Found matching alias '$alias' for command '$command'"
         fi
     done
 
     matching_commands=()
     for command in "${commands[@]}"; do
         if ${commands_matching_aliases[$command]-false}; then
-            debug "    Found matching command '$command' (from alias)"
+            debug "---- Found matching command '$command' (from alias)"
             matching_commands+=("$command")
         elif command_matches "$type" "$target" "$command"; then
-            debug "    Found matching command '$command'"
+            debug "---- Found matching command '$command'"
             matching_commands+=("$command")
         fi
     done
@@ -720,16 +720,16 @@ last_parameter=0
 
 if [[ $action = 'complete-bash' ]]; then
     debug "Tab completion setup:"
-    debug "  COMP_LINE='$COMP_LINE'"
-    debug "  COMP_POINT=$COMP_POINT"
+    debug "-- COMP_LINE='$COMP_LINE'"
+    debug "-- COMP_POINT=$COMP_POINT"
 
     # Remove everything after the cursor and assign to numbered variables
     args=${COMP_LINE:0:$COMP_POINT}
-    debug "  Setting parameters to '$args'"
+    debug "-- Setting parameters to '$args'"
     set -- $args
 
     # Remove the command name
-    debug "  Removing the first parameter '$1'"
+    debug "-- Removing the first parameter '$1'"
     shift
 
     # If there is a space at the end, we want to complete the next parameter; otherwise the last one given
@@ -762,7 +762,7 @@ run_command_if_only_one_match() {
         export BIN_COMMAND="$exe $command"
         run_command "$executable" "$@"
     else
-        debug "    There were ${#matching_commands[@]} matches - not running command"
+        debug "---- There were ${#matching_commands[@]} matches - not running command"
     fi
 }
 
@@ -820,7 +820,7 @@ while [[ $# -gt $last_parameter ]]; do
     if ! $exact && parent=$(matching_commands_shared_prefix "${full_command:1}"); then
         # If all matching commands have the same parent command, pretend
         # the user typed the full parent command, then continue parsing
-        debug "  Expanding partial match to '$parent'"
+        debug "-- Expanding partial match to '$parent'"
         current_directory="$current_directory/$parent"
         full_command=" $parent"
         list_title='Matching commands'
@@ -829,7 +829,7 @@ while [[ $# -gt $last_parameter ]]; do
     fi
 
     if $exact; then
-        debug "    Not running match (if any) because 'exact' is $exact"
+        debug "---- Not running match (if any) because 'exact' is $exact"
     else
         run_command_if_only_one_match "$@"
     fi
@@ -901,20 +901,20 @@ unique_commands=()
 
 for command in "${list_commands[@]}"; do
     if $is_root_dir && [[ ${command_to_executable[$command]} =~ \.(json|md|txt|yaml|yml)$ ]]; then
-        debug "  Ignored common non-executable file type '${command_to_executable[$command]}' in root directory"
+        debug "-- Ignored common non-executable file type '${command_to_executable[$command]}' in root directory"
         continue
     fi
 
     short=$(remove_extension "$command")
 
     if [[ "$short" = "$command" ]]; then
-        debug "  '$command' can't be shortened"
+        debug "-- '$command' can't be shortened"
         unique_commands+=("$command")
     elif has_duplicate "$short" "$command"; then
-        debug "  '$short' is not unique - using full command name '$command'"
+        debug "-- '$short' is not unique - using full command name '$command'"
         unique_commands+=("$command")
     else
-        debug "  '$command' shortened to '$short'"
+        debug "-- '$command' shortened to '$short'"
         unique_commands+=("$short")
     fi
 done
@@ -948,7 +948,7 @@ if [[ $action = 'complete-bash' ]]; then
         match=${match/ *}
         matches+=("$match")
         matching_commands+=("$command")
-        debug "  Found matching command '$command' => '$match'"
+        debug "-- Found matching command '$command' => '$match'"
     done
 
     for alias in "${aliases[@]}"; do
@@ -958,20 +958,20 @@ if [[ $action = 'complete-bash' ]]; then
 
         command="${alias_to_command[$alias]}"
         if in_array "$command" "${matching_commands[@]}"; then
-            debug "  Skipping matching alias '$alias' because the command '$command' has already matched"
+            debug "-- Skipping matching alias '$alias' because the command '$command' has already matched"
         else
             match=${alias#$prefix}
             match=${match/ *}
             matches+=("$match")
             matching_commands+=("$command")
-            debug "  Found matching alias '$alias' => '$match' (command='$command')"
+            debug "-- Found matching alias '$alias' => '$match' (command='$command')"
         fi
     done
 
     # Output the matches and remove duplicates
     for command in "${matches[@]}"; do
         if is_hidden_command "$command" "${1-}"; then
-            debug "  '$command' is hidden - skipping"
+            debug "-- '$command' is hidden - skipping"
             continue
         fi
 
@@ -991,7 +991,7 @@ visible_commands=()
 
 for command in "${unique_commands[@]}"; do
     if is_hidden_command "$command" "${full_command:1}"; then
-        debug "  '$command' is hidden - skipping"
+        debug "-- '$command' is hidden - skipping"
     else
         visible_commands+=("$command")
     fi
