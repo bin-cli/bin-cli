@@ -636,17 +636,17 @@ is_hidden_command() {
     local command=$1
     local target=${2-}
 
-    # We can't just match on $command, because it may be the parent command that is hidden
+    # We can't just match on $command, because it may be the parent command that
+    # has already been typed that is hidden, so subcommands should be shown
     prefix_length=${#target}
-    if [[ $prefix_length -gt 0 ]]; then
-        command="${command:$prefix_length}"
-    else
+
+    if [[ $prefix_length -eq 0 ]]; then
         command=" $command"
+    else
+        command="${command:$prefix_length}"
     fi
 
-    # Technically this would break on a command containing a space followed by an underscore,
-    # like 'a _b' - but that's such an edge case I'm not going to complicate this any more!
-    [[ $command = *" _"* || $command = *" '_"* ]]
+    [[ $command = *' _'* ]]
 }
 
 matching_commands=()
@@ -855,64 +855,9 @@ while [[ $# -gt $last_parameter ]]; do
 done
 
 #===============================================================================
-# Tab completion output
+# Determine unique command names
 #===============================================================================
 
-if [[ $action = 'complete-bash' ]]; then
-
-    # Work out the full prefix we're looking for
-    prefix=''
-    if [[ -n $full_command ]]; then
-        prefix="${full_command:1} "
-    fi
-
-    target="$prefix${1-}"
-
-    debug "Looking for commands and aliases starting with '$target'"
-
-    # Look for commands and aliases that match, and collect the first parameter for each
-    matches=()
-    matching_commands=()
-
-    for command in "${commands[@]}"; do
-        if command_matches prefix "$target" "$command"; then
-            match=${command#$prefix}
-            match=${match/ *}
-            matches+=("$match")
-            matching_commands+=("$command")
-            debug "    Found matching command '$command' => '$match'"
-        fi
-    done
-
-    for alias in "${aliases[@]}"; do
-        if command_matches prefix "$target" "$alias"; then
-            command="${alias_to_command[$alias]}"
-            if in_array "$command" "${matching_commands[@]}"; then
-                debug "    Skipping matching alias '$alias' because the command '$command' has already matched"
-            else
-                match=${alias#$prefix}
-                match=${match/ *}
-                matches+=("$match")
-                matching_commands+=("$command")
-                debug "    Found matching alias '$alias' => '$match' (command='$command')"
-            fi
-        fi
-    done
-
-    # Output the matches and remove duplicates
-    for match in "${matches[@]}"; do
-        echo "$match"
-    done | sort | uniq
-
-    exit
-
-fi
-
-#===============================================================================
-# List available/matching commands
-#===============================================================================
-
-# Remove the extensions, as long as they are unique
 remove_extension() {
     # Can't use ${command%%.*} because it could remove too much ("a.b c" => "a" instead of "a.b")
     # Can't use ${command%.*} because it could remove too little ("a.b.c" => "a.b" instead of "a")
@@ -960,11 +905,6 @@ for command in "${list_commands[@]}"; do
         continue
     fi
 
-    if is_hidden_command "$command" "${full_command:1}"; then
-        debug "  '$command' is hidden - skipping"
-        continue
-    fi
-
     short=$(remove_extension "$command")
 
     if [[ "$short" = "$command" ]]; then
@@ -979,9 +919,87 @@ for command in "${list_commands[@]}"; do
     fi
 done
 
+#===============================================================================
+# Tab completion output
+#===============================================================================
+
+if [[ $action = 'complete-bash' ]]; then
+
+    # Work out the full prefix we're looking for
+    prefix=''
+    if [[ -n $full_command ]]; then
+        prefix="${full_command:1} "
+    fi
+
+    target="$prefix${1-}"
+
+    debug "Looking for commands and aliases starting with '$target'"
+
+    # Look for commands and aliases that match, and collect the first parameter for each
+    matches=()
+    matching_commands=()
+
+    for command in "${unique_commands[@]}"; do
+        if ! command_matches prefix "$target" "$command"; then
+            continue
+        fi
+
+        match=${command#$prefix}
+        match=${match/ *}
+        matches+=("$match")
+        matching_commands+=("$command")
+        debug "  Found matching command '$command' => '$match'"
+    done
+
+    for alias in "${aliases[@]}"; do
+        if ! command_matches prefix "$target" "$alias"; then
+            continue
+        fi
+
+        command="${alias_to_command[$alias]}"
+        if in_array "$command" "${matching_commands[@]}"; then
+            debug "  Skipping matching alias '$alias' because the command '$command' has already matched"
+        else
+            match=${alias#$prefix}
+            match=${match/ *}
+            matches+=("$match")
+            matching_commands+=("$command")
+            debug "  Found matching alias '$alias' => '$match' (command='$command')"
+        fi
+    done
+
+    # Output the matches and remove duplicates
+    for command in "${matches[@]}"; do
+        if is_hidden_command "$command" "${1-}"; then
+            debug "  '$command' is hidden - skipping"
+            continue
+        fi
+
+        echo "$command"
+    done | sort | uniq
+
+    exit
+
+fi
+
+#===============================================================================
+# List available/matching commands
+#===============================================================================
+
+# Remove hidden commands
+visible_commands=()
+
+for command in "${unique_commands[@]}"; do
+    if is_hidden_command "$command" "${full_command:1}"; then
+        debug "  '$command' is hidden - skipping"
+    else
+        visible_commands+=("$command")
+    fi
+done
+
 # Calculate the maximum length of a command in the list so we can align the help text
 maxlength=0
-for command in "${unique_commands[@]}"; do
+for command in "${visible_commands[@]}"; do
     if [[ ${#command} -gt $maxlength ]]; then
         maxlength=${#command}
     fi
@@ -1010,11 +1028,11 @@ get_command_aliases() {
     fi
 }
 
-debug_exit "Would list ${#unique_commands[@]} matching command(s)"
+debug_exit "Would list ${#visible_commands[@]} matching command(s)"
 
 echo "$TITLE$list_title$RESET"
 
-for command in "${unique_commands[@]}"; do
+for command in "${visible_commands[@]}"; do
     command_help=${help[$command]-}
     command_aliases=$(get_command_aliases "$command")
 
@@ -1029,7 +1047,7 @@ for command in "${unique_commands[@]}"; do
     fi
 done
 
-if [[ ${#unique_commands[@]} -eq 0 ]]; then
+if [[ ${#visible_commands[@]} -eq 0 ]]; then
     echo "${GREY}None found${RESET}"
 fi
 

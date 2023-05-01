@@ -14,7 +14,7 @@ Feature: Tab completion for custom script directories
     Given a file '/project/.binconfig' with content 'dir=scripts'
     And a script '/project/scripts/right'
     And a script '/project/bin/wrong'
-    When I tab complete 'bin'
+    When I tab complete 'bin '
     Then it is successful
     And the output is:
       """
