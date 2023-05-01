@@ -45,14 +45,11 @@ Feature: Debugging
       ---- Registered help for 'one'
       -- Found [two] section
       ---- Registered help for 'two'
-      -- Registered alias 'deux' for command 'two'
-      ---- Registered alias 'deux'
-      -- Registered alias 'dos' for command 'two'
-      ---- Registered alias 'dos'
+      ---- Registered alias 'deux' for command 'two'
+      ---- Registered alias 'dos' for command 'two'
       -- Found [three] section
       ---- Registered help for 'three'
-      -- Registered alias '333' for command 'three'
-      ---- Registered alias '333'
+      ---- Registered alias '333' for command 'three'
       'exact' defaulted to 'false'
       Bin directory set to '/project/scripts' from config file
       Searching '/project/scripts' for scripts

@@ -291,7 +291,7 @@ register_command_alias() {
     alias_to_command[$alias]=$command
     alias_sources[$alias]=$source
 
-    debug "-- Registered alias '$alias' for command '$command'"
+    debug "---- Registered alias '$alias' for command '$command'"
 }
 
 register_executable_alias() {
@@ -463,15 +463,15 @@ if [[ -n $binconfig ]]; then
             fi
         elif [[ -z $command ]]; then
             # Unknown keys don't trigger an error for forwards compatibility (global)
-            debug "-- Unknown key '$key'"
+            debug "---- Unknown key '$key'"
         elif [[ ($key = 'alias' || $key = 'aliases') ]]; then
             # alias=blah
             # aliases=blah1, blah2
             IFS=',' read -ra line_aliases <<<"$value"
             for alias in "${line_aliases[@]}"; do
-                alias=${alias// /}
+                alias=${alias## }
+                alias=${alias%% }
                 register_command_alias "$alias" "$command" "$binconfig line $line"
-                debug "---- Registered alias '$alias'"
             done
         elif [[ $key = 'help' ]]; then
             # help=Description
@@ -894,14 +894,16 @@ has_duplicate() {
             # Matched to the short command, but not the long one
             "$short") return 0 ;;
             "$short."*) return 0 ;;
+            "$short "*) return 0 ;;
         esac
     done
 
     local alias
     for alias in "${aliases[@]}"; do
-        if [[ "$alias" = "$short" ]]; then
-            return 0
-        fi
+        case "$alias" in
+            "$short") return 0 ;;
+            "$short "*) return 0 ;;
+        esac
     done
 
     # No matches found

@@ -80,6 +80,33 @@ Feature: Script extensions
       bin sample2       (alias: sample1)
       """
 
+  Scenario: Subcommands are taken into account when checking for conflicts
+    Given a script '/project/bin/sample.sh'
+    And a script '/project/bin/sample/two'
+    When I run 'bin'
+    Then it is successful
+    And the output is:
+      """
+      Available commands
+      bin sample two
+      bin sample.sh
+      """
+
+  Scenario: Subcommand aliases are taken into account when checking for conflicts
+    Given a script '/project/bin/sample.sh'
+    And a file '/project/.binconfig' with content:
+      """
+      [sample.sh]
+      alias=sample two
+      """
+    When I run 'bin'
+    Then it is successful
+    And the output is:
+      """
+      Available commands
+      bin sample.sh    (alias: sample two)
+      """
+
   @undocumented
   Scenario: Multiple extensions may be removed from the filename
     Given a script '/project/bin/sample1.blah.sh'

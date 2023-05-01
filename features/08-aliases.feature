@@ -68,6 +68,18 @@ Feature: Aliases
     Then it is successful
     And the output is 'Copying to production...'
 
+  @undocumented
+  Scenario: Aliases can be subcommands
+    Given a script '/project/bin/publish' that outputs 'Copying to production...'
+    And a file '/project/.binconfig' with content:
+      """
+      [publish]
+      alias=deploy live
+      """
+    When I run 'bin deploy live'
+    Then it is successful
+    And the output is 'Copying to production...'
+
   Scenario: Aliases are displayed in the command list
     Given a script '/project/bin/artisan'
     And a script '/project/bin/deploy'
