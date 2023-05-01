@@ -46,6 +46,8 @@ in_array() {
     local needle=$1
     shift
 
+    local value
+
     for value in "$@"; do
         if [[ "$value" = "$needle" ]]; then
             return 0
@@ -324,10 +326,10 @@ process_aliases() {
         fi
 
         # Expand aliases to cover subcommands (e.g. if 'deploy'='push' then 'deploy live'='push live')
-        target=${alias_to_command[$alias]}
+        local target=${alias_to_command[$alias]}
         for command in "${commands[@]}"; do
             if [[ "$command" = "$target "* ]]; then
-                suffix=${command:${#target}}
+                local suffix=${command:${#target}}
                 aliases+=("$alias$suffix")
                 alias_to_command[$alias$suffix]="$target$suffix"
                 debug "---- Registered alias '$alias$suffix' for command '$target$suffix'"
@@ -551,19 +553,18 @@ register_commands() {
     local directory=$1
     local prefix=${2-}
 
-    local file
-    local name
-    local target
-
     # Loop through the directory to find commands
-    for file in "$directory/"*; do
-        realfile="$(readlink -f "$file")"
+    local file
 
-        name=${file##*/} # Remove path
+    for file in "$directory/"*; do
+        local name
+        name=${file##*/}  # Remove path
         name=${name// /-} # Spaces to dashes
 
+        local realfile="$(readlink -f "$file")"
+
         if [[ -L $file ]]; then
-            target=$(readlink "$file")
+            local target=$(readlink "$file")
             if [[ $target = /* ]]; then
                 fail "The symlink '$file' must use a relative path, not absolute ('$target')"
             fi
@@ -638,7 +639,7 @@ is_hidden_command() {
 
     # We can't just match on $command, because it may be the parent command that
     # has already been typed that is hidden, so subcommands should be shown
-    prefix_length=${#target}
+    local prefix_length=${#target}
 
     if [[ $prefix_length -eq 0 ]]; then
         command=" $command"
@@ -658,8 +659,7 @@ find_matching_commands() {
     debug "-- Looking for command '$target' ($type)"
 
     local -A commands_matching_aliases
-    local command
-
+    local alias
     for alias in "${aliases[@]}"; do
         if command_matches "$type" "$target" "$alias"; then
             command=${alias_to_command[$alias]}
@@ -669,6 +669,7 @@ find_matching_commands() {
     done
 
     matching_commands=()
+    local command
     for command in "${commands[@]}"; do
         if ${commands_matching_aliases[$command]-false}; then
             debug "---- Found matching command '$command' (from alias)"
@@ -686,6 +687,7 @@ matching_commands_shared_prefix() {
 
     local shared_next_command=''
 
+    local command
     for command in "${matching_commands[@]}"; do
         # Remove the common prefix
         local remaining=${command:$prefix_length}
@@ -757,8 +759,8 @@ run_command() {
 
 run_command_if_only_one_match() {
     if [[ ${#matching_commands[@]} -eq 1 ]]; then
-        command=${matching_commands[0]}
-        executable=${command_to_executable[$command]}
+        local command=${matching_commands[0]}
+        local executable=${command_to_executable[$command]}
         export BIN_COMMAND="$exe $command"
         run_command "$executable" "$@"
     else
@@ -875,17 +877,17 @@ has_duplicate() {
     local long=$2
 
     local command
-
     for command in "${commands[@]}"; do
         case "$command" in
             # Ignore a match to itself
             "$long") continue ;;
-                # Matched to the short command, but not the long one
+            # Matched to the short command, but not the long one
             "$short") return 0 ;;
             "$short."*) return 0 ;;
         esac
     done
 
+    local alias
     for alias in "${aliases[@]}"; do
         if [[ "$alias" = "$short" ]]; then
             return 0
@@ -945,7 +947,7 @@ if [[ $action = 'complete-bash' ]]; then
         fi
 
         match=${command#$prefix}
-        match=${match/ *}
+        match=${match/ */}
         matches+=("$match")
         matching_commands+=("$command")
         debug "-- Found matching command '$command' => '$match'"
@@ -961,7 +963,7 @@ if [[ $action = 'complete-bash' ]]; then
             debug "-- Skipping matching alias '$alias' because the command '$command' has already matched"
         else
             match=${alias#$prefix}
-            match=${match/ *}
+            match=${match/ */}
             matches+=("$match")
             matching_commands+=("$command")
             debug "-- Found matching alias '$alias' => '$match' (command='$command')"
@@ -1013,6 +1015,7 @@ get_command_aliases() {
     local command_aliases=''
     local command_alias_count=0
 
+    local alias
     for alias in "${aliases[@]}"; do
         local target=${alias_to_command[$alias]}
         if [[ "$target" = "$command" ]]; then
