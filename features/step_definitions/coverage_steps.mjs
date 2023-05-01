@@ -1,11 +1,11 @@
-import {Given} from '@cucumber/cucumber';
 import * as paths from '../support/paths.mjs';
 import {move} from 'fs-extra/lib/move/index.js';
 import {quote} from 'shell-quote';
 import {spawnSync} from 'child_process';
 import {createRequire} from 'module';
+import {Then} from '@cucumber/cucumber';
 
-Given('code coverage must be at least {float}%', async function (minPercent) {
+Then('Code coverage must be at least {float}%', async function (minPercent) {
 
     // We have to use the jail to merge the results - otherwise the paths are wrong
     await move(paths.coverage, `${paths.jail}/coverage`);

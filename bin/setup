@@ -21,5 +21,13 @@ else
 fi
 
 echo
+echo -e "${LCYAN}Installing shellcheck (requires root access)...${RESET}"
+if command -v shellcheck &>/dev/null; then
+    echo 'Already installed.'
+else
+    sudo apt install shellcheck
+fi
+
+echo
 echo -e "${LCYAN}Installing/updating Node modules...${RESET}"
 npm ci

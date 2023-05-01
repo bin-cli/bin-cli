@@ -81,7 +81,7 @@ debug() {
     if $fd3_open; then
         local lines="${BASH_LINENO[*]}"
         lines=${lines% 0}
-        echo "$@" "$DEBUG_LINE[line ${lines// /, }]$DEBUG_RESET" >&3
+        echo "$@" "${DEBUG_LINE}[line ${lines// /, }]${DEBUG_RESET}" >&3
     fi
 }
 
@@ -258,14 +258,14 @@ fi
 #===============================================================================
 
 if [[ $action = 'completion' ]]; then
-    command=("$(readlink -f "$0")" --complete-bash)
+    complete_command=("$(readlink -f "$0")" --complete-bash)
     if [[ -n $bin_dirname ]]; then
-        command+=("--dir" "'$bin_dirname'")
+        complete_command+=("--dir" "'$bin_dirname'")
     fi
     if [[ $exe != 'bin' ]]; then
-        command+=("--exe" "'$exe'")
+        complete_command+=("--exe" "'$exe'")
     fi
-    echo "complete -C \"${command[*]}\" -o default $exe"
+    echo "complete -C \"${complete_command[*]}\" -o default $exe"
     exit
 fi
 
@@ -540,7 +540,7 @@ else
     fi
 
     # Check for special cases that we only allow with a matching .binconfig file
-    if in_array $bin_directory '/bin' '/usr/bin' '/usr/local/bin' '/snap/bin' "$HOME/bin"; then
+    if in_array "$bin_directory" '/bin' '/usr/bin' '/usr/local/bin' '/snap/bin' "$HOME/bin"; then
         fail "Could not find '$bin_dirname/' directory or '.binconfig' file starting from '$PWD' (ignored '$bin_directory')" $ERR_NOT_FOUND
     fi
 
@@ -568,10 +568,12 @@ register_commands() {
         name=${file##*/}  # Remove path
         name=${name// /-} # Spaces to dashes
 
-        local realfile="$(readlink -f "$file")"
+        local realfile
+        realfile="$(readlink -f "$file")"
 
         if [[ -L $file ]]; then
-            local target=$(readlink "$file")
+            local target
+            target=$(readlink "$file")
             if [[ $target = /* ]]; then
                 fail "The symlink '$file' must use a relative path, not absolute ('$target')"
             fi
@@ -735,6 +737,7 @@ if [[ $action = 'complete-bash' ]]; then
     # Remove everything after the cursor and assign to numbered variables
     args=${COMP_LINE:0:$COMP_POINT}
     debug "-- Setting parameters to '$args'"
+    # shellcheck disable=SC2086
     set -- $args
 
     # Remove the command name
@@ -953,7 +956,7 @@ if [[ $action = 'complete-bash' ]]; then
             continue
         fi
 
-        match=${command#$prefix}
+        match=${command#"$prefix"}
         match=${match/ */}
         matches+=("$match")
         matching_commands+=("$command")
@@ -969,7 +972,7 @@ if [[ $action = 'complete-bash' ]]; then
         if in_array "$command" "${matching_commands[@]}"; then
             debug "-- Skipping matching alias '$alias' because the command '$command' has already matched"
         else
-            match=${alias#$prefix}
+            match=${alias#"$prefix"}
             match=${match/ */}
             matches+=("$match")
             matching_commands+=("$command")

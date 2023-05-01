@@ -28,7 +28,7 @@ async function run(command, env = {}) {
         env_string += `${key}='${value}' \\\n`;
     }
 
-    await outputFile(paths.jail + '/command.txt', `cd ${this.workingDir}\n${env_string}${command}\n`);
+    await outputFile(`${paths.jail}/command.txt`, `cd ${this.workingDir}\n${env_string}${command}\n`);
 
     // Use kcov to measure code coverage
     let kcovId;
