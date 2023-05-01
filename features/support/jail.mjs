@@ -9,7 +9,7 @@ Before({name: 'Create test jail'}, async function () {
     // Create a chroot jail to better mimic a regular filesystem and avoid accidental dependencies
     await ensureDir(`${paths.jail}/usr/bin`);
 
-    for (const exe of ['bash', 'env', 'kcov', 'readlink', 'realpath', 'sort', 'uniq']) {
+    for (const exe of ['bash', 'env', 'kcov', 'readlink', 'sort', 'uniq']) {
         await copy(`/usr/bin/${exe}`, `${paths.jail}/usr/bin/${exe}`);
     }
 

@@ -38,7 +38,7 @@ Feature: Edge cases
 
   @undocumented
   Scenario: Symlink aliases are handled correctly when inside a symlinked root
-    # Need to test this because 'realpath' will expand paths fully
+    # Need to test this because 'readlink -f' will expand paths fully
     Given a script '/project/bin/deploy' that outputs 'Copying to production...'
     And a symlink '/project/bin/publish' pointing to 'deploy'
     And a symlink '/symlink' pointing to 'project'

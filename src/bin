@@ -249,7 +249,7 @@ fi
 #===============================================================================
 
 if [[ $action = 'completion' ]]; then
-    command=("$(realpath "$0")" --complete-bash)
+    command=("$(readlink -f "$0")" --complete-bash)
     if [[ -n $bin_dirname ]]; then
         command+=("--dir" "'$bin_dirname'")
     fi
@@ -403,7 +403,7 @@ if root=$(findup -f .binconfig); then
 
     if [[ $bin_dirname_from_config = /* ]]; then
         fail "The option 'dir' cannot be an absolute path in $binconfig line $line"
-    elif [[ "$(realpath "$root/$bin_dirname_from_config")/" != "$(realpath "$root")/"* ]]; then
+    elif [[ "$(readlink -f "$root/$bin_dirname_from_config")/" != "$(readlink -f "$root")/"* ]]; then
         fail "The option 'dir' cannot point to a directory outside $root in $binconfig line $line"
     elif [[ -z $bin_dirname ]]; then
         # If no directory was given at the command line, use the one from the config file
@@ -557,7 +557,7 @@ register_commands() {
 
     # Loop through the directory to find commands
     for file in "$directory/"*; do
-        realfile="$(realpath "$file")"
+        realfile="$(readlink -f "$file")"
 
         name=${file##*/} # Remove path
         name=${name// /-} # Spaces to dashes
