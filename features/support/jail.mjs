@@ -2,7 +2,7 @@ import {After, Before} from '@cucumber/cucumber';
 import {copy, createSymlink, emptyDir, ensureDir} from 'fs-extra';
 import * as paths from './paths.mjs';
 
-export async function makeJail() {
+Before({name: 'Create test jail'}, async function () {
     // Make sure there is nothing left over from a previous run
     await emptyDir(paths.jail);
 
@@ -17,21 +17,10 @@ export async function makeJail() {
 
     // Copy the 'bin' executable into it
     await copy(`${paths.root}/dist/bin`, `${paths.jail}/usr/bin/bin`);
-}
-
-export async function clearJail() {
-    await emptyDir(paths.jail);
-}
-
-Before({name: 'Create test jail'}, async function () {
-    await makeJail();
 
     // Create the default working directory
     await ensureDir(`${paths.jail}/project`);
     this.workingDir = '/project';
-
-    // Use kcov to check code coverage by default, but it needs to be disabled for certain tests
-    this.kcov = true;
 });
 
 After({name: 'Clear jail directory', tags: 'not @exit'}, async function (hook) {
@@ -42,7 +31,7 @@ After({name: 'Clear jail directory', tags: 'not @exit'}, async function (hook) {
 
     // Empty the temp directory, so we're not wasting space, but don't delete
     // it, so it doesn't keep appearing and disappearing
-    await clearJail();
+    await emptyDir(paths.jail);
 });
 
 After({name: '@exit', tags: '@exit'}, async function () {

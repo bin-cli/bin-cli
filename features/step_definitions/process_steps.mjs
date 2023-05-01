@@ -33,7 +33,7 @@ async function run(command, env = {}) {
     // Use kcov to measure code coverage
     let kcovId;
 
-    if (this.kcov) {
+    if (!this.disableKcov) {
         await ensureDir(`${paths.jail}/coverage`);
 
         kcovId = coverage.nextId();
@@ -91,10 +91,10 @@ async function run(command, env = {}) {
     this.runResult = {status, stdout, stderr};
 
     // Stash the code coverage results for merging later
-    if (this.kcov && await exists(`${paths.jail}/coverage/result-${kcovId}`)) {
+    if (!this.disableKcov && await exists(`${paths.jail}/coverage/result-${kcovId}`)) {
         await move(`${paths.jail}/coverage/result-${kcovId}`, `${paths.coverage}/result-${kcovId}`);
     }
-};
+}
 
 When('I run {string}', run);
 
