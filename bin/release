@@ -39,7 +39,7 @@ echo
 
 echo -e "${LCYAN}Tagging in Git...${RESET}"
 git tag "$version"
-git push origin "$version"
+git push origin HEAD "$version"
 echo
 
 echo -e "${LCYAN}Copying to Dotfiles...${RESET}"
