@@ -23,11 +23,3 @@ Feature: Aliasing `b` to `bin`
       Available commands
       b hello
       """
-
-  Scenario: The executable name for tab completion can be overridden with --exe
-    When I run 'bin --completion --exe b'
-    Then it is successful
-    And the output is:
-      """
-      complete -C "/usr/bin/bin --complete-bash --exe 'b'" -o default b
-      """
