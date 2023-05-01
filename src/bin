@@ -430,6 +430,8 @@ fi
 # Parse config file
 #===============================================================================
 
+commands_listed_in_config=()
+
 if [[ -n $binconfig ]]; then
     debug "Parsing $binconfig"
 
@@ -446,6 +448,7 @@ if [[ -n $binconfig ]]; then
             # [command]
             command=${BASH_REMATCH[1]}
             debug "-- Found [$command] section"
+            commands_listed_in_config+=("$command")
         elif [[ -z $command && $key = 'dir' ]]; then
             # Already handled
             :
@@ -1072,5 +1075,21 @@ if [[ ${#non_executable_files[@]} -gt 0 ]]; then
     echo "${WARNING}Warning: The following files are not executable (chmod +x):${RESET}"
     for file in "${non_executable_files[@]}"; do
         echo "$file"
+    done
+fi
+
+# List missing commands, if any
+missing_commands=()
+for command in "${commands_listed_in_config[@]}"; do
+    if [[ -z "${command_to_executable[$command]-}" ]]; then
+        missing_commands+=("$command")
+    fi
+done
+
+if [[ ${#missing_commands[@]} -gt 0 ]]; then
+    echo
+    echo "${WARNING}Warning: The following commands listed in $binconfig do not exist:${RESET}"
+    for command in "${missing_commands[@]}"; do
+        echo "[$command]"
     done
 fi

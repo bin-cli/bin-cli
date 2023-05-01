@@ -48,3 +48,22 @@ Feature: Config files
     When I run 'bin hello'
     Then it is successful
     And the output is 'Hello, World!'
+
+  @undocumented
+  Scenario: A warning is displayed if .binconfig contains a command that doesn't exist
+    Given a file '/project/.binconfig' with content:
+      """
+      [my-command]
+      help=Description of command
+      """
+    And a script '/project/bin/sample'
+    When I run 'bin'
+    Then it is successful
+    And the output is:
+      """
+      Available commands
+      bin sample
+
+      Warning: The following commands listed in /project/.binconfig do not exist:
+      [my-command]
+      """
