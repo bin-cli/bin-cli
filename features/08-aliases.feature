@@ -214,3 +214,17 @@ Feature: Aliases
     When I run 'bin'
     Then it fails with exit code 246
     And the error is "bin: The symlink '/project/bin/two' must use a relative path, not absolute ('/project/bin/one')"
+
+  @undocumented
+  Scenario: A broken symlink
+    Given a symlink '/project/bin/broken' pointing to 'missing'
+    When I run 'bin'
+    Then it is successful
+    And the output is:
+      """
+      Available commands
+      None found
+
+      Warning: The following symlinks point to targets that don't exist:
+      /project/bin/broken => missing
+      """

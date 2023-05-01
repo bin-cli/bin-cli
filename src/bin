@@ -554,6 +554,7 @@ fi
 #===============================================================================
 
 commands=()
+broken_symlinks=()
 non_executable_files=()
 
 declare -A command_to_executable
@@ -580,7 +581,12 @@ register_commands() {
             if [[ $target = /* ]]; then
                 fail "The symlink '$file' must use a relative path, not absolute ('$target')"
             fi
-            register_executable_alias "$prefix$name" "$realfile" "$file"
+            if [[ -e $file ]]; then
+                register_executable_alias "$prefix$name" "$realfile" "$file"
+            else
+                debug "-- Skipped broken symlink '$file' => '$target'"
+                broken_symlinks+=("$file => $target")
+            fi
         elif [[ -d $file ]]; then
             # Ignore subdirectories if scripts are in the root directory,
             # because it could take a long time to search a large tree, and it's
@@ -1069,7 +1075,20 @@ if [[ ${#visible_commands[@]} -eq 0 ]]; then
     echo "${GREY}None found${RESET}"
 fi
 
-# List non-executable files, if any
+#===============================================================================
+# Display warnings
+#===============================================================================
+
+# Broken symlinks
+if [[ ${#broken_symlinks[@]} -gt 0 ]]; then
+    echo
+    echo "${WARNING}Warning: The following symlinks point to targets that don't exist:${RESET}"
+    for symlink in "${broken_symlinks[@]}"; do
+        echo "$symlink"
+    done
+fi
+
+# Non-executable files
 if [[ ${#non_executable_files[@]} -gt 0 ]]; then
     echo
     echo "${WARNING}Warning: The following files are not executable (chmod +x):${RESET}"
@@ -1078,7 +1097,7 @@ if [[ ${#non_executable_files[@]} -gt 0 ]]; then
     done
 fi
 
-# List missing commands, if any
+# Missing commands in .binconfig
 missing_commands=()
 for command in "${commands_listed_in_config[@]}"; do
     if [[ -z "${command_to_executable[$command]-}" ]]; then
