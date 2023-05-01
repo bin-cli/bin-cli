@@ -61,8 +61,15 @@ in_array() {
 # Output helpers
 #===============================================================================
 
-# This is a bit of a hack so we can use 'debug' inside functions where stdout is redirected
+# So we can use 'debug' inside functions where stdout is redirected,
+# redirect FD4 to stdout globally, then write debug data to FD4 locally
 exec 4>&1
+
+# If FD3 is open, write debug data to it
+fd3_open=false
+if { true >&3; } 2>/dev/null; then # kcov-ignore-line: Usage not detected
+    fd3_open=true
+fi
 
 debug() {
     # Display debug data when using --debug (only after parsing parameters)
@@ -71,7 +78,7 @@ debug() {
     fi
 
     # Output debug data to FD 3 when using the 'bin tdd' script in development
-    if { true >&3; } 2>/dev/null; then # kcov-ignore-line: Usage not detected
+    if $fd3_open; then
         local lines="${BASH_LINENO[*]}"
         lines=${lines% 0}
         echo "$@" "$DEBUG_LINE[line ${lines// /, }]$DEBUG_RESET" >&3
