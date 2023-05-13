@@ -5,29 +5,51 @@ cd "$(dirname "$0")/.."
 RESET="\e[0m"
 LCYAN="\e[96m"
 
-echo -e "${LCYAN}Installing fakechroot (requires root access)...${RESET}"
-if command -v fakechroot &>/dev/null; then
-    echo 'Already installed.'
-else
-    sudo apt install fakechroot
-fi
+apt_updated=false
 
+sudo() {
+    # This is mainly to allow running in Docker
+    if [[ $UID -eq 0 ]]; then
+        "$@"
+    else
+        command sudo "$@"
+    fi
+}
+
+install() {
+    local command=$1
+    local package=${2-$command}
+
+    if [[ $UID -eq 0 ]]; then
+        echo -e "${LCYAN}Installing $command...${RESET}"
+    else
+        echo -e "${LCYAN}Installing $command (requires root access)...${RESET}"
+    fi
+
+    if command -v "$command" &>/dev/null; then
+        echo 'Already installed.'
+        return
+    fi
+
+    if ! $apt_updated; then
+        sudo apt-get update
+        apt_updated=true
+    fi
+
+    sudo apt-get -y install "$package"
+}
+
+install fakechroot
 echo
-echo -e "${LCYAN}Installing inotifywait (requires root access)...${RESET}"
-if command -v inotifywait &>/dev/null; then
-    echo 'Already installed.'
-else
-    sudo apt install inotify-tools
-fi
-
+install gawk
 echo
-echo -e "${LCYAN}Installing shellcheck (requires root access)...${RESET}"
-if command -v shellcheck &>/dev/null; then
-    echo 'Already installed.'
-else
-    sudo apt install shellcheck
-fi
-
+install inotifywait inotify-tools
+echo
+install kcov
+echo
+install npm
+echo
+install shellcheck
 echo
 echo -e "${LCYAN}Installing/updating Node modules...${RESET}"
 npm ci

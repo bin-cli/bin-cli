@@ -21,3 +21,8 @@ gawk \
     }" \
     src/bin \
     > dist/bin
+
+chmod +x dist/bin
+
+# Smoke test
+dist/bin -v

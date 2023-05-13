@@ -1,0 +1,19 @@
+name: Run Tests
+on: [push]
+
+env:
+  FORCE_COLOR: 1
+
+jobs:
+  test-on-ubuntu:
+    name: Test on Ubuntu
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 12 # Just because it matches the Ubuntu 22.04 default
+          cache: npm
+      - run: bin/setup
+      - run: bin/build
+      - run: bin/test
