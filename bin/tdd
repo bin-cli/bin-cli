@@ -15,7 +15,7 @@ while true; do
 
     (
         bin/build
-        npx cucumber-js --fail-fast --publish-quiet
+        bin/test --fail-fast
     ) || true
 
     if [[ -f jail/command.txt ]]; then
