@@ -2,7 +2,7 @@ Feature: Debugging
   https://github.com/bin-cli/bin#debugging
 
   Scenario: Passing --debug returns detailed debugging information about shims
-    Given a file '/project/.binconfig' with content:
+    Given a file '{ROOT}/project/.binconfig' with content:
       """
       dir=scripts
 
@@ -17,14 +17,14 @@ Feature: Debugging
       help=Three
       alias=333
       """
-    And a script '/project/scripts/one'
-    And a script '/project/scripts/two'
-    And a script '/project/scripts/three'
-    And a script '/project/scripts/four'
-    And a script '/project/scripts/five'
-    And a script '/project/scripts/subdir/six'
-    And a script '/usr/bin/php'
-    And the working directory is '/project/public'
+    And a script '{ROOT}/project/scripts/one'
+    And a script '{ROOT}/project/scripts/two'
+    And a script '{ROOT}/project/scripts/three'
+    And a script '{ROOT}/project/scripts/four'
+    And a script '{ROOT}/project/scripts/five'
+    And a script '{ROOT}/project/scripts/subdir/six'
+    And a script '{ROOT}/usr/bin/php'
+    And the working directory is '{ROOT}/project/public'
     When I run 'bin --debug --shim php -v'
     Then it is successful
     And the output is:
@@ -33,14 +33,14 @@ Feature: Debugging
       # pasted into a GitHub issue without a code fence
       """
       Bin version 1.2.3-dev
-      Working directory is /project/public
+      Working directory is {ROOT}/project/public
       Looking for a .binconfig file in:
-      -- /project/public - not found
-      -- /project - found
-      Checking /project/.binconfig for a 'dir' setting
+      -- {ROOT}/project/public - not found
+      -- {ROOT}/project - found
+      Checking {ROOT}/project/.binconfig for a 'dir' setting
       -- Found dir=scripts
       -- Using 'scripts' from the config file
-      Parsing /project/.binconfig
+      Parsing {ROOT}/project/.binconfig
       -- Found [one] section
       ---- Registered help for 'one'
       -- Found [two] section
@@ -51,16 +51,16 @@ Feature: Debugging
       ---- Registered help for 'three'
       ---- Registered alias '333' for command 'three'
       'exact' defaulted to 'false'
-      Bin directory set to '/project/scripts' from config file
-      Searching '/project/scripts' for scripts
-      -- Registered command 'five' for executable '/project/scripts/five'
-      -- Registered command 'four' for executable '/project/scripts/four'
-      -- Registered command 'one' for executable '/project/scripts/one'
-      -- Registered subdirectory '/project/scripts/subdir' to parent command 'subdir'
-      -- Searching subdirectory '/project/scripts/subdir'
-      -- Registered command 'subdir six' for executable '/project/scripts/subdir/six'
-      -- Registered command 'three' for executable '/project/scripts/three'
-      -- Registered command 'two' for executable '/project/scripts/two'
+      Bin directory set to '{ROOT}/project/scripts' from config file
+      Searching '{ROOT}/project/scripts' for scripts
+      -- Registered command 'five' for executable '{ROOT}/project/scripts/five'
+      -- Registered command 'four' for executable '{ROOT}/project/scripts/four'
+      -- Registered command 'one' for executable '{ROOT}/project/scripts/one'
+      -- Registered subdirectory '{ROOT}/project/scripts/subdir' to parent command 'subdir'
+      -- Searching subdirectory '{ROOT}/project/scripts/subdir'
+      -- Registered command 'subdir six' for executable '{ROOT}/project/scripts/subdir/six'
+      -- Registered command 'three' for executable '{ROOT}/project/scripts/three'
+      -- Registered command 'two' for executable '{ROOT}/project/scripts/two'
       Processing symlink aliases
       Processing directory aliases and checking for conflicts
       Processing positional parameters
@@ -101,20 +101,20 @@ Feature: Debugging
       """
 
     Scenario: Passing --print displays the command that would have been run (1)
-      Given a script '/project/bin/sample/hello'
+      Given a script '{ROOT}/project/bin/sample/hello'
       When I run 'bin --print sample hello world'
       Then it is successful
-      And the output is '/project/bin/sample/hello world'
+      And the output is '{ROOT}/project/bin/sample/hello world'
 
     Scenario: Passing --print displays the command that would have been run (2)
-      Given an empty directory '/project/bin'
+      Given an empty directory '{ROOT}/project/bin'
       When I run 'bin --print --shim php -v'
       Then it is successful
       And the output is 'php -v'
 
     Scenario: Passing --print displays the command that would have been run (3)
-      Given an empty directory '/project/bin'
+      Given an empty directory '{ROOT}/project/bin'
       When I run 'bin --print php -v'
       Then the exit code is 127
       And there is no output
-      And the error is "bin: Command 'php' not found in /project/bin"
+      And the error is "bin: Command 'php' not found in {ROOT}/project/bin"

@@ -2,8 +2,8 @@ Feature: Automatic exclusions
   https://github.com/bin-cli/bin#automatic-exclusions
 
   Scenario: Scripts starting with '_' are excluded from listings
-    Given a script '/project/bin/visible'
-    And a script '/project/bin/_hidden'
+    Given a script '{ROOT}/project/bin/visible'
+    And a script '{ROOT}/project/bin/_hidden'
     When I run 'bin'
     Then it is successful
     And the output is:
@@ -13,14 +13,14 @@ Feature: Automatic exclusions
       """
 
   Scenario: Scripts starting with '_' can be executed
-    Given a script '/project/bin/_hidden' that outputs 'Hidden script'
+    Given a script '{ROOT}/project/bin/_hidden' that outputs 'Hidden script'
     When I run 'bin _hidden'
     Then it is successful
     And the output is 'Hidden script'
 
   Scenario: Subcommands starting with '_' are excluded from listings of subcommands
-    Given a script '/project/bin/sub/visible'
-    And a script '/project/bin/sub/_hidden'
+    Given a script '{ROOT}/project/bin/sub/visible'
+    And a script '{ROOT}/project/bin/sub/_hidden'
     When I run 'bin sub'
     Then it is successful
     And the output is:
@@ -30,7 +30,7 @@ Feature: Automatic exclusions
       """
 
   Scenario: Subcommands starting with '_' are not executed even if they are the only match
-    Given a script '/project/bin/sub/_hidden'
+    Given a script '{ROOT}/project/bin/sub/_hidden'
     When I run 'bin s'
     Then it is successful
     And the output is:
@@ -40,8 +40,8 @@ Feature: Automatic exclusions
       """
 
   Scenario: Subcommands starting with '_' are excluded from listings of partial matches
-    Given a script '/project/bin/sub/visible'
-    And a script '/project/bin/sub/_hidden'
+    Given a script '{ROOT}/project/bin/sub/visible'
+    And a script '{ROOT}/project/bin/sub/_hidden'
     When I run 'bin --exact s'
     Then it is successful
     And the output is:
@@ -51,14 +51,14 @@ Feature: Automatic exclusions
       """
 
   Scenario: Subcommands starting with '_' can be executed
-    Given a script '/project/bin/sub/_hidden' that outputs 'Hidden script'
+    Given a script '{ROOT}/project/bin/sub/_hidden' that outputs 'Hidden script'
     When I run 'bin sub _hidden'
     Then it is successful
     And the output is 'Hidden script'
 
   Scenario: Directories starting with '_' are excluded from listings
-    Given a script '/project/bin/visible'
-    And a script '/project/bin/_sub/child'
+    Given a script '{ROOT}/project/bin/visible'
+    And a script '{ROOT}/project/bin/_sub/child'
     When I run 'bin'
     Then it is successful
     And the output is:
@@ -68,15 +68,15 @@ Feature: Automatic exclusions
       """
 
   Scenario: Commands in directories starting with '_' can be executed
-    Given a script '/project/bin/_sub/child' that outputs 'Hidden script'
+    Given a script '{ROOT}/project/bin/_sub/child' that outputs 'Hidden script'
     When I run 'bin _sub child'
     Then it is successful
     And the output is 'Hidden script'
 
   @undocumented
   Scenario: Commands in directories starting with '_' are listed when the directory name is given
-    Given a script '/project/bin/_sub/child'
-    Given a script '/project/bin/_sub/_hidden'
+    Given a script '{ROOT}/project/bin/_sub/child'
+    Given a script '{ROOT}/project/bin/_sub/_hidden'
     When I run 'bin _sub'
     Then it is successful
     And the output is:
@@ -87,8 +87,8 @@ Feature: Automatic exclusions
 
   @undocumented
   Scenario: Commands in directories starting with '_' are listed when the prefix is given
-    Given a script '/project/bin/_sub/child'
-    And a script '/project/bin/_sub/_hidden'
+    Given a script '{ROOT}/project/bin/_sub/child'
+    And a script '{ROOT}/project/bin/_sub/_hidden'
     When I run 'bin _'
     Then it is successful
     And the output is:
@@ -98,8 +98,8 @@ Feature: Automatic exclusions
       """
 
   Scenario: Scripts starting with '.' are excluded from listings
-    Given a script '/project/bin/visible'
-    And a script '/project/bin/.hidden'
+    Given a script '{ROOT}/project/bin/visible'
+    And a script '{ROOT}/project/bin/.hidden'
     When I run 'bin'
     Then it is successful
     And the output is:
@@ -109,14 +109,14 @@ Feature: Automatic exclusions
       """
 
   Scenario: Scripts starting with '.' cannot be executed
-    Given a script '/project/bin/.hidden'
+    Given a script '{ROOT}/project/bin/.hidden'
     When I run 'bin .hidden'
     Then it fails with exit code 246
     And the error is "bin: Command names may not start with '.'"
 
   Scenario: Files that are not executable are listed as warnings
-    Given a script '/project/bin/executable'
-    And an empty file '/project/bin/not-executable'
+    Given a script '{ROOT}/project/bin/executable'
+    And an empty file '{ROOT}/project/bin/not-executable'
     When I run 'bin'
     Then it is successful
     And the output is:
@@ -125,19 +125,19 @@ Feature: Automatic exclusions
       bin executable
 
       Warning: The following files are not executable (chmod +x):
-      /project/bin/not-executable
+      {ROOT}/project/bin/not-executable
       """
 
   Scenario: Files that are not executable cannot be executed
-    Given an empty file '/project/bin/not-executable'
+    Given an empty file '{ROOT}/project/bin/not-executable'
     When I run 'bin not-executable'
     Then it fails with exit code 126
-    And the error is "bin: '/project/bin/not-executable' is not executable (chmod +x)"
+    And the error is "bin: '{ROOT}/project/bin/not-executable' is not executable (chmod +x)"
 
   Scenario: Non-executable files are not listed in the project root
-    Given a file '/project/.binconfig' with content 'dir=.'
-    And a script '/project/executable'
-    And an empty file '/project/not-executable'
+    Given a file '{ROOT}/project/.binconfig' with content 'dir=.'
+    And a script '{ROOT}/project/executable'
+    And an empty file '{ROOT}/project/not-executable'
     When I run 'bin'
     Then it is successful
     And the output is:
@@ -147,13 +147,13 @@ Feature: Automatic exclusions
       """
 
   Scenario: Common non-executable file types are not listed in the project root even if they are executable
-    Given a file '/project/.binconfig' with content 'dir=.'
-    And a script '/project/executable1.sh'
-    And a script '/project/executable2.json'
-    And a script '/project/executable3.md'
-    And a script '/project/executable4.txt'
-    And a script '/project/executable5.yaml'
-    And a script '/project/executable6.yml'
+    Given a file '{ROOT}/project/.binconfig' with content 'dir=.'
+    And a script '{ROOT}/project/executable1.sh'
+    And a script '{ROOT}/project/executable2.json'
+    And a script '{ROOT}/project/executable3.md'
+    And a script '{ROOT}/project/executable4.txt'
+    And a script '{ROOT}/project/executable5.yaml'
+    And a script '{ROOT}/project/executable6.yml'
     When I run 'bin'
     Then it is successful
     And the output is:
@@ -163,18 +163,18 @@ Feature: Automatic exclusions
       """
 
   Scenario: Common non-executable file types can still be run manually
-    Given a file '/project/.binconfig' with content 'dir=.'
-    And a script '/project/executable.json' that outputs 'Executable'
+    Given a file '{ROOT}/project/.binconfig' with content 'dir=.'
+    And a script '{ROOT}/project/executable.json' that outputs 'Executable'
     When I run 'bin executable'
     Then it is successful
     And the output is 'Executable'
 
   Scenario Template: Common bin directories are ignored when searching parent directories
-    Given a script '<bin>/hello'
-    And the working directory is '<workdir>'
+    Given a script '{ROOT}<bin>/hello'
+    And the working directory is '{ROOT}<workdir>'
     When I run 'bin hello'
     Then it fails with exit code 127
-    And the error is "bin: Could not find 'bin/' directory or '.binconfig' file starting from '<workdir>' (ignored '<bin>')"
+    And the error is "bin: Could not find 'bin/' directory or '.binconfig' file starting from '{ROOT}<workdir>' (ignored '{ROOT}<bin>')"
 
     Examples:
       | bin            | workdir                |
@@ -185,9 +185,9 @@ Feature: Automatic exclusions
       | /home/user/bin | /home/user/example     |
 
   Scenario Template: Common bin directories are not ignored if there is a .binconfig directory in the parent directory
-    Given a script '<bin>/hello' that outputs 'Hello, World!'
-    And an empty file '<config>'
-    And the working directory is '<workdir>'
+    Given a script '{ROOT}<bin>/hello' that outputs 'Hello, World!'
+    And an empty file '{ROOT}<config>'
+    And the working directory is '{ROOT}<workdir>'
     When I run 'bin hello'
     Then it is successful
     And the output is 'Hello, World!'

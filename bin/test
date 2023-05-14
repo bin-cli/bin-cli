@@ -21,28 +21,28 @@ if [[ $result -eq 0 ]]; then
 fi
 
 # If it failed, output debugging information
-if [[ -f jail/command.txt ]]; then
+if [[ -f temp/root/command.txt ]]; then
     echo
     echo -e "${LMAGENTA}${BOLD}${UNDERLINE}Command${RESET}"
-    cat jail/command.txt
+    cat temp/root/command.txt
 fi
 
-if [[ -f jail/stdout.txt ]]; then
+if [[ -f temp/root/stdout.txt ]]; then
     echo
     echo -e "${LGREEN}${BOLD}${UNDERLINE}Output${RESET}"
-    cat jail/stdout.txt
+    cat temp/root/stdout.txt
 fi
 
-if [[ -f jail/stderr.txt ]]; then
+if [[ -f temp/root/stderr.txt ]]; then
     echo
     echo -e "${LRED}${BOLD}${UNDERLINE}Errors${RESET}"
-    cat jail/stderr.txt
+    cat temp/root/stderr.txt
 fi
 
-if [[ -f jail/debug.txt ]]; then
+if [[ -f temp/root/debug.txt ]]; then
     echo
     echo -e "${LCYAN}${BOLD}${UNDERLINE}Debug log${RESET}"
-    cat jail/debug.txt
+    cat temp/root/debug.txt
 fi
 
 # Return the result code

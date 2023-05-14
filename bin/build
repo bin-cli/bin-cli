@@ -10,7 +10,7 @@ if [[ $version = '--help' || $version = '-h' ]]; then
     exit
 fi
 
-mkdir -p dist
+mkdir -p temp/dist
 
 gawk \
     "{
@@ -20,9 +20,9 @@ gawk \
             print
     }" \
     src/bin \
-    > dist/bin
+    > temp/dist/bin
 
-chmod +x dist/bin
+chmod +x temp/dist/bin
 
 # Smoke test
-dist/bin -v
+temp/dist/bin -v

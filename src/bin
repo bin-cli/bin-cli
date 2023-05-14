@@ -12,7 +12,14 @@ shopt -s nullglob
 #===============================================================================
 
 # Version (set by build script - don't change in source file)
-VERSION='1.2.3-dev'
+VERSION='1.2.3-source'
+
+# $BIN_TEST_ROOT is be ignored in production builds, but is used to emulate these directories in the tests
+if [[ $VERSION = '1.2.3-dev' ]]; then
+    BIN_TEST_ROOT=${BIN_TEST_ROOT-}
+else
+    BIN_TEST_ROOT='' # kcov-ignore-line: Not tested
+fi
 
 # ANSI codes
 if [[ -t 1 ]]; then
@@ -258,7 +265,7 @@ fi
 #===============================================================================
 
 if [[ $action = 'completion' ]]; then
-    complete_command=("$(readlink -f "$0")" --complete-bash)
+    complete_command=("$0" --complete-bash)
     if [[ -n $bin_dirname ]]; then
         complete_command+=("--dir" "'$bin_dirname'")
     fi
@@ -359,7 +366,7 @@ findup() (
             debug "-- $PWD - not found"
         fi
 
-        if [[ $PWD = '/' ]]; then
+        if [[ $PWD = '/' || $PWD = "$BIN_TEST_ROOT" ]]; then
             return 1
         fi
 
@@ -543,7 +550,7 @@ else
     fi
 
     # Check for special cases that we only allow with a matching .binconfig file
-    if in_array "$bin_directory" '/bin' '/usr/bin' '/usr/local/bin' '/snap/bin' "$HOME/bin"; then
+    if in_array "$bin_directory" "$BIN_TEST_ROOT/bin" "$BIN_TEST_ROOT/usr/bin" "$BIN_TEST_ROOT/usr/local/bin" "$BIN_TEST_ROOT/snap/bin" "$HOME/bin"; then
         fail "Could not find '$bin_dirname/' directory or '.binconfig' file starting from '$PWD' (ignored '$bin_directory')" $ERR_NOT_FOUND
     fi
 
@@ -573,7 +580,7 @@ register_commands() {
         name=${name// /-} # Spaces to dashes
 
         local realfile
-        realfile="$(readlink -f "$file")"
+        realfile=$(readlink -f "$file") || true
 
         if [[ -L $file ]]; then
             local target

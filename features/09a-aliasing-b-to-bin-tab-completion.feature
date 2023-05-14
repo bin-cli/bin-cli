@@ -7,5 +7,5 @@ Feature: Tab completion for aliasing `b` to `bin`
     Then it is successful
     And the output is:
       """
-      complete -C "/usr/bin/bin --complete-bash --exe 'b'" -o default b
+      complete -C "{ROOT}/usr/bin/bin --complete-bash --exe 'b'" -o default b
       """

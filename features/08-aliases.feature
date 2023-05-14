@@ -2,8 +2,8 @@ Feature: Aliases
   https://github.com/bin-cli/bin#aliases
 
   Scenario: An alias can be defined in .binconfig
-    Given a script '/project/bin/deploy' that outputs 'Copying to production...'
-    And a file '/project/.binconfig' with content:
+    Given a script '{ROOT}/project/bin/deploy' that outputs 'Copying to production...'
+    And a file '{ROOT}/project/.binconfig' with content:
       """
       [deploy]
       alias=publish
@@ -13,8 +13,8 @@ Feature: Aliases
     And the output is 'Copying to production...'
 
   Scenario: Multiple aliases can be defined on one line
-    Given a script '/project/bin/deploy' that outputs 'Copying to production...'
-    And a file '/project/.binconfig' with content:
+    Given a script '{ROOT}/project/bin/deploy' that outputs 'Copying to production...'
+    And a file '{ROOT}/project/.binconfig' with content:
       """
       [deploy]
       alias=publish, push
@@ -24,8 +24,8 @@ Feature: Aliases
     And the output is 'Copying to production...'
 
   Scenario: Multiple aliases can be defined on one line with the option 'aliases'
-    Given a script '/project/bin/deploy' that outputs 'Copying to production...'
-    And a file '/project/.binconfig' with content:
+    Given a script '{ROOT}/project/bin/deploy' that outputs 'Copying to production...'
+    And a file '{ROOT}/project/.binconfig' with content:
       """
       [deploy]
       aliases=publish, push
@@ -35,8 +35,8 @@ Feature: Aliases
     And the output is 'Copying to production...'
 
   Scenario: Multiple aliases can be defined on separate lines
-    Given a script '/project/bin/deploy' that outputs 'Copying to production...'
-    And a file '/project/.binconfig' with content:
+    Given a script '{ROOT}/project/bin/deploy' that outputs 'Copying to production...'
+    And a file '{ROOT}/project/.binconfig' with content:
       """
       [deploy]
       alias=publish
@@ -47,8 +47,8 @@ Feature: Aliases
     And the output is 'Copying to production...'
 
   Scenario: Aliases can be defined for directories
-    Given a script '/project/bin/deploy/live' that outputs 'Copying to production...'
-    And a file '/project/.binconfig' with content:
+    Given a script '{ROOT}/project/bin/deploy/live' that outputs 'Copying to production...'
+    And a file '{ROOT}/project/.binconfig' with content:
       """
       [deploy]
       alias=push
@@ -58,8 +58,8 @@ Feature: Aliases
     And the output is 'Copying to production...'
 
   Scenario: Aliases can be defined for subcommands
-    Given a script '/project/bin/deploy/live' that outputs 'Copying to production...'
-    And a file '/project/.binconfig' with content:
+    Given a script '{ROOT}/project/bin/deploy/live' that outputs 'Copying to production...'
+    And a file '{ROOT}/project/.binconfig' with content:
       """
       [deploy live]
       alias=publish
@@ -70,8 +70,8 @@ Feature: Aliases
 
   @undocumented
   Scenario: Aliases can be subcommands
-    Given a script '/project/bin/publish' that outputs 'Copying to production...'
-    And a file '/project/.binconfig' with content:
+    Given a script '{ROOT}/project/bin/publish' that outputs 'Copying to production...'
+    And a file '{ROOT}/project/.binconfig' with content:
       """
       [publish]
       alias=deploy live
@@ -81,9 +81,9 @@ Feature: Aliases
     And the output is 'Copying to production...'
 
   Scenario: Aliases are displayed in the command list
-    Given a script '/project/bin/artisan'
-    And a script '/project/bin/deploy'
-    And a file '/project/.binconfig' with content:
+    Given a script '{ROOT}/project/bin/artisan'
+    And a script '{ROOT}/project/bin/deploy'
+    And a file '{ROOT}/project/.binconfig' with content:
       """
       [artisan]
       alias=art
@@ -101,9 +101,9 @@ Feature: Aliases
       """
 
   Scenario: Aliases are displayed after the help text
-    Given a script '/project/bin/artisan'
-    And a script '/project/bin/deploy'
-    And a file '/project/.binconfig' with content:
+    Given a script '{ROOT}/project/bin/artisan'
+    And a script '{ROOT}/project/bin/deploy'
+    And a file '{ROOT}/project/.binconfig' with content:
       """
       [artisan]
       alias=art
@@ -123,8 +123,8 @@ Feature: Aliases
       """
 
   Scenario: Aliases are subject to unique prefix matching
-    Given a script '/project/bin/deploy' that outputs 'Copying to production...'
-    And a file '/project/.binconfig' with content:
+    Given a script '{ROOT}/project/bin/deploy' that outputs 'Copying to production...'
+    And a file '{ROOT}/project/.binconfig' with content:
       """
       [deploy]
       alias=publish
@@ -134,8 +134,8 @@ Feature: Aliases
     And the output is 'Copying to production...'
 
   Scenario: Multiple aliases for the same command are treated as one match
-    Given a script '/project/bin/deploy' that outputs 'Copying to production...'
-    And a file '/project/.binconfig' with content:
+    Given a script '{ROOT}/project/bin/deploy' that outputs 'Copying to production...'
+    And a file '{ROOT}/project/.binconfig' with content:
       """
       [deploy]
       alias=publish, push
@@ -145,21 +145,21 @@ Feature: Aliases
     And the output is 'Copying to production...'
 
   Scenario: Defining an alias that conflicts with a command causes an error
-    Given a script '/project/bin/one'
-    And a script '/project/bin/two'
-    And a file '/project/.binconfig' with content:
+    Given a script '{ROOT}/project/bin/one'
+    And a script '{ROOT}/project/bin/two'
+    And a file '{ROOT}/project/.binconfig' with content:
       """
       [one]
       alias=two
       """
     When I run 'bin'
     Then it fails with exit code 246
-    And the error is "bin: The alias 'two' defined in /project/.binconfig line 2 conflicts with an existing command"
+    And the error is "bin: The alias 'two' defined in {ROOT}/project/.binconfig line 2 conflicts with an existing command"
 
   Scenario: Defining an alias that conflicts with another alias causes an error
-    Given a script '/project/bin/one'
-    And a script '/project/bin/two'
-    And a file '/project/.binconfig' with content:
+    Given a script '{ROOT}/project/bin/one'
+    And a script '{ROOT}/project/bin/two'
+    And a file '{ROOT}/project/.binconfig' with content:
       """
       [one]
       alias=three
@@ -169,11 +169,11 @@ Feature: Aliases
       """
     When I run 'bin'
     Then it fails with exit code 246
-    And the error is "bin: The alias 'three' defined in /project/.binconfig line 5 conflicts with the alias defined in /project/.binconfig line 2"
+    And the error is "bin: The alias 'three' defined in {ROOT}/project/.binconfig line 5 conflicts with the alias defined in {ROOT}/project/.binconfig line 2"
 
   Scenario: An alias can be defined by a symlink
-    Given a script '/project/bin/deploy' that outputs 'Copying to production...'
-    And a symlink '/project/bin/publish' pointing to 'deploy'
+    Given a script '{ROOT}/project/bin/deploy' that outputs 'Copying to production...'
+    And a symlink '{ROOT}/project/bin/publish' pointing to 'deploy'
     When I run 'bin'
     Then it is successful
     And the output is:
@@ -183,9 +183,9 @@ Feature: Aliases
       """
 
   Scenario: A directory alias can be defined by a symlink
-    Given a script '/project/bin/deploy/live'
-    And a script '/project/bin/deploy/staging'
-    And a symlink '/project/bin/publish' pointing to 'deploy'
+    Given a script '{ROOT}/project/bin/deploy/live'
+    And a script '{ROOT}/project/bin/deploy/staging'
+    And a symlink '{ROOT}/project/bin/publish' pointing to 'deploy'
     When I run 'bin'
     Then it is successful
     And the output is:
@@ -196,28 +196,28 @@ Feature: Aliases
       """
 
   Scenario: Defining an alias that conflicts with a symlink alias causes an error
-    Given a script '/project/bin/one'
-    And a script '/project/bin/two'
-    And a symlink '/project/bin/three' pointing to 'one'
-    And a file '/project/.binconfig' with content:
+    Given a script '{ROOT}/project/bin/one'
+    And a script '{ROOT}/project/bin/two'
+    And a symlink '{ROOT}/project/bin/three' pointing to 'one'
+    And a file '{ROOT}/project/.binconfig' with content:
       """
       [two]
       alias=three
       """
     When I run 'bin'
     Then it fails with exit code 246
-    And the error is "bin: The alias 'three' defined in /project/bin/three conflicts with the alias defined in /project/.binconfig line 2"
+    And the error is "bin: The alias 'three' defined in {ROOT}/project/bin/three conflicts with the alias defined in {ROOT}/project/.binconfig line 2"
 
   Scenario: A symlink alias must be relative not absolute
-    Given a script '/project/bin/one'
-    And a symlink '/project/bin/two' pointing to '/project/bin/one'
+    Given a script '{ROOT}/project/bin/one'
+    And a symlink '{ROOT}/project/bin/two' pointing to '{ROOT}/project/bin/one'
     When I run 'bin'
     Then it fails with exit code 246
-    And the error is "bin: The symlink '/project/bin/two' must use a relative path, not absolute ('/project/bin/one')"
+    And the error is "bin: The symlink '{ROOT}/project/bin/two' must use a relative path, not absolute ('{ROOT}/project/bin/one')"
 
   @undocumented
   Scenario: A broken symlink
-    Given a symlink '/project/bin/broken' pointing to 'missing'
+    Given a symlink '{ROOT}/project/bin/broken' pointing to 'missing'
     When I run 'bin'
     Then it is successful
     And the output is:
@@ -226,5 +226,5 @@ Feature: Aliases
       None found
 
       Warning: The following symlinks point to targets that don't exist:
-      /project/bin/broken => missing
+      {ROOT}/project/bin/broken => missing
       """

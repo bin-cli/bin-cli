@@ -38,7 +38,7 @@ echo
 
 if [[ -d ~/.git && -f ~/.bin/bin ]]; then
     echo -e "${LCYAN}Copying to Dotfiles...${RESET}"
-    cp dist/bin ~/.bin/bin
+    cp temp/dist/bin ~/.bin/bin
     (
         cd
         git add .bin/bin

@@ -31,7 +31,6 @@ require() {
 }
 
 echo -e "${LCYAN}Checking for missing dependencies...${RESET}"
-require fakechroot
 require gawk
 require inotifywait inotify-tools
 require kcov

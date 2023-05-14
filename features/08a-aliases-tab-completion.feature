@@ -3,9 +3,13 @@ Feature: Tab completion for aliases
   https://github.com/bin-cli/bin#aliases
 
   Scenario: Tab completion works for aliases
-    Given a script '/project/bin/deploy'
-    And a file '/project/.binconfig' with content:
+    Given a script '{ROOT}/project/bin/deploy'
+    And a script '{ROOT}/project/bin/another'
+    And a file '{ROOT}/project/.binconfig' with content:
       """
+      [artisan]
+      alias=art
+
       [deploy]
       alias=publish
       """
@@ -18,8 +22,8 @@ Feature: Tab completion for aliases
 
   @undocumented
   Scenario: If both the command and the alias match, only the command is listed in tab completion
-    Given a script '/project/bin/deploy'
-    And a file '/project/.binconfig' with content:
+    Given a script '{ROOT}/project/bin/deploy'
+    And a file '{ROOT}/project/.binconfig' with content:
       """
       [deploy]
       alias=publish
@@ -33,8 +37,8 @@ Feature: Tab completion for aliases
 
   @undocumented
   Scenario: If multiple aliases for the same command match, only one is returned in tab completion
-    Given a script '/project/bin/deploy'
-    And a file '/project/.binconfig' with content:
+    Given a script '{ROOT}/project/bin/deploy'
+    And a file '{ROOT}/project/.binconfig' with content:
       """
       [deploy]
       alias=publish

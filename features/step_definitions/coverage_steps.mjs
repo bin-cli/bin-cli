@@ -1,5 +1,4 @@
 import * as paths from '../support/paths.mjs';
-import {move} from 'fs-extra/lib/move/index.js';
 import {quote} from 'shell-quote';
 import {spawnSync} from 'child_process';
 import {createRequire} from 'module';
@@ -7,13 +6,7 @@ import {Then} from '@cucumber/cucumber';
 
 Then('Code coverage must be at least {float}%', async function (minPercent) {
 
-    // We have to use the jail to merge the results - otherwise the paths are wrong
-    await move(paths.coverage, `${paths.jail}/coverage`);
-
     const command = quote([
-        'fakechroot',
-        'chroot',
-        paths.jail,
         'sh',
         '-c',
         [
@@ -22,8 +15,8 @@ Then('Code coverage must be at least {float}%', async function (minPercent) {
             '--exclude-region=kcov-ignore-start:kcov-ignore-end',
             '--path-strip-level=0',
             '--merge',
-            `/coverage/merged`,
-            `/coverage/result-*`,
+            `${paths.coverage}/merged`,
+            `${paths.coverage}/result-*`,
         ].join(' '),
     ]);
 
@@ -40,11 +33,9 @@ Then('Code coverage must be at least {float}%', async function (minPercent) {
         throw stderr;
     }
 
-    await move(`${paths.jail}/coverage/merged/kcov-merged`, paths.coverage);
-
     // Check we have 100% coverage (excluding ignored lines/sections)
     const require = createRequire(import.meta.url);
-    const coverage = require(`${paths.coverage}/coverage.json`);
+    const coverage = require(`${paths.coverage}/merged/kcov-merged/coverage.json`);
 
     if (coverage.percent_covered < minPercent) {
         throw new Error(`Test coverage dropped to ${coverage.percent_covered}%`);

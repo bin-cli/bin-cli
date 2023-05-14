@@ -22,7 +22,7 @@ Feature: CLI arguments
     And the output contains 'Bin version '
 
   Scenario: '--' can be placed before executable names
-    Given a script '/project/bin/--help' that outputs 'Help'
+    Given a script '{ROOT}/project/bin/--help' that outputs 'Help'
     When I run 'bin -- --help'
     Then it is successful
     And the output is 'Help'

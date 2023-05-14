@@ -37,9 +37,9 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: bin
-          path: dist/bin
+          path: temp/dist/bin
       - name: Upload 'coverage/' artifact
         uses: actions/upload-artifact@v3
         with:
           name: coverage
-          path: coverage/
+          path: temp/coverage/

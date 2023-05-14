@@ -35,7 +35,7 @@ jobs:
           draft: true
           prerelease: true
           files: |
-            dist/bin
+            temp/dist/bin
       - name: Release
         if: "!contains(github.ref_name, '-')"
         uses: marvinpinto/action-automatic-releases@v1.2.1
@@ -44,4 +44,4 @@ jobs:
           draft: true
           prerelease: false
           files: |
-            dist/bin
+            temp/dist/bin

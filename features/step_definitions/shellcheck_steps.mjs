@@ -8,7 +8,7 @@ Then('ShellCheck must report no errors', async function () {
     const command = quote([
         'shellcheck',
         '--color',
-        `${paths.root}/dist/bin`,
+        `${paths.dist}/bin`,
     ]);
 
     const result = spawnSync(command, {
