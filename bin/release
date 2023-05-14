@@ -51,3 +51,10 @@ if [[ -d ~/.git && -f ~/.bin/bin ]]; then
     )
     echo
 fi
+
+echo -e "${LCYAN}Finished${RESET}"
+echo 'Go here to check the release status:'
+echo '  https://github.com/bin-cli/bin/actions'
+echo
+echo 'Then go here to write the changelog and publish the release:'
+echo '  https://github.com/bin-cli/bin/releases'
