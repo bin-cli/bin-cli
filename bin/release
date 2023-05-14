@@ -29,12 +29,8 @@ echo -e "${LCYAN}Building test version...${RESET}"
 bin/build
 echo
 
-echo -e "${LCYAN}Testing...${RESET}"
+echo -e "${LCYAN}Testing locally...${RESET}"
 bin/test
-echo
-
-echo -e "${LCYAN}Building release version...${RESET}"
-bin/build "$version"
 echo
 
 echo -e "${LCYAN}Tagging in Git...${RESET}"
@@ -51,6 +47,3 @@ cp dist/bin ~/.bin/bin
     git push
 )
 echo
-
-echo -e "${LCYAN}Manual release${RESET}"
-echo "https://github.com/bin-cli/bin/releases/new?tag=$version"
