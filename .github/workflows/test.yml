@@ -17,3 +17,11 @@ jobs:
       - run: bin/setup
       - run: bin/build
       - run: bin/test
+      - uses: actions/upload-artifact@v3
+        with:
+          name: bin
+          path: dist/bin
+      - uses: actions/upload-artifact@v3
+        with:
+          name: coverage
+          path: coverage/
