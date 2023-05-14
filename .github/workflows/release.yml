@@ -13,8 +13,10 @@ env:
 
 jobs:
   test:
+    name: Test
     uses: ./.github/workflows/test.yml
   release:
+    name: Release
     needs: test
     runs-on: ubuntu-22.04
     steps:
