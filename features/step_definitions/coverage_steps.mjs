@@ -6,19 +6,15 @@ import {Then} from '@cucumber/cucumber';
 
 Then('Code coverage must be at least {float}%', async function (minPercent) {
 
-    const command = quote([
-        'sh',
-        '-c',
-        [
-            'kcov',
-            '--exclude-line=kcov-ignore-line',
-            '--exclude-region=kcov-ignore-start:kcov-ignore-end',
-            '--path-strip-level=0',
-            '--merge',
-            `${paths.coverage}/merged`,
-            `${paths.coverage}/result-*`,
-        ].join(' '),
-    ]);
+    const command = [
+        'kcov',
+        '--exclude-line=kcov-ignore-line',
+        '--exclude-region=kcov-ignore-start:kcov-ignore-end',
+        '--path-strip-level=0',
+        '--merge',
+        quote([`${paths.coverage}/merged`]),
+        quote([`${paths.coverage}/result-`]) + '*',
+    ].join(' ');
 
     const result = spawnSync(command, {
         shell: true,

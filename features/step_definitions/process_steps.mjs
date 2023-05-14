@@ -47,8 +47,6 @@ async function run(command, env = {}) {
         ].join(' ') + ' ' + command;
     }
 
-    command = quote(['sh', '-c', command]);
-
     // Write the command to a file to be displayed by the 'bin/tdd' script if the test fails
     let env_string = '';
     for (let [key, value] of Object.entries(env)) {
