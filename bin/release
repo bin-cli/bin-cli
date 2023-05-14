@@ -33,6 +33,10 @@ echo -e "${LCYAN}Testing locally...${RESET}"
 bin/test
 echo
 
+echo -e "${LCYAN}Building release version...${RESET}"
+bin/build "$version"
+echo
+
 echo -e "${LCYAN}Tagging in Git...${RESET}"
 git tag "$version"
 git push origin HEAD "$version"
