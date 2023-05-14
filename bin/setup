@@ -5,7 +5,7 @@ cd "$(dirname "$0")/.."
 RESET="\e[0m"
 LCYAN="\e[96m"
 
-apt_updated=false
+to_install=()
 
 sudo() {
     # This is mainly to allow running in Docker
@@ -16,40 +16,41 @@ sudo() {
     fi
 }
 
-install() {
+require() {
     local command=$1
     local package=${2-$command}
 
-    if [[ $UID -eq 0 ]]; then
-        echo -e "${LCYAN}Installing $command...${RESET}"
-    else
-        echo -e "${LCYAN}Installing $command (requires root access)...${RESET}"
-    fi
+    printf '%-13s' "$command"
 
     if command -v "$command" &>/dev/null; then
-        echo 'Already installed.'
-        return
+        echo 'Already installed'
+    else
+        echo 'Missing'
+        to_install+=("$package")
     fi
-
-    if ! $apt_updated; then
-        sudo apt-get update
-        apt_updated=true
-    fi
-
-    sudo apt-get -y install "$package"
 }
 
-install fakechroot
+echo -e "${LCYAN}Checking for missing dependencies...${RESET}"
+require fakechroot
+require gawk
+require inotifywait inotify-tools
+require kcov
+require npm
+require shellcheck
 echo
-install gawk
-echo
-install inotifywait inotify-tools
-echo
-install kcov
-echo
-install npm
-echo
-install shellcheck
-echo
+
+if [[ ${#to_install[@]} -gt 0 ]]; then
+    if [[ $UID -eq 0 ]]; then
+        echo -e "${LCYAN}Installing missing dependencies...${RESET}"
+    else
+        echo -e "${LCYAN}Installing missing dependencies (requires root access)...${RESET}"
+    fi
+
+    sudo apt-get update
+    echo
+    sudo apt-get -y install "${to_install[@]}"
+    echo
+fi
+
 echo -e "${LCYAN}Installing/updating Node modules...${RESET}"
 npm ci
