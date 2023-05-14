@@ -2,45 +2,10 @@
 set -o errexit -o nounset -o pipefail
 cd "$(dirname "$0")/.."
 
-RESET="\e[0m"
-BOLD="\e[1m"
-UNDERLINE="\e[4m"
-LRED="\e[91m"
-LGREEN="\e[92m"
-LMAGENTA="\e[95m"
-LCYAN="\e[96m"
-
 while true; do
     clear
 
-    (
-        bin/build
-        bin/test --fail-fast
-    ) || true
-
-    if [[ -f jail/command.txt ]]; then
-        echo
-        echo -e "${LMAGENTA}${BOLD}${UNDERLINE}Command${RESET}"
-        cat jail/command.txt
-    fi
-
-    if [[ -f jail/stdout.txt ]]; then
-        echo
-        echo -e "${LGREEN}${BOLD}${UNDERLINE}Output${RESET}"
-        cat jail/stdout.txt
-    fi
-
-    if [[ -f jail/stderr.txt ]]; then
-        echo
-        echo -e "${LRED}${BOLD}${UNDERLINE}Errors${RESET}"
-        cat jail/stderr.txt
-    fi
-
-    if [[ -f jail/debug.txt ]]; then
-        echo
-        echo -e "${LCYAN}${BOLD}${UNDERLINE}Debug log${RESET}"
-        cat jail/debug.txt
-    fi
+    bin/test || true
 
     inotifywait \
         -e create \

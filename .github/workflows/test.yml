@@ -30,8 +30,6 @@ jobs:
           cache: npm
       - name: Install other dependencies
         run: bin/setup
-      - name: Build
-        run: bin/build
       - name: Test
         run: bin/test
       - name: Upload 'bin' artifact

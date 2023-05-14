@@ -23,10 +23,6 @@ if [[ -n $(cd && git status --porcelain) ]]; then
     exit 1
 fi
 
-echo -e "${LCYAN}Building test version...${RESET}"
-bin/build
-echo
-
 echo -e "${LCYAN}Testing locally...${RESET}"
 bin/test
 echo
