@@ -571,7 +571,7 @@ root="$(dirname "$0")/.."
 exec node "$root/server.js"
 ```
 
-In that case, `$root` will be something like `/path/to/repo/bin/..` - which is valid but a little ugly. You may prefer to use this format instead - the code is a little longer, it will resolve to `/path/to/repo` instead:
+In that case, `$root` will be something like `/path/to/repo/bin/..` - which is valid but a little ugly. You may prefer to use this format instead - the code is a little longer, but it will resolve to `/path/to/repo` instead:
 
 ```bash
 #!/usr/bin/env bash
