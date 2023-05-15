@@ -461,22 +461,13 @@ If something doesn't seem to be working (or you're not sure why it works the way
 
 ```bash
 $ bin --debug --shim php -v
-Bin version 1.2.3-dev
-Working directory is /project/public/
+Bin version 1.2.3
+Working directory is /local/project/public
 Looking for a .binconfig file in:
-  /project/public/.binconfig - not found
-  /project/.binconfig - found
-Parsing /project/.binconfig
-  Root set to /project/scripts/
-  Found config for 3 commands
-Searching /project/scripts/ for scripts
-  Found 1 subdirectory
-  Found 5 commands in this directory
-Searching /project/scripts/subdir/ for scripts
+-- /local/project/public - not found
+-- /local/project - found
 [...]
-Looking for a script or alias matching 'php' - not found
-Looking for scripts and aliases with the prefix 'php' - 0 found
-Falling back to external 'php' because the --shim option was enabled
+No command found - using shim
 Would execute: php -v
 ```
 
