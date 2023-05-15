@@ -633,8 +633,8 @@ exec "$root/bin/php" "$root/artisan" "$@"
 And then use Bash aliases, defined in `~/.bashrc`, to call these shims automatically:
 
 ```bash
-alias artisan='bin artisan'
-alias php='bin php'
+alias artisan='bin --fallback ./artisan artisan'
+alias php='bin --shim php'
 ```
 
 You can also use that shim to run PHP scripts within the `bin/` directory:
