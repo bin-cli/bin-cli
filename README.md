@@ -661,6 +661,8 @@ The [shortest portable alternative](https://stackoverflow.com/a/33225083/167815)
 echo "Using PHP " . PHP_VERSION . "\n";
 ```
 
+This does mess with automatic syntax detection in many editors though, so you may want to [add the `.php` extension](#script-extensions).
+
 ### Docker shim
 
 Similarly, you could create shims for commands that need to be run inside a Docker container:
