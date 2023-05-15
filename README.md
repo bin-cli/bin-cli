@@ -514,6 +514,15 @@ If you want to use Bash instead, you could use `#!/bin/bash`, but it is better t
 echo 'Hello, World!'
 ```
 
+For non-trivial scripts, I recommend adding `set -euo pipefail`, or equivalent, [for safety](https://www.howtogeek.com/782514/how-to-use-set-and-pipefail-in-bash-scripts-on-linux/).
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ...
+```
+
 For scripts written in other programming languages, just change the executable name as appropriate:
 
 ```python
