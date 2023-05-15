@@ -2,10 +2,16 @@
 set -o errexit -o nounset -o pipefail
 cd "$(dirname "$0")/.."
 
-RESET="\e[0m"
-LCYAN="\e[96m"
+RESET=$'\e[0m'
+LCYAN=$'\e[96m'
 
 to_install=()
+
+if [[ $(uname -a) = Darwin* ]]; then
+    macos=true
+else
+    macos=false
+fi
 
 sudo() {
     # This is mainly to allow running in Docker
@@ -18,38 +24,54 @@ sudo() {
 
 require() {
     local command=$1
-    local package=${2-$command}
+    local ubuntu_package=$2
+    local homebrew_package=$3
 
     printf '%-13s' "$command"
 
     if command -v "$command" &>/dev/null; then
         echo 'Already installed'
+        return
+    fi
+
+    if $macos; then
+        package=$homebrew_package
+    else
+        package=$ubuntu_package
+    fi
+
+    if [[ $package = '-' ]]; then
+        echo 'Not available / not required'
     else
         echo 'Missing'
         to_install+=("$package")
     fi
 }
 
-echo -e "${LCYAN}Checking for missing dependencies...${RESET}"
-require gawk
-require inotifywait inotify-tools
-require kcov
-require npm
-require shellcheck
+echo "${LCYAN}Checking for missing dependencies...${RESET}"
+#       Command     Ubuntu pkg      Homebrew pkg
+require gawk        gawk            gawk
+require inotifywait inotify-tools   -
+require kcov        kcov            -
+require npm         npm             node
+require shellcheck  shellcheck      shellcheck
 echo
 
 if [[ ${#to_install[@]} -gt 0 ]]; then
-    if [[ $UID -eq 0 ]]; then
-        echo -e "${LCYAN}Installing missing dependencies...${RESET}"
+    echo "${LCYAN}Installing missing dependencies...${RESET}"
+
+    if $macos; then
+        brew update
+        echo
+        brew install "${to_install[@]}"
     else
-        echo -e "${LCYAN}Installing missing dependencies (requires root access)...${RESET}"
+        sudo apt-get update
+        echo
+        sudo apt-get -y install "${to_install[@]}"
     fi
 
-    sudo apt-get update
-    echo
-    sudo apt-get -y install "${to_install[@]}"
     echo
 fi
 
-echo -e "${LCYAN}Installing/updating Node modules...${RESET}"
+echo "${LCYAN}Installing/updating Node modules...${RESET}"
 npm ci

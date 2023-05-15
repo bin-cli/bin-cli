@@ -49,7 +49,7 @@ Feature: Basics
   Scenario: The exit code from the command is passed through
     Given a script '{ROOT}/project/bin/fail' with content:
       """sh
-      #!/usr/bin/sh
+      #!/bin/sh
       exit 123
       """
     When I run 'bin fail'
@@ -60,7 +60,7 @@ Feature: Basics
   Scenario: The error from the command is passed through
     Given a script '{ROOT}/project/bin/warn' with content:
       """sh
-      #!/usr/bin/sh
+      #!/bin/sh
       echo "Something is wrong" >&2
       """
     When I run 'bin warn'

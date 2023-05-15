@@ -2,9 +2,9 @@
 set -o errexit -o nounset -o pipefail
 cd "$(dirname "$0")/.."
 
-RESET="\e[0m"
-LRED="\e[91m"
-LCYAN="\e[96m"
+RESET=$'\e[0m'
+LRED=$'\e[91m'
+LCYAN=$'\e[96m'
 
 version=${1-}
 
@@ -14,30 +14,30 @@ if [[ -z $version || $version = '--help' || $version = '-h' ]]; then
 fi
 
 if [[ -n $(git status --porcelain) ]]; then
-    echo -e "${LRED}Error: There are uncommitted local changes${RESET}" >&2
+    echo "${LRED}Error: There are uncommitted local changes${RESET}" >&2
     exit 1
 fi
 
 if [[ -n $(cd && git status --porcelain) ]]; then
-    echo -e "${LRED}Error: There are uncommitted changes in Dotfiles${RESET}" >&2
+    echo "${LRED}Error: There are uncommitted changes in Dotfiles${RESET}" >&2
     exit 1
 fi
 
-echo -e "${LCYAN}Testing locally...${RESET}"
+echo "${LCYAN}Testing locally...${RESET}"
 bin/test
 echo
 
-echo -e "${LCYAN}Building release version...${RESET}"
+echo "${LCYAN}Building release version...${RESET}"
 bin/build "$version"
 echo
 
-echo -e "${LCYAN}Tagging in Git (will trigger release via GitHub Actions)...${RESET}"
+echo "${LCYAN}Tagging in Git (will trigger release via GitHub Actions)...${RESET}"
 git tag "v$version"
 git push origin HEAD "v$version"
 echo
 
 if [[ -d ~/.git && -f ~/.bin/bin ]]; then
-    echo -e "${LCYAN}Copying to Dotfiles...${RESET}"
+    echo "${LCYAN}Copying to Dotfiles...${RESET}"
     cp temp/dist/bin ~/.bin/bin
     (
         cd
@@ -48,7 +48,7 @@ if [[ -d ~/.git && -f ~/.bin/bin ]]; then
     echo
 fi
 
-echo -e "${LCYAN}Finished${RESET}"
+echo "${LCYAN}Finished${RESET}"
 echo 'Go here to check the release status:'
 echo '  https://github.com/bin-cli/bin/actions'
 echo

@@ -16,7 +16,7 @@ Given('an empty directory {string}', async function (directory) {
 Given('a script {string}', async function (file) {
     file = paths.replace(file);
     await paths.ensureInRoot(file);
-    await outputFile(file, `#!/usr/bin/sh\necho "This should not be executed" >&2\nexit 222\n`, {mode: 0o777});
+    await outputFile(file, `#!/bin/sh\necho "This should not be executed" >&2\nexit 222\n`, {mode: 0o777});
 });
 
 Given('a script {string} with content:', async function (file, content) {
@@ -28,7 +28,7 @@ Given('a script {string} with content:', async function (file, content) {
 Given('a script {string} that outputs {string}', async function (file, message) {
     file = paths.replace(file);
     await paths.ensureInRoot(file);
-    await outputFile(file, `#!/usr/bin/sh\necho "${message}"\n`, {mode: 0o777});
+    await outputFile(file, `#!/bin/sh\necho "${message}"\n`, {mode: 0o777});
 });
 
 Given('an empty file {string}', async function (file) {

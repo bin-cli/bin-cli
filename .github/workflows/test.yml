@@ -17,16 +17,16 @@ env:
   FORCE_COLOR: 1
 
 jobs:
+
   test-on-ubuntu:
     name: Test on Ubuntu
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 12 # Just because it matches the Ubuntu 22.04 default
           cache: npm
       - name: Install other dependencies
         run: bin/setup
@@ -39,7 +39,23 @@ jobs:
           name: bin
           path: temp/dist/bin
       - name: Upload 'coverage/' artifact
+        if: always()
         uses: actions/upload-artifact@v3
         with:
           name: coverage
           path: temp/coverage/merged/
+
+  test-on-macos:
+    name: Test on macOS
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          cache: npm
+      - name: Install other dependencies
+        run: bin/setup
+      - name: Test
+        run: bin/test

@@ -2,13 +2,13 @@
 set -o errexit -o nounset -o pipefail
 cd "$(dirname "$0")/.."
 
-RESET="\e[0m"
-BOLD="\e[1m"
-UNDERLINE="\e[4m"
-LRED="\e[91m"
-LGREEN="\e[92m"
-LMAGENTA="\e[95m"
-LCYAN="\e[96m"
+RESET=$'\e[0m'
+BOLD=$'\e[1m'
+UNDERLINE=$'\e[4m'
+LRED=$'\e[91m'
+LGREEN=$'\e[92m'
+LMAGENTA=$'\e[95m'
+LCYAN=$'\e[96m'
 
 result=0
 
@@ -23,25 +23,25 @@ fi
 # If it failed, output debugging information
 if [[ -f temp/root/command.txt ]]; then
     echo
-    echo -e "${LMAGENTA}${BOLD}${UNDERLINE}Command${RESET}"
+    echo "${LMAGENTA}${BOLD}${UNDERLINE}Command${RESET}"
     cat temp/root/command.txt
 fi
 
 if [[ -f temp/root/stdout.txt ]]; then
     echo
-    echo -e "${LGREEN}${BOLD}${UNDERLINE}Output${RESET}"
+    echo "${LGREEN}${BOLD}${UNDERLINE}Output${RESET}"
     cat temp/root/stdout.txt
 fi
 
 if [[ -f temp/root/stderr.txt ]]; then
     echo
-    echo -e "${LRED}${BOLD}${UNDERLINE}Errors${RESET}"
+    echo "${LRED}${BOLD}${UNDERLINE}Errors${RESET}"
     cat temp/root/stderr.txt
 fi
 
 if [[ -f temp/root/debug.txt ]]; then
     echo
-    echo -e "${LCYAN}${BOLD}${UNDERLINE}Debug log${RESET}"
+    echo "${LCYAN}${BOLD}${UNDERLINE}Debug log${RESET}"
     cat temp/root/debug.txt
 fi
 
