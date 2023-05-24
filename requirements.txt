@@ -1,0 +1,2 @@
+# https://pypi.org/project/mkdocs/#history
+mkdocs ~= 1.4

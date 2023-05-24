@@ -1,0 +1,41 @@
+# https://www.mkdocs.org/
+
+nav:
+  - index.md
+  - Getting started:
+    - installation.md
+    - creating-scripts.md
+    - config-files.md
+  - Other features:
+    - help-text.md
+    - subcommands.md
+    - script-extensions.md
+    - unique-prefix-matching.md
+    - aliases.md
+    - alias-bin-command.md
+    - custom-script-directory.md
+    - shims.md
+    - command-name.md
+    - automatic-exclusions.md
+  - Writing scripts:
+    - hello-world.md
+    - relative-paths.md
+    - installing-dependencies.md
+    - php-shim.md
+    - docker-shim.md
+    - parameters-help.md
+  - Miscellaneous:
+    - debugging.md
+    - cli-reference.md
+  - Get involved:
+    - Discussions & ideas: https://github.com/bin-cli/bin/discussions
+    - Bug reports: https://github.com/bin-cli/bin/issues
+    - Pull requests: https://github.com/bin-cli/bin/pulls
+
+site_name: Bin CLI – Script Runner
+repo_url: https://github.com/bin-cli/bin
+edit_uri: edit/main/docs/
+theme: readthedocs
+extra_css: [extra.css]
+site_dir: temp/site
+dev_addr: 0.0.0.0:8000

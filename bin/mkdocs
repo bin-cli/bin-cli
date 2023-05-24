@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+mkdir -p temp
+
+if [[ ! -d temp/python ]]; then
+    python3 -m venv temp/python
+fi
+
+if [[ ! -f temp/python/bin/mkdocs ]]; then
+    temp/python/bin/pip install -r requirements.txt
+    echo
+fi
+
+temp/python/bin/mkdocs "$@"

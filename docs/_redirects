@@ -1,0 +1,3 @@
+# https://docs.netlify.com/routing/redirects/redirect-options/
+/ https://github.com/bin-cli/bin 302
+/bin https://github.com/bin-cli/bin/releases/latest/download/bin 302
