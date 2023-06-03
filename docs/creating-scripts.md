@@ -14,6 +14,13 @@ nano bin/sample2
 code bin/sample3
 ```
 
+For example:
+
+```bash
+#!/bin/sh
+echo 'Hello, World!'
+```
+
 And make the scripts executable:
 
 ```bash
