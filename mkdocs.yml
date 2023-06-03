@@ -17,7 +17,7 @@ nav:
     - shims.md
     - command-name.md
     - automatic-exclusions.md
-  - Writing scripts:
+  - Example scripts:
     - hello-world.md
     - relative-paths.md
     - installing-dependencies.md
