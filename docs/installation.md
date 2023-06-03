@@ -4,6 +4,7 @@ System-wide:
 
 ```bash
 sudo wget https://bin-cli.com/bin -O /usr/local/bin/bin
+sudo chmod +x /usr/local/bin/bin
 ```
 
 Or for the current user only:
@@ -11,6 +12,7 @@ Or for the current user only:
 ```bash
 mkdir -p ~/bin
 wget https://bin-cli.com/bin -O ~/bin/bin
+chmod +x ~/bin/bin
 echo 'PATH="$HOME/bin:$PATH"' >> ~/.bash_profile
 ```
 
