@@ -73,7 +73,27 @@ if [[ $# -lt 1 ]]; then
     exit 1
 fi
 
-# The rest of the script goes here...
+# The rest of the script goes here... For example:
+
+if $boolean; then
+    echo "-b or --boolean specified"
+else
+    echo "-b or --boolean NOT specified"
+fi
+
+if [[ -v required ]]; then
+    echo "-r or --required specified with value: $required"
+else
+    echo "-r or --required NOT specified"
+fi
+
+if [[ ! -v optional ]]; then
+    echo "-o or --optional NOT specified"
+elif [[ -z $optional ]]; then
+    echo "-o or --optional specified with no value"
+else
+    echo "-o or --optional specified with value: $optional"
+fi
 ```
 
 The options passed to `getopt` itself are:
@@ -98,7 +118,7 @@ args=$(getopt -n "$exe" -o 'hbr:o::' -l 'help,boolean,required:,optional,other::
 
 ## Getopts
 
-Getopts is built into Bash, so is more portable than Getopt, but it only supports short parameters, and doesn't support parameters with optional values. Here is an example:
+Getopts (with an "s") is built into Bash, so is more portable than Getopt, and is a little simpler - but it only supports short parameters, and it doesn't support parameters with optional values. Here is an example:
 
 ```bash
 #!/usr/bin/env bash
@@ -143,5 +163,17 @@ if [[ $# -lt 1 ]]; then
     exit 1
 fi
 
-# The rest of the script goes here...
+# The rest of the script goes here... For example:
+
+if $boolean; then
+    echo "-b specified"
+else
+    echo "-b NOT specified"
+fi
+
+if [[ -v required ]]; then
+    echo "-r specified with value: $required"
+else
+    echo "-r NOT specified"
+fi
 ```
