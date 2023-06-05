@@ -76,12 +76,6 @@ fi
 # The rest of the script goes here...
 ```
 
-If `getopt` fails due to invalid options, `set -e` (`errexit`) causes the script to exit. If you don't use that, change that line to:
-
-```bash
-args=$(getopt -n "$exe" -o 'hbr:o::' -l 'help,boolean,required:,optional,other::' -- "$@") || exit
-```
-
 The options passed to `getopt` itself are:
 
 - `-n` - Executable name (*recommended*) - used in error messages
@@ -95,6 +89,12 @@ For both `-o` and `-l`:
 - No suffix means _no argument_ (`--boolean`/`-b`)
 
 We initialise the boolean variables to `false`, and unset the rest to ensure they aren't inherited from the parent process. (Or you could give them default values.)
+
+If `getopt` fails due to invalid options, `set -e` (`errexit`) causes the script to exit. If you don't want to use that, change the line to:
+
+```bash
+args=$(getopt -n "$exe" -o 'hbr:o::' -l 'help,boolean,required:,optional,other::' -- "$@") || exit
+```
 
 ## Getopts
 
