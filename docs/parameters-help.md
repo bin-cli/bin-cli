@@ -11,7 +11,7 @@ set -euo pipefail
 if [[ ${1-} = '--help' || ${1-} = '-h' ]]; then
     echo "Usage: ${BIN_COMMAND-$0} [name]"
     echo
-    echo 'Say "Hello" to the named person, or the world in general."
+    echo 'Say "Hello" to the named person, or the world in general.'
     exit
 fi
 
