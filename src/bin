@@ -1010,7 +1010,7 @@ while [[ $# -gt $last_parameter ]]; do
 
     # No exact matches - check for special actions
     if [[ $action = 'create' ]]; then
-        debug "No command found - using creating it"
+        debug "No command found - creating it"
 
         if [[ $subcommand = .* ]]; then
             fail "Command names may not start with '.'"
