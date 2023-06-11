@@ -24,20 +24,24 @@ fi
 # ANSI codes
 if [[ -t 1 ]]; then
     # kcov-ignore-start: There is never a terminal connected during unit tests
-    TITLE=$'\e[97;1;4m' # White, bold, underline
-    WARNING=$'\e[33m'
-    GREY=$'\e[90m'
     RESET=$'\e[0m'
+    BOLD=$'\e[1m'
+    UNDERLINE=$'\e[4m'
+    YELLOW=$'\e[33m'
+    GREY=$'\e[90m'
+    LWHITE=$'\e[97m'
     # kcov-ignore-end
 else
-    TITLE=''
-    WARNING=''
-    GREY=''
     RESET=''
+    BOLD=''
+    UNDERLINE=''
+    YELLOW=''
+    GREY=''
+    LWHITE=''
 fi
 
 # The debug output always goes to a terminal, but indirectly
-DEBUG_LINE=$'\e[90m'
+DEBUG_GREY=$'\e[90m'
 DEBUG_RESET=$'\e[0m'
 
 # Exit codes
@@ -210,7 +214,7 @@ debug() {
     if $fd3_open; then
         local lines="${BASH_LINENO[*]}"
         lines=${lines% 0}
-        echo "$@" "${DEBUG_LINE}[line ${lines// /, }]${DEBUG_RESET}" >&3
+        echo "$@" "${DEBUG_GREY}[line ${lines// /, }]${DEBUG_RESET}" >&3
     fi
 }
 
@@ -1199,7 +1203,7 @@ get_command_aliases() {
 
 debug_exit "Would list ${#visible_commands[@]} matching command(s)"
 
-echo "$TITLE$list_title$RESET"
+echo "$LWHITE$BOLD$UNDERLINE$list_title$RESET"
 
 for command in ${visible_commands+"${visible_commands[@]}"}; do
     command_help=$(map_get help "$command")
@@ -1227,7 +1231,7 @@ fi
 # Broken symlinks
 if [[ ${#broken_symlinks[@]} -gt 0 ]]; then
     echo
-    echo "${WARNING}Warning: The following symlinks point to targets that don't exist:${RESET}"
+    echo "${YELLOW}Warning: The following symlinks point to targets that don't exist:${RESET}"
     for symlink in ${broken_symlinks+"${broken_symlinks[@]}"}; do
         echo "$symlink"
     done
@@ -1236,7 +1240,7 @@ fi
 # Non-executable files
 if [[ ${#non_executable_files[@]} -gt 0 ]]; then
     echo
-    echo "${WARNING}Warning: The following files are not executable (chmod +x):${RESET}"
+    echo "${YELLOW}Warning: The following files are not executable (chmod +x):${RESET}"
     for file in ${non_executable_files+"${non_executable_files[@]}"}; do
         echo "$file"
     done
@@ -1253,7 +1257,7 @@ done
 
 if [[ ${#missing_commands[@]} -gt 0 ]]; then
     echo
-    echo "${WARNING}Warning: The following commands listed in $binconfig do not exist:${RESET}"
+    echo "${YELLOW}Warning: The following commands listed in $binconfig do not exist:${RESET}"
     for command in ${missing_commands+"${missing_commands[@]}"}; do
         echo "[$command]"
     done
