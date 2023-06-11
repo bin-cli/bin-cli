@@ -11,12 +11,16 @@ Options that can be used with a command:
   --prefix              Enable unique prefix matching (overrides .binconfig)
   --shim                If the command is not found, run the global command with the same name (implies '--exact')
 
-Options that do something special:
-  --completion          Output a tab completion script for the current shell
-  --debug               Display debugging information instead of running a command
-  --help, -h            Display this help
+Options that do something with a COMMAND:
+  --create, -c          Create the given script and open in your $EDITOR (implies '--exact')
+  --edit, -e            Open the given script in your $EDITOR
   --print               Output the command that would have been run, instead of running it
+  --debug               Display debugging information instead of running the command
+
+Options that do something special and don't accept a COMMAND:
+  --completion          Output a tab completion script for the current shell
   --shell SHELL         Override the shell to use for '--completion' -- only 'bash' is currently supported
+  --help, -h            Display this help
   --version, -v         Display the current version number and exit
 
 Any options must be given before the command, because everything after the command will be passed as parameters to the script.

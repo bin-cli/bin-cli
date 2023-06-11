@@ -1,10 +1,14 @@
-import {Given} from '@cucumber/cucumber';
+import {Given, Then} from '@cucumber/cucumber';
 import * as fs from 'fs';
-import {ensureDir, outputFile} from 'fs-extra';
+import {ensureDir, exists, outputFile} from 'fs-extra';
 import {dirname} from 'path';
 import {promisify} from 'util';
 import * as paths from '../support/paths.mjs';
+import * as assert from "assert";
+import isExecutable from "is-executable";
 
+const access = promisify(fs.access);
+const readFile = promisify(fs.readFile);
 const symlink = promisify(fs.symlink);
 
 Given('an empty directory {string}', async function (directory) {
@@ -16,7 +20,7 @@ Given('an empty directory {string}', async function (directory) {
 Given('a script {string}', async function (file) {
     file = paths.replace(file);
     await paths.ensureInRoot(file);
-    await outputFile(file, `#!/bin/sh\necho "This should not be executed" >&2\nexit 222\n`, {mode: 0o777});
+    await outputFile(file, `#!/bin/sh\necho "This script ($0) should not be executed" >&2\nexit 222\n`, {mode: 0o777});
 });
 
 Given('a script {string} with content:', async function (file, content) {
@@ -56,4 +60,12 @@ Given('a symlink {string} pointing to {string}', async function (link, target) {
     await ensureDir(dirname(link));
     // Can't use createSymlink() from 'fs-extra' because it requires target to exist
     await symlink(target, link);
+});
+
+Then('there is a script {string} with content:', async function (file, content) {
+    file = paths.replace(file);
+    assert.ok(await exists(file), `${file} does not exist`);
+    assert.ok(await isExecutable(file), `${file} exists but is not executable`);
+    // Add EOF new line because Cucumber removes the trailing new line and Node doesn't
+    assert.strictEqual(await readFile(file, 'utf-8'), `${content}\n`);
 });

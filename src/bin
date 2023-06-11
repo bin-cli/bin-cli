@@ -263,12 +263,16 @@ help() {
     echo "  --prefix              Enable unique prefix matching (overrides .binconfig)"
     echo "  --shim                If the command is not found, run the global command with the same name (implies '--exact')"
     echo
-    echo "Options that do something special:"
-    echo "  --completion          Output a tab completion script for the current shell"
-    echo "  --debug               Display debugging information instead of running a command"
-    echo "  --help, -h            Display this help"
+    echo "Options that do something with a COMMAND:"
+    echo "  --create, -c          Create the given script and open in your \$EDITOR (implies '--exact')"
+    echo "  --edit, -e            Open the given script in your \$EDITOR"
     echo "  --print               Output the command that would have been run, instead of running it"
+    echo "  --debug               Display debugging information instead of running the command"
+    echo
+    echo "Options that do something special and don't accept a COMMAND:"
+    echo "  --completion          Output a tab completion script for the current shell"
     echo "  --shell SHELL         Override the shell to use for '--completion' -- only 'bash' is currently supported"
+    echo "  --help, -h            Display this help"
     echo "  --version, -v         Display the current version number and exit"
     echo
     echo "Any options must be given before the command, because everything after the command will be passed as parameters to the script."
@@ -309,6 +313,10 @@ while [[ $# -gt 0 ]]; do
             set_action completion
             shift
             ;;
+        --create | -c)
+            set_action create
+            shift
+            ;;
         --debug)
             debug=true
             shift
@@ -316,6 +324,10 @@ while [[ $# -gt 0 ]]; do
         --dir)
             bin_dirname=$2
             shift 2
+            ;;
+        --edit | -e)
+            set_action edit
+            shift
             ;;
         --exact)
             exact=true
@@ -356,7 +368,9 @@ while [[ $# -gt 0 ]]; do
         -*)
             fail "Invalid option '$1'"
             ;;
-        *) break ;;
+        *)
+            break
+            ;;
     esac
 done
 
@@ -909,9 +923,36 @@ fi
 # Parse parameters and run the command
 #===============================================================================
 
+open_in_editor() {
+    local file=$1
+
+    local editor=${VISUAL-${EDITOR-}}
+
+    if [[ -z $editor ]]; then
+        if command -v editor &>/dev/null; then
+            editor='editor'
+        elif command -v nano &>/dev/null; then
+            editor='nano'
+        elif command -v vi &>/dev/null; then
+            editor='vi'
+        else
+            fail 'No editor configured - please export EDITOR or VISUAL environment variables'
+        fi
+    fi
+
+    debug_exit "Would execute:" "$editor" "$file"
+    exec "$editor" "$file"
+}
+
 run_command() {
+    debug "Action is '$action'"
+
     if [[ $action = 'complete-bash' ]]; then
         bug "run_command() should not be reached during tab completion" # kcov-ignore-line: This should never be happen
+    elif [[ $action = 'create' ]]; then
+        fail "$1 already exists (use --edit to edit it)"
+    elif [[ $action = 'edit' ]]; then
+        open_in_editor "$1"
     elif [[ $action = 'print' ]]; then
         debug_exit "Would print:" "$@"
         echo "$@"
@@ -968,8 +1009,23 @@ while [[ $# -gt $last_parameter ]]; do
         continue
     fi
 
-    # If we haven't matched anything yet, check whether we should run a fallback instead
-    if $shim; then
+    # No exact matches - check for special actions
+    if [[ $action = 'create' ]]; then
+        debug "No command found - using creating it"
+
+        if [[ $# -gt 0 ]]; then
+            current_directory="$current_directory/$subcommand"
+            mkdir "$current_directory"
+            echo "Created subdirectory $current_directory/"
+            continue
+        fi
+
+        script="$current_directory/$subcommand"
+        echo -e "#!/usr/bin/env bash\nset -eno pipefail\n\n" >"$script"
+        chmod +x "$script"
+        echo "Created script $script"
+        open_in_editor "$script"
+    elif $shim; then
         debug "No command found - using shim"
         # We want word splitting here
         # shellcheck disable=SC2086

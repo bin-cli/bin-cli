@@ -14,6 +14,11 @@ Given('the working directory is {string}', async function (directory) {
     this.workingDir = directory;
 });
 
+Given('an environment variable {string} set to {string}', function (name, value) {
+    this.env = this.env || {};
+    this.env[name] = value;
+});
+
 async function run(command, env = {}) {
     command = paths.replace(command);
 
@@ -23,6 +28,7 @@ async function run(command, env = {}) {
         PATH: `${paths.root}/usr/bin:${paths.root}/global/bin`,
         BIN_TEST_ROOT: paths.root,
         ...env,
+        ...(this.env || {}),
     };
 
     // Use kcov to measure code coverage
@@ -127,6 +133,12 @@ Then('the output is {string}', function (expected) {
 });
 
 Then('the output contains {string}', function (expected) {
+    expected = paths.replace(expected);
+    const actual = this.runResult.stdout;
+    assert(actual.includes(expected), `Expected string to contain "${expected}":\n\n${actual}`);
+});
+
+Then('the output contains:', function (expected) {
     expected = paths.replace(expected);
     const actual = this.runResult.stdout;
     assert(actual.includes(expected), `Expected string to contain "${expected}":\n\n${actual}`);

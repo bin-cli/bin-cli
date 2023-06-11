@@ -16,7 +16,9 @@ Before({name: 'Create test directory'}, async function () {
     const executables = [
         'bash', // bash
         'basename', // coreutils
+        'chmod', // coreutils
         'dirname', // coreutils
+        'mkdir', // coreutils
         'readlink', // coreutils
         'sort', // coreutils
         'tr', // coreutils
