@@ -6,6 +6,7 @@ If something doesn't seem to be working (or you're not sure why it works the way
 
 ```bash
 Bin version 1.2.3
+Action set to 'run'
 Working directory is /example/project
 Looking for a .binconfig file in:
 -- /example/project - not found
@@ -22,7 +23,6 @@ Processing directory aliases and checking for conflicts
 Processing positional parameters
 -- Looking for command 'test' (exact)
 ---- Found matching command 'test'
-Action is ''
 Would execute: /example/project/bin/test
 ```
 

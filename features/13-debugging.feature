@@ -2,7 +2,7 @@ Feature: Debugging
   https://github.com/bin-cli/bin#debugging
 
   @auto-update-debugging
-  Scenario: Passing --debug returns detailed debugging information about shims
+  Scenario: Passing --debug returns detailed debugging information
     Given a script '{ROOT}/project/bin/test'
     When I run 'bin --debug test'
     Then it is successful
@@ -12,24 +12,11 @@ Feature: Debugging
       # pasted into a GitHub issue without a code fence
       """
       Bin version 1.2.3-dev
+      Action set to 'run'
       Working directory is {ROOT}/project
       Looking for a .binconfig file in:
       -- {ROOT}/project - not found
       -- {ROOT} - not found
-      'dir' defaulted to 'bin'
-      'exact' defaulted to 'false'
-      Looking for a bin/ directory in:
-      -- {ROOT}/project - found
-      Bin directory set to '{ROOT}/project/bin'
-      Searching '{ROOT}/project/bin' for scripts
-      -- Registered command 'test' for executable '{ROOT}/project/bin/test'
-      Processing symlink aliases
-      Processing directory aliases and checking for conflicts
-      Processing positional parameters
-      -- Looking for command 'test' (exact)
-      ---- Found matching command 'test'
-      Action is ''
-      Would execute: {ROOT}/project/bin/test
       """
 
     Scenario: Passing --print displays the command that would have been run (1)

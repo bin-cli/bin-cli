@@ -378,15 +378,16 @@ if [[ -n $error ]]; then
     fail "$error"
 fi
 
+if [[ -z $action ]]; then
+    action='run'
+fi
+
 #===============================================================================
 # Display help / version information
 #===============================================================================
 
 debug "Bin version $VERSION"
-
-if [[ -n $action ]]; then
-    debug "Action set to '$action'"
-fi
+debug "Action set to '$action'"
 
 if [[ $action = 'help' ]]; then
     debug_exit 'Would output help text'
@@ -945,8 +946,6 @@ open_in_editor() {
 }
 
 run_command() {
-    debug "Action is '$action'"
-
     if [[ $action = 'complete-bash' ]]; then
         bug "run_command() should not be reached during tab completion" # kcov-ignore-line: This should never be happen
     elif [[ $action = 'create' ]]; then
