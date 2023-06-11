@@ -1,5 +1,7 @@
 import {After, Before} from '@cucumber/cucumber';
-import {copy, emptyDir, ensureDir, pathExists, remove} from 'fs-extra';
+import {copy, emptyDir, ensureDir, ensureSymlink, remove} from 'fs-extra';
+import {platform} from 'os';
+import which from 'which';
 import * as paths from './paths.mjs';
 
 Before({name: 'Create test directory'}, async function () {
@@ -7,8 +9,29 @@ Before({name: 'Create test directory'}, async function () {
     await emptyDir(paths.root);
 
     // Copy the 'bin' executable so we have a known path
-    await ensureDir(`${paths.root}/usr/bin`);
     await copy(`${paths.dist}/bin`, `${paths.root}/usr/bin/bin`);
+
+    // Symlink the executables we need, since we won't be using the global $PATH
+    // We can't use {ROOT}/usr/bin here because it interferes with the /usr/bin path test
+    const executables = [
+        'bash',
+        'basename',
+        'dirname',
+        'readlink',
+        'sort',
+        'tr',
+        'uniq',
+    ];
+
+    if (!this.disableKcov && platform() !== 'darwin') {
+        // kcov is only needed to determine code coverage in tests
+        // It doesn't work properly (for us) on macOS, and may be disabled with @disable-kcov
+        executables.push('kcov');
+    }
+
+    for (const exe of executables) {
+        await ensureSymlink(await which(exe), `${paths.root}/global/bin/${exe}`);
+    }
 
     // Create the default working directory
     await ensureDir(`${paths.root}/project`);

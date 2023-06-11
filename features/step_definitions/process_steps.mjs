@@ -20,7 +20,7 @@ async function run(command, env = {}) {
     // Merge with default environment vars
     env = {
         HOME: `${paths.root}/home/user`,
-        PATH: `${paths.root}/usr/bin:${process.env.PATH}`,
+        PATH: `${paths.root}/usr/bin:${paths.root}/global/bin`,
         BIN_TEST_ROOT: paths.root,
         ...env,
     };
