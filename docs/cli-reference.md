@@ -1,6 +1,6 @@
 # CLI reference
 
-<!-- START auto-update-cli-reference -->
+<!-- START auto-update-cli-reference-docs -->
 
 ```
 Usage: bin [OPTIONS] [--] [COMMAND] [ARGUMENTS...]
@@ -28,4 +28,4 @@ Options that do something special and don't accept a COMMAND:
 Any options must be given before the command, because everything after the command will be passed as parameters to the script.
 ```
 
-<!-- END auto-update-cli-reference -->
+<!-- END auto-update-cli-reference-docs -->

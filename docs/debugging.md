@@ -2,7 +2,7 @@
 
 If something doesn't seem to be working (or you're not sure why it works the way it does), add `--debug` at the start to see an explanation:
 
-<!-- START auto-update-debugging -->
+<!-- START auto-update-debugging-docs -->
 
 ```bash
 Bin version 1.2.3
@@ -26,7 +26,7 @@ Processing positional parameters
 Would execute: /example/project/bin/test
 ```
 
-<!-- END auto-update-debugging -->
+<!-- END auto-update-debugging-docs -->
 
 You can also use `--print` to display only the command that would have been executed:
 

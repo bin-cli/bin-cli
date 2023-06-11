@@ -1,7 +1,7 @@
 Feature: CLI arguments
   https://github.com/bin-cli/bin#cli-reference
 
-  @auto-update-cli-reference
+  @auto-update-cli-reference-docs
   Scenario: The help message is displayed when using --help
     When I run 'bin --help'
     Then it is successful

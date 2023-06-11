@@ -1,7 +1,7 @@
 Feature: Debugging
   https://github.com/bin-cli/bin#debugging
 
-  @auto-update-debugging
+  @auto-update-debugging-docs
   Scenario: Passing --debug returns detailed debugging information
     Given a script '{ROOT}/project/bin/test'
     When I run 'bin --debug test'
