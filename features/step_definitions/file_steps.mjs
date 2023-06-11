@@ -62,6 +62,13 @@ Given('a symlink {string} pointing to {string}', async function (link, target) {
     await symlink(target, link);
 });
 
+Then('there is a file {string} with content:', async function (file, content) {
+    file = paths.replace(file);
+    assert.ok(await exists(file), `${file} does not exist`);
+    // Add EOF new line because Cucumber removes the trailing new line and Node doesn't
+    assert.strictEqual(await readFile(file, 'utf-8'), `${content}\n`);
+});
+
 Then('there is a script {string} with content:', async function (file, content) {
     file = paths.replace(file);
     assert.ok(await exists(file), `${file} does not exist`);

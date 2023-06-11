@@ -987,6 +987,25 @@ while [[ $# -gt $last_parameter ]]; do
     subcommand=$1
     shift
 
+    # Special case for creating/editing the .binconfig file
+    if [[ -z $full_command && $subcommand = '.binconfig' ]]; then
+        if [[ $action = 'create' ]]; then
+            if [[ -e "$root/.binconfig" ]]; then
+                fail "$root/.binconfig already exists (use --edit to edit it)"
+            else
+                echo > "$root/.binconfig"
+                echo "Created file $root/.binconfig"
+                open_in_editor "$root/.binconfig"
+            fi
+        elif [[ $action = 'edit' ]]; then
+            if [[ -e "$root/.binconfig" ]]; then
+                open_in_editor "$root/.binconfig"
+            else
+                fail 'No .binconfig file found (use --create to create one)'
+            fi
+        fi
+    fi
+
     # Build up the entered command in canonical format
     full_command+=" $subcommand"
 

@@ -111,3 +111,22 @@ Feature: Edit scripts
     When I run 'bin --edit .hidden script'
     Then it fails with exit code 246
     And the error is "bin: Command names may not start with '.'"
+
+  @undocumented
+  Scenario: Running '--edit .binconfig' edits the .binconfig file if it exists
+    Given an empty directory '{ROOT}/project/bin'
+    And an empty file '{ROOT}/project/.binconfig'
+    And a script '{ROOT}/usr/bin/myeditor' that outputs 'EXECUTED: myeditor "$@"'
+    And an environment variable 'VISUAL' set to 'myeditor'
+    When I run 'bin --edit .binconfig'
+    Then it is successful
+    And the output is 'EXECUTED: myeditor {ROOT}/project/.binconfig'
+
+  @undocumented
+  Scenario: Running '--edit .binconfig' gives an error if .binconfig doesn't exist
+    Given an empty directory '{ROOT}/project/bin'
+    When I run 'bin --edit .binconfig'
+    Then it fails with exit code 246
+    And the error is 'bin: No .binconfig file found (use --create to create one)'
+
+  # TODO: Handle --dir

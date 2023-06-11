@@ -84,3 +84,52 @@ Feature: Create scripts
     When I run 'bin --create .hidden script'
     Then it fails with exit code 246
     And the error is "bin: Command names may not start with '.'"
+
+  @undocumented
+  Scenario: Running '--create .binconfig' creates a .binconfig file
+    Given an empty directory '{ROOT}/project/bin'
+    And a script '{ROOT}/usr/bin/myeditor' that outputs 'EXECUTED: myeditor "$@"'
+    And an environment variable 'VISUAL' set to 'myeditor'
+    When I run 'bin --create .binconfig'
+    Then it is successful
+    And there is a file '{ROOT}/project/.binconfig' with content:
+      """
+      """
+    And the output is:
+      """
+      Created file {ROOT}/project/.binconfig
+      EXECUTED: myeditor {ROOT}/project/.binconfig
+      """
+
+  # TODO
+#  @undocumented
+#  Scenario: .binconfig is pre-filled with the command names
+#    Given a script '{ROOT}/project/bin/hello'
+#    And a script '{ROOT}/project/bin/world'
+#    And a script '{ROOT}/usr/bin/myeditor' that outputs 'EXECUTED: myeditor "$@"'
+#    And an environment variable 'VISUAL' set to 'myeditor'
+#    When I run 'bin --create .binconfig'
+#    Then it is successful
+#    And there is a file '{ROOT}/project/.binconfig' with content:
+#      """
+#      [hello]
+#      help=
+#
+#      [world]
+#      help=
+#      """
+#    And the output is:
+#      """
+#      Created file {ROOT}/project/.binconfig
+#      EXECUTED: myeditor {ROOT}/project/.binconfig
+#      """
+
+  @undocumented
+  Scenario: Running '--create .binconfig' gives an error if .binconfig already exists
+    Given an empty directory '{ROOT}/project/bin'
+    And an empty file '{ROOT}/project/.binconfig'
+    When I run 'bin --create .binconfig'
+    Then it fails with exit code 246
+    And the error is 'bin: {ROOT}/project/.binconfig already exists (use --edit to edit it)'
+
+  # TODO: Handle --dir
