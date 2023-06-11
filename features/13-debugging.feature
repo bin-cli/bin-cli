@@ -1,6 +1,7 @@
 Feature: Debugging
   https://github.com/bin-cli/bin#debugging
 
+  @auto-update-debugging
   Scenario: Passing --debug returns detailed debugging information about shims
     Given a script '{ROOT}/project/bin/test'
     When I run 'bin --debug test'

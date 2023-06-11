@@ -2,17 +2,31 @@
 
 If something doesn't seem to be working (or you're not sure why it works the way it does), add `--debug` at the start to see an explanation:
 
+<!-- START auto-update-debugging -->
+
 ```bash
-$ bin --debug --shim php -v
 Bin version 1.2.3
-Working directory is /local/project/public
+Working directory is /example/project
 Looking for a .binconfig file in:
--- /local/project/public - not found
--- /local/project - found
-[...]
-No command found - using shim
-Would execute: php -v
+-- /example/project - not found
+-- /example - not found
+'dir' defaulted to 'bin'
+'exact' defaulted to 'false'
+Looking for a bin/ directory in:
+-- /example/project - found
+Bin directory set to '/example/project/bin'
+Searching '/example/project/bin' for scripts
+-- Registered command 'test' for executable '/example/project/bin/test'
+Processing symlink aliases
+Processing directory aliases and checking for conflicts
+Processing positional parameters
+-- Looking for command 'test' (exact)
+---- Found matching command 'test'
+Action is ''
+Would execute: /example/project/bin/test
 ```
+
+<!-- END auto-update-debugging -->
 
 You can also use `--print` to display only the command that would have been executed:
 

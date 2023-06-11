@@ -4,6 +4,7 @@
     "fs-extra": "^10.1.0",
     "is-executable": "^1.0.1",
     "shell-quote": "^1.8.1",
+    "string.prototype.replaceall": "^1.0.7",
     "which": "^2.0.2"
   }
 }
