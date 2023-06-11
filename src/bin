@@ -1012,6 +1012,10 @@ while [[ $# -gt $last_parameter ]]; do
     if [[ $action = 'create' ]]; then
         debug "No command found - using creating it"
 
+        if [[ $subcommand = .* ]]; then
+            fail "Command names may not start with '.'"
+        fi
+
         if [[ $# -gt 0 ]]; then
             current_directory="$current_directory/$subcommand"
             mkdir "$current_directory"

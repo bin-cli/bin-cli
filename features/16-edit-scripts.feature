@@ -97,3 +97,17 @@ Feature: Edit scripts
     When I run 'bin --edit hello world'
     Then it fails with exit code 127
     And the error is "bin: Command 'hello' not found in {ROOT}/project/bin"
+
+  @undocumented
+  Scenario: Scripts starting with '.' cannot be edited
+    Given a script '{ROOT}/project/bin/.hidden'
+    When I run 'bin --edit .hidden'
+    Then it fails with exit code 246
+    And the error is "bin: Command names may not start with '.'"
+
+  @undocumented
+  Scenario: Scripts in a directory starting with '.' cannot be edited
+    Given a script '{ROOT}/project/bin/.hidden/script'
+    When I run 'bin --edit .hidden script'
+    Then it fails with exit code 246
+    And the error is "bin: Command names may not start with '.'"

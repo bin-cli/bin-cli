@@ -71,3 +71,16 @@ Feature: Create scripts
       EXECUTED: myeditor {ROOT}/project/bin/a/b
       """
 
+  @undocumented
+  Scenario: Scripts starting with '.' cannot be created
+    Given an empty directory '{ROOT}/project/bin'
+    When I run 'bin --create .hidden'
+    Then it fails with exit code 246
+    And the error is "bin: Command names may not start with '.'"
+
+  @undocumented
+  Scenario: Scripts in a directory starting with '.' cannot be created
+    Given an empty directory '{ROOT}/project/bin'
+    When I run 'bin --create .hidden script'
+    Then it fails with exit code 246
+    And the error is "bin: Command names may not start with '.'"
