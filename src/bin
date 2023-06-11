@@ -14,7 +14,7 @@ shopt -s nullglob
 # Version (set by build script - don't change in source file)
 VERSION='1.2.3-source'
 
-# $BIN_TEST_ROOT is be ignored in production builds, but is used to emulate these directories in the tests
+# The BIN_TEST_ROOT env var is ignored in production builds, but is used to emulate global directories in the tests
 if [[ $VERSION = '1.2.3-dev' ]]; then
     BIN_TEST_ROOT=${BIN_TEST_ROOT-}
 else
