@@ -14,13 +14,13 @@ Before({name: 'Create test directory'}, async function () {
     // Symlink the executables we need, since we won't be using the global $PATH
     // We can't use {ROOT}/usr/bin here because it interferes with the /usr/bin path test
     const executables = [
-        'bash',
-        'basename',
-        'dirname',
-        'readlink',
-        'sort',
-        'tr',
-        'uniq',
+        'bash', // bash
+        'basename', // coreutils
+        'dirname', // coreutils
+        'readlink', // coreutils
+        'sort', // coreutils
+        'tr', // coreutils
+        'uniq', // coreutils
     ];
 
     if (!this.disableKcov && platform() !== 'darwin') {
