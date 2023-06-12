@@ -92,7 +92,7 @@ Feature: Custom script directory
   Scenario: When --dir is a relative path, that directory is not expected to exist
     When I run 'bin --dir scripts hello'
     Then it fails with exit code 127
-    And the error is "bin: Could not find 'scripts/' directory or '.binconfig' file starting from '{ROOT}/project'"
+    And the error is "bin: Could not find 'scripts/' directory starting from '{ROOT}/project'"
 
   @undocumented
   Scenario: When --dir is an absolute path, that directory is expected to exist

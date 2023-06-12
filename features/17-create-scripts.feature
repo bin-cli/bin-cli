@@ -132,4 +132,36 @@ Feature: Create scripts
     Then it fails with exit code 246
     And the error is 'bin: {ROOT}/project/.binconfig already exists (use --edit to edit it)'
 
-  # TODO: Handle --dir
+  @undocumented
+  Scenario: If a directory is specified when creating a config file, it is written to the file
+    Given an empty directory '{ROOT}/project/scripts'
+    And a script '{ROOT}/usr/bin/myeditor' that outputs 'EXECUTED: myeditor "$@"'
+    And an environment variable 'VISUAL' set to 'myeditor'
+    When I run 'bin --dir scripts --create .binconfig'
+    Then it is successful
+    And there is a file '{ROOT}/project/.binconfig' with content:
+      """
+      dir=scripts
+      """
+    And the output is:
+      """
+      Created file {ROOT}/project/.binconfig
+      EXECUTED: myeditor {ROOT}/project/.binconfig
+      """
+
+  @undocumented
+  Scenario: If an absolute directory is specified when creating a config file, a relative path is written to the file
+    Given an empty directory '{ROOT}/project/scripts'
+    And a script '{ROOT}/usr/bin/myeditor' that outputs 'EXECUTED: myeditor "$@"'
+    And an environment variable 'VISUAL' set to 'myeditor'
+    When I run 'bin --dir {ROOT}/project/scripts --create .binconfig'
+    Then it is successful
+    And there is a file '{ROOT}/project/.binconfig' with content:
+      """
+      dir=scripts
+      """
+    And the output is:
+      """
+      Created file {ROOT}/project/.binconfig
+      EXECUTED: myeditor {ROOT}/project/.binconfig
+      """

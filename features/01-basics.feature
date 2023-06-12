@@ -78,3 +78,9 @@ Feature: Basics
       Available commands
       None found
       """
+
+  @undocumented
+  Scenario: If no bin/ directory is found, an error is displayed
+    When I run 'bin'
+    Then it fails with exit code 127
+    And the error is "bin: Could not find 'bin/' directory or '.binconfig' file starting from '{ROOT}/project'"

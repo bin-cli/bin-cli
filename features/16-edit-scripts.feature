@@ -129,4 +129,11 @@ Feature: Edit scripts
     Then it fails with exit code 246
     And the error is 'bin: No .binconfig file found (use --create to create one)'
 
-  # TODO: Handle --dir
+  @undocumented
+  Scenario: Running '--edit .binconfig' with a conflicting '--dir' gives an error
+    Given an empty directory '{ROOT}/project/bin'
+    And an empty directory '{ROOT}/project/scripts'
+    And an empty file '{ROOT}/project/.binconfig'
+    When I run 'bin --dir scripts --edit .binconfig'
+    Then it fails with exit code 246
+    And the error is 'bin: .binconfig belongs to bin/ not scripts/'

@@ -6,17 +6,22 @@ If something doesn't seem to be working (or you're not sure why it works the way
 
 ```bash
 Bin version 1.2.3
-Action set to 'run'
-Working directory is /example/project
-Looking for a .binconfig file in:
--- /example/project - not found
--- /example - not found
-'dir' defaulted to 'bin'
+Working directory is '/example/project'
+Action is 'run'
+Determining paths...
+-- No directory specified at the command line
+-- Looking for a .binconfig file starting from /example/project
+---- Checking in /example/project - not found
+---- Checking in /example - not found
+-- Looking for a bin/ directory starting from /example/project
+---- Checking in /example/project - found
+-- root=/example/project
+-- binconfig=
+-- bin_dir=/example/project/bin
+-- bin_dir_from_root=bin
+-- is_root_dir=bin
 'exact' defaulted to 'false'
-Looking for a bin/ directory in:
--- /example/project - found
-Bin directory set to '/example/project/bin'
-Searching '/example/project/bin' for scripts
+Searching '/example/project/bin/' for scripts to register
 -- Registered command 'test' for executable '/example/project/bin/test'
 Processing symlink aliases
 Processing directory aliases and checking for conflicts

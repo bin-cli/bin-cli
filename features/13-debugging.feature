@@ -12,11 +12,13 @@ Feature: Debugging
       # pasted into a GitHub issue without a code fence
       """
       Bin version 1.2.3-dev
-      Action set to 'run'
-      Working directory is {ROOT}/project
-      Looking for a .binconfig file in:
-      -- {ROOT}/project - not found
-      -- {ROOT} - not found
+      Working directory is '{ROOT}/project'
+      Action is 'run'
+      Determining paths...
+      -- No directory specified at the command line
+      -- Looking for a .binconfig file starting from {ROOT}/project
+      ---- Checking in {ROOT}/project - not found
+      ---- Checking in {ROOT} - not found
       """
 
     Scenario: Passing --print displays the command that would have been run (1)
