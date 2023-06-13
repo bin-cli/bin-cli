@@ -5,7 +5,7 @@ If something doesn't seem to be working (or you're not sure why it works the way
 <!-- START auto-update-debugging-docs -->
 
 ```bash
-Bin version 1.2.3
+Bin v1.2.3
 Working directory is '/example/project'
 Action is 'run'
 Determining paths...

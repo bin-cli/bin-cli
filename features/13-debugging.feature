@@ -11,7 +11,7 @@ Feature: Debugging
       # (unlike "-" or ">" or spaces), so it should be output correctly when
       # pasted into a GitHub issue without a code fence
       """
-      Bin version 1.2.3-dev
+      Bin v1.2.3-dev
       Working directory is '{ROOT}/project'
       Action is 'run'
       Determining paths...

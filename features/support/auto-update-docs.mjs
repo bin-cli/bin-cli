@@ -50,7 +50,7 @@ After({tags: '@auto-update-debugging-docs'}, async function (hook) {
     }
 
     const output = this.runResult.stdout
-        .replaceAll('1.2.3-dev', '1.2.3')
+        .replaceAll('v1.2.3-dev', 'v1.2.3')
         .replaceAll(paths.root, '/example');
 
     await autoUpdate(

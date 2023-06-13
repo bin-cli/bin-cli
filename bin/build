@@ -2,7 +2,7 @@
 set -o errexit -o nounset -o pipefail
 cd "$(dirname "$0")/.."
 
-default_version='1.2.3-dev'
+default_version='v1.2.3-dev'
 version=${1-$default_version}
 
 if [[ $version = '--help' || $version = '-h' ]]; then

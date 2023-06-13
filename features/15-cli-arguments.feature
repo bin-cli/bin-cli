@@ -15,12 +15,12 @@ Feature: CLI arguments
   Scenario: The version number is displayed when using --version
     When I run 'bin --version'
     Then it is successful
-    And the output contains 'Bin version '
+    And the output is 'Bin v1.2.3-dev'
 
   Scenario: The version number is displayed when using -v
     When I run 'bin -v'
     Then it is successful
-    And the output contains 'Bin version '
+    And the output is 'Bin v1.2.3-dev'
 
   Scenario: '--' can be placed before executable names
     Given a script '{ROOT}/project/bin/--help' that outputs 'Help'
