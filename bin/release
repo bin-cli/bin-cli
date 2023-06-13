@@ -42,7 +42,7 @@ if [[ -d ~/.git && -f ~/.bin/bin ]]; then
     (
         cd
         git add .bin/bin
-        git commit -m "Upgrade to Bin $version"
+        git commit -m "Upgrade to Bin CLI $VERSION"
         git push
     )
     echo

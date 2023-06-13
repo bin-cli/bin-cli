@@ -733,7 +733,7 @@ fi
 # Display help / version information
 #===============================================================================
 
-debug "Bin $VERSION"
+debug "Bin CLI $VERSION"
 debug "Working directory is '$PWD'"
 debug "Action is '$action'"
 
@@ -745,7 +745,7 @@ fi
 
 if [[ $action = 'version' ]]; then
     debug_exit "Would print version number"
-    echo "Bin $VERSION"
+    echo "Bin CLI $VERSION"
     exit
 fi
 

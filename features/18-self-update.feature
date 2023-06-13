@@ -21,7 +21,7 @@ Feature: Self-update
     And the output is:
       # The curl progress output would be in the middle
       """
-      Bin v1.2.3-dev
+      Bin CLI v1.2.3-dev
 
       Downloading the latest version from https://bin-cli.com/bin
 
