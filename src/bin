@@ -14,7 +14,11 @@ shopt -s nullglob
 # Version (set by build script - don't change in source file)
 VERSION='v1.2.3-source'
 
+# Download URL
 DOWNLOAD_URL='https://bin-cli.com/bin'
+
+# Executable
+BIN_EXECUTABLE="$0"
 
 # The BIN_TEST_ROOT env var is ignored in production builds, but is used to emulate global directories in the tests
 if [[ $VERSION = 'v1.2.3-dev' ]]; then
@@ -756,7 +760,7 @@ fi
 # This doesn't do the tab completion - it just outputs the script to be 'eval'ed
 
 if [[ $action = 'completion' ]]; then
-    complete_command=("$0" --complete-bash)
+    complete_command=("$BIN_EXECUTABLE" --complete-bash)
     if [[ -n $dir ]]; then
         complete_command+=("--dir" "'$dir'")
     fi
@@ -771,15 +775,26 @@ fi
 # Self-update
 #===============================================================================
 
-if [[ $action = 'self-update' ]]; then
-    "$0" --version
+update_header() {
+    "$BIN_EXECUTABLE" --version
     echo
     echo "Downloading the latest version from $DOWNLOAD_URL"
     echo
-    curl -L "$DOWNLOAD_URL" > "$0"
+}
+
+if [[ $action = 'self-update' ]]; then
+    if command -v wget &>/dev/null; then
+        update_header
+        wget "$DOWNLOAD_URL" -O "$BIN_EXECUTABLE"
+    elif command -v curl &>/dev/null; then
+        update_header
+        curl -L "$DOWNLOAD_URL" > "$BIN_EXECUTABLE"
+    else
+        fail "Neither 'wget' nor 'curl' are available"
+    fi
     echo
     echo 'Updated to:'
-    "$0" --version
+    "$BIN_EXECUTABLE" --version
     exit
 fi
 
