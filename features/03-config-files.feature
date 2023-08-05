@@ -1,5 +1,5 @@
 Feature: Config files
-  https://github.com/bin-cli/bin#config-files
+  https://github.com/bin-cli/bin-cli#config-files
 
   @undocumented
   Scenario: Directories above .binconfig are not searched when .binconfig exists

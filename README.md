@@ -1,6 +1,6 @@
 # Bin – A simple task runner
 
-[![GitHub Actions Status](https://github.com/bin-cli/bin/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/bin-cli/bin/actions/workflows/test.yml)
+[![GitHub Actions Status](https://github.com/bin-cli/bin-cli/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/bin-cli/bin-cli/actions/workflows/test.yml)
 [![Netlify Status](https://api.netlify.com/api/v1/badges/e128b9c4-43cd-4ad9-b079-9828e89db6b8/deploy-status)](https://app.netlify.com/sites/bin-cli/deploys)
 
 <!-- This text is also in docs/index.md -->

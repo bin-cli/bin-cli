@@ -1,6 +1,6 @@
 Feature: Tab completion for aliasing `b` to `bin`
-  https://github.com/bin-cli/bin#tab-completion
-  https://github.com/bin-cli/bin#aliasing-b-to-bin
+  https://github.com/bin-cli/bin-cli#tab-completion
+  https://github.com/bin-cli/bin-cli#aliasing-b-to-bin
 
   Scenario: The executable name for tab completion can be overridden with --exe
     When I run 'bin --completion --exe b'

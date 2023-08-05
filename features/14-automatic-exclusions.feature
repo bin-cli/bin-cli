@@ -1,5 +1,5 @@
 Feature: Automatic exclusions
-  https://github.com/bin-cli/bin#automatic-exclusions
+  https://github.com/bin-cli/bin-cli#automatic-exclusions
 
   Scenario: Scripts starting with '_' are excluded from listings
     Given a script '{ROOT}/project/bin/visible'

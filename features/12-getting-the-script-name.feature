@@ -1,5 +1,5 @@
 Feature: Getting the script name
-  https://github.com/bin-cli/bin#getting-the-script-name
+  https://github.com/bin-cli/bin-cli#getting-the-script-name
 
   Scenario: The command name is passed in an environment variable
     Given a script '{ROOT}/project/bin/sample' that outputs "Usage: $BIN_COMMAND [...]"

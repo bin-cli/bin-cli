@@ -1,5 +1,5 @@
 Feature: Help text
-  https://github.com/bin-cli/bin#help-text
+  https://github.com/bin-cli/bin-cli#help-text
 
   Scenario: Help text configured in .binconfig is displayed in command listings
     Given a script '{ROOT}/project/bin/artisan'

@@ -1,5 +1,5 @@
 Feature: Debugging
-  https://github.com/bin-cli/bin#debugging
+  https://github.com/bin-cli/bin-cli#debugging
 
   @auto-update-debugging-docs
   Scenario: Passing --debug returns detailed debugging information

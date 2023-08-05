@@ -1,5 +1,5 @@
 Feature: Unique prefix matching
-  https://github.com/bin-cli/bin#unique-prefix-matching
+  https://github.com/bin-cli/bin-cli#unique-prefix-matching
 
   Scenario: When entering a unique prefix, the matching command is executed
     Given a script '{ROOT}/project/bin/hello' that outputs 'Hello, World!'

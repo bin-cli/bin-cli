@@ -1,5 +1,5 @@
 Feature: Aliasing `b` to `bin`
-  https://github.com/bin-cli/bin#aliasing-b-to-bin
+  https://github.com/bin-cli/bin-cli#aliasing-b-to-bin
 
   # This doesn't work with kcov because $0 is set to 'bin' instead of 'b', though I'm not sure why
   @disable-kcov

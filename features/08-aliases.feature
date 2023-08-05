@@ -1,5 +1,5 @@
 Feature: Aliases
-  https://github.com/bin-cli/bin#aliases
+  https://github.com/bin-cli/bin-cli#aliases
 
   Scenario: An alias can be defined in .binconfig
     Given a script '{ROOT}/project/bin/deploy' that outputs 'Copying to production...'

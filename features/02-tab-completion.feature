@@ -1,5 +1,5 @@
 Feature: Tab completion
-  https://github.com/bin-cli/bin#tab-completion
+  https://github.com/bin-cli/bin-cli#tab-completion
 
   Scenario: A tab completion script is available for Bash
     When I run 'bin --completion'

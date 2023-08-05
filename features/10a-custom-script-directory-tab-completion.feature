@@ -1,6 +1,6 @@
 Feature: Tab completion for custom script directories
-  https://github.com/bin-cli/bin#tab-completion
-  https://github.com/bin-cli/bin#custom-script-directory
+  https://github.com/bin-cli/bin-cli#tab-completion
+  https://github.com/bin-cli/bin-cli#custom-script-directory
 
   Scenario: Tab completion supports custom directories
     When I run 'bin --completion --exe scr --dir scripts'

@@ -1,5 +1,5 @@
 Feature: Subcommands
-  https://github.com/bin-cli/bin#subcommands
+  https://github.com/bin-cli/bin-cli#subcommands
 
   Scenario: Subcommands are created by scripts in subdirectories
     Given a script '{ROOT}/project/bin/deploy/live' that outputs 'Copying to production...'

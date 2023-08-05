@@ -1,5 +1,5 @@
 Feature: Basics
-  https://github.com/bin-cli/bin#how-it-works
+  https://github.com/bin-cli/bin-cli#how-it-works
 
   Scenario: A script that is in the bin/ directory can be run without parameters
     Given a script '{ROOT}/project/bin/hello' that outputs "Hello, ${1:-World}! [$#]"

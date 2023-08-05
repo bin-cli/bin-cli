@@ -1,5 +1,5 @@
 Feature: Automatic shims
-  https://github.com/bin-cli/bin#automatic-shims
+  https://github.com/bin-cli/bin-cli#automatic-shims
 
   Scenario: Normally, if the command doesn't exist, Bin returns an error
     Given an empty directory '{ROOT}/project/bin'

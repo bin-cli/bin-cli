@@ -1,5 +1,5 @@
 Feature: CLI arguments
-  https://github.com/bin-cli/bin#cli-reference
+  https://github.com/bin-cli/bin-cli#cli-reference
 
   @auto-update-cli-reference-docs
   Scenario: The help message is displayed when using --help

@@ -1,5 +1,5 @@
 Feature: Script extensions
-  https://github.com/bin-cli/bin#script-extensions
+  https://github.com/bin-cli/bin-cli#script-extensions
 
   Scenario: Scripts with extensions are listed without the extensions
     Given a script '{ROOT}/project/bin/sample1.sh'

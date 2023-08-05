@@ -1,6 +1,6 @@
 Feature: Tab completion for aliases
-  https://github.com/bin-cli/bin#tab-completion
-  https://github.com/bin-cli/bin#aliases
+  https://github.com/bin-cli/bin-cli#tab-completion
+  https://github.com/bin-cli/bin-cli#aliases
 
   Scenario: Tab completion works for aliases
     Given a script '{ROOT}/project/bin/deploy'
