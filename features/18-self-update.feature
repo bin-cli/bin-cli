@@ -61,7 +61,6 @@ Feature: Self-update
       Executed with: --version
       """
 
-
   @undocumented
   Scenario: If neither wget nor curl are installed, self-update exits with an error
     When I run 'bin --self-update'
