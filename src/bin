@@ -14,9 +14,6 @@ shopt -s nullglob
 # Version (set by build script - don't change in source file)
 VERSION='v1.2.3-source'
 
-# Download URL
-DOWNLOAD_URL='https://bin-cli.com/bin'
-
 # Executable
 BIN_EXECUTABLE="$0"
 
@@ -700,10 +697,6 @@ while [[ $# -gt 0 ]]; do
             set_action print
             shift
             ;;
-        --self-update)
-            set_action self-update
-            shift
-            ;;
         --shim)
             shim=true
             shift
@@ -768,33 +761,6 @@ if [[ $action = 'completion' ]]; then
         complete_command+=("--exe" "'$exe'")
     fi
     echo "complete -C \"${complete_command[*]}\" -o default $exe"
-    exit
-fi
-
-#===============================================================================
-# Self-update
-#===============================================================================
-
-update_header() {
-    "$BIN_EXECUTABLE" --version
-    echo
-    echo "Downloading the latest version from $DOWNLOAD_URL"
-    echo
-}
-
-if [[ $action = 'self-update' ]]; then
-    if command -v wget &>/dev/null; then
-        update_header
-        wget "$DOWNLOAD_URL" -O "$BIN_EXECUTABLE"
-    elif command -v curl &>/dev/null; then
-        update_header
-        curl -L "$DOWNLOAD_URL" > "$BIN_EXECUTABLE"
-    else
-        fail "Neither 'wget' nor 'curl' are available"
-    fi
-    echo
-    echo 'Updated to:'
-    "$BIN_EXECUTABLE" --version
     exit
 fi
 
