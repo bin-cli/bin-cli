@@ -3,8 +3,8 @@ set -o errexit -o nounset -o pipefail
 shopt -s nullglob
 
 ################################################################################
-# Bin - A simple task runner        Copyright (c) 2023 Dave James Miller       #
-# https://bin-cli.com/              MIT License                                #
+# Bin - A simple task runner           Copyright (c) 2023 Dave James Miller    #
+# https://github.com/bin-cli/bin-cli   MIT License                             #
 ################################################################################
 
 #===============================================================================
