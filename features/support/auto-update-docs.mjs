@@ -38,7 +38,7 @@ After({tags: '@auto-update-cli-reference-docs'}, async function (hook) {
     }
 
     await autoUpdate(
-        `${paths.root}/README.md`,
+        `${paths.bin}/README.md`,
         'auto-update-cli-reference-docs',
         '\n\n```\n' + this.runResult.stdout + '```\n\n',
     );
@@ -54,7 +54,7 @@ After({tags: '@auto-update-debugging-docs'}, async function (hook) {
         .replaceAll(paths.root, '/example');
 
     await autoUpdate(
-        `${paths.root}/README.md`,
+        `${paths.bin}/README.md`,
         'auto-update-debugging-docs',
         '\n\n```bash\n' + output + '```\n\n',
     );

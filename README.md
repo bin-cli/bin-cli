@@ -910,6 +910,8 @@ Options that do something special and don't accept a COMMAND:
   --version, -v         Display the current version number and exit
 
 Any options must be given before the command, because everything after the command will be passed as parameters to the script.
+
+For more details see https://github.com/bin-cli/bin-cli#readme
 ```
 
 <!-- END auto-update-cli-reference-docs -->

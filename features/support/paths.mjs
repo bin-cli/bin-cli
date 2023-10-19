@@ -3,7 +3,6 @@ import {fileURLToPath} from 'url';
 import fs from 'fs-extra';
 
 export const bin = dirname(dirname(dirname(fileURLToPath(import.meta.url))));
-export const docs = `${bin}/docs`;
 export const temp = `${bin}/temp`;
 export const coverage = `${temp}/coverage`;
 export const dist = `${temp}/dist`;
