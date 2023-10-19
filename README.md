@@ -2,7 +2,7 @@
 
 [![GitHub Actions Status](https://github.com/bin-cli/bin-cli/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/bin-cli/bin-cli/actions/workflows/test.yml)
 
-## Introduction to Bin
+## Introduction
 
 *Bin* is a simple task/script runner, designed to be used in code repositories, with scripts written in any programming language.
 
