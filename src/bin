@@ -827,7 +827,7 @@ else
     if root=$(findup -f .binconfig); then
         binconfig="$root/.binconfig"
         bin_dir_from_root=$(bin_dir_for "$binconfig" true)
-        bin_dir="$root/$bin_dir_from_root"
+        bin_dir="${root%/}/$bin_dir_from_root"
 
         if [[ ! -d $bin_dir ]]; then
             fail "Found '$binconfig', but '$bin_dir/' directory is missing"
@@ -841,7 +841,7 @@ else
 
         binconfig=''
         bin_dir_from_root='bin'
-        bin_dir="$root/$bin_dir_from_root"
+        bin_dir="${root%/}/$bin_dir_from_root"
 
         if in_array "$bin_dir" "$BIN_TEST_ROOT/bin" "$BIN_TEST_ROOT/usr/bin" "$BIN_TEST_ROOT/usr/local/bin" "$BIN_TEST_ROOT/snap/bin" "$HOME/bin"; then
             fail "Could not find 'bin/' directory or '.binconfig' file starting from '$PWD' (ignored '$bin_dir')" $ERR_NOT_FOUND
