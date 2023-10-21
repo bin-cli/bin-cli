@@ -151,6 +151,24 @@ That's all there is to it. Now you can run them:
 bin sample
 ```
 
+### Creating/editing scripts in your preferred editor
+
+There are built-in commands you can use to create/edit scripts in your preferred editor (`$VISUAL` or `$EDITOR`, with `editor`, `nano` or `vi` as a fallback):
+
+```bash
+bin --create sample
+bin -c sample
+
+bin --edit sample
+bin -e sample
+```
+
+The `--edit` command supports unique prefix matching:
+
+```bash
+bin -e sam
+```
+
 ### Config files
 
 *Bin* config files are named `.binconfig`, and are written in [INI format](https://en.wikipedia.org/wiki/INI_file).
@@ -173,6 +191,13 @@ repo/
 ├── bin/
 │   └── ...
 └── .binconfig
+```
+
+You can use these commands to create/edit it in your preferred editor (`$VISUAL` or `$EDITOR`, with `editor`, `nano` or `vi` as a fallback):
+
+```bash
+bin --create .binconfig
+bin --edit .binconfig
 ```
 
 ## Other features
