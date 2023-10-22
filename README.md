@@ -372,7 +372,7 @@ If you prefer to shorten the script prefix from `bin` to `b`, you can create a s
 $ sudo ln -s /usr/bin/bin /usr/local/bin/b
 ```
 
-Or you can can create an alias in your shell's config. For example, in `~/.bashrc`:
+Or you can create an alias in your shell's config. For example, in `~/.bashrc`:
 
 ```bash
 alias b='bin --exe b'
