@@ -38,4 +38,4 @@ Feature: Debugging
       When I run 'bin --print php -v'
       Then the exit code is 127
       And there is no output
-      And the error is "bin: Command 'php' not found in {ROOT}/project/bin"
+      And the error is "bin: Command 'php' not found in {ROOT}/project/bin or {ROOT}/project/.binconfig"

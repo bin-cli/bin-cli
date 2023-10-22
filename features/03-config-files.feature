@@ -7,8 +7,8 @@ Feature: Config files
     And a script '{ROOT}/project/bin/hello' that outputs 'Hello, World!'
     And the working directory is '{ROOT}/project/root'
     When I run 'bin hello'
-    Then it fails with exit code 246
-    And the error is "bin: Found '{ROOT}/project/root/.binconfig', but '{ROOT}/project/root/bin/' directory is missing"
+    Then it fails with exit code 127
+    And the error is "bin: Command 'hello' not found in {ROOT}/project/root/bin or {ROOT}/project/root/.binconfig"
 
   @undocumented
   Scenario: Directories below .binconfig are not searched when .binconfig exists

@@ -206,7 +206,7 @@ Feature: Aliases
       """
     When I run 'bin'
     Then it fails with exit code 246
-    And the error is "bin: The alias 'three' defined in {ROOT}/project/bin/three conflicts with the alias defined in {ROOT}/project/.binconfig line 2"
+    And the error is "bin: The alias 'three' defined in {ROOT}/project/.binconfig line 2 conflicts with the alias defined in {ROOT}/project/bin/three"
 
   Scenario: A symlink alias must be relative not absolute
     Given a script '{ROOT}/project/bin/one'

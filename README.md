@@ -573,15 +573,15 @@ Determining paths...
 -- Looking for a bin/ directory starting from /example/project
 ---- Checking in /example/project - found
 -- root=/example/project
--- binconfig=
+-- binconfig=/example/project/.binconfig
 -- bin_dir=/example/project/bin
 -- bin_dir_from_root=bin
 -- is_root_dir=bin
-'exact' defaulted to 'false'
 Searching '/example/project/bin/' for scripts to register
 -- Registered command 'test' for executable '/example/project/bin/test'
+'exact' defaulted to 'false'
 Processing symlink aliases
-Processing directory aliases and checking for conflicts
+Processing subcommand aliases and checking for conflicts
 Processing positional parameters
 -- Looking for command 'test' (exact)
 ---- Found matching command 'test'
