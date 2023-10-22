@@ -21,6 +21,30 @@ Feature: Inline commands
     Then it is successful
     And the output is '1=one 2=two'
 
+  Scenario: Inline commands can contain multiple commands
+    Given a file '{ROOT}/project/.binconfig' with content:
+      """
+      [hello]
+      command=echo one; echo two
+      """
+    When I run 'bin hello'
+    Then it is successful
+    And the output is:
+      """
+      one
+      two
+      """
+
+  Scenario: Inline commands can contain logic
+    Given a file '{ROOT}/project/.binconfig' with content:
+      """
+      [hello]
+      command=echo one || echo two
+      """
+    When I run 'bin hello'
+    Then it is successful
+    And the output is 'one'
+
   Scenario: Additional parameters are not automatically passed to the command
     Given a file '{ROOT}/project/.binconfig' with content:
       """
