@@ -634,6 +634,9 @@ run_command_if_only_one_match() {
     # Typically with a fallback to $0 if it is unset: ${BIN_COMMAND-$0}
     export BIN_COMMAND="$exe $command"
 
+    # And this can be used to display other command names
+    export BIN_EXE="$exe"
+
     local executable
     executable=$(map_get command_to_executable "$command")
     if [[ -n "$executable" ]]; then

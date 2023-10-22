@@ -1,7 +1,6 @@
 Feature: Inline commands
-  Not documented yet...
+  https://github.com/bin-cli/bin-cli#inline-commands
 
-  @undocumented
   Scenario: An inline command can be defined in .binconfig
     Given a file '{ROOT}/project/.binconfig' with content:
       """
@@ -12,13 +11,34 @@ Feature: Inline commands
     Then it is successful
     And the output is 'Hello, World!'
 
-  @undocumented
   Scenario: Inline commands can accept positional arguments
     Given a file '{ROOT}/project/.binconfig' with content:
       """
       [hello]
       command=echo "1=$1 2=$2"
       """
+    When I run 'bin hello one two'
+    Then it is successful
+    And the output is '1=one 2=two'
+
+  Scenario: Additional parameters are not automatically passed to the command
+    Given a file '{ROOT}/project/.binconfig' with content:
+      """
+      [hello]
+      command=helper
+      """
+    And a script '{ROOT}/usr/bin/helper' that outputs '1=$1 2=$2'
+    When I run 'bin hello one two'
+    Then it is successful
+    And the output is '1= 2='
+
+  Scenario: Additional parameters can be manually automatically passed to the command
+    Given a file '{ROOT}/project/.binconfig' with content:
+      """
+      [hello]
+      command=helper "$@"
+      """
+    And a script '{ROOT}/usr/bin/helper' that outputs '1=$1 2=$2'
     When I run 'bin hello one two'
     Then it is successful
     And the output is '1=one 2=two'
@@ -46,7 +66,18 @@ Feature: Inline commands
     And the output is 'BIN_DIR={ROOT}/project/bin'
 
   @undocumented
-  Scenario: The bin command is available in $BIN_COMMAND
+  Scenario: The bin executable is available in $BIN_EXE
+    Given a file '{ROOT}/project/.binconfig' with content:
+      """
+      [test]
+      command=echo "BIN_EXE=$BIN_EXE"
+      """
+    When I run 'bin test'
+    Then it is successful
+    And the output is 'BIN_EXE=bin'
+
+  @undocumented
+  Scenario: The bin command name is available in $BIN_COMMAND
     Given a file '{ROOT}/project/.binconfig' with content:
       """
       [test]

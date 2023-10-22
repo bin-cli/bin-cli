@@ -364,6 +364,26 @@ Aliases are also subject to unique prefix matching - so here `bin pub` would mat
 
 Defining an alias that conflicts with a script or another alias will cause *Bin* to exit with an error code and print a message to stdout (for safety).
 
+### Inline commands
+
+If you have a really short script, you can instead write it as an inline command in `.binconfig`:
+
+```ini
+[hello]
+command=echo 'Hello World'
+
+[phpunit]
+command="$BIN_ROOT/vendor/bin/phpunit" "$@"
+```
+
+The following variables are available:
+
+- `$BIN_DIR` points to the directory containing the scripts (usually `$BIN_ROOT/bin`, unless configured otherwise)
+- `$BIN_ROOT` points to the project root directory (usually one level above `bin/`)
+- `$1`, `$2`, ... and `$@` contain the additional arguments
+
+The command is executed within a Bash shell, so may contain logic operators if desired... But I recommend only using it for simple aliases to other scripts that can be called directly, such as the PHPUnit example above, since it won't be possible to call it without Bin CLI installed.
+
 ### Aliasing the `bin` command
 
 If you prefer to shorten the script prefix from `bin` to `b`, you can create a symlink. The exact command will depend on how and where you installed *Bin* - for example:
@@ -488,6 +508,8 @@ But if you ran the script manually with `bin/sample -h`, it would output the fal
 ```
 Usage: bin/sample [...]
 ```
+
+There is also `$BIN_EXE`, which you can use to display other commands, if required.
 
 ### Automatic exclusions
 
