@@ -1420,7 +1420,7 @@ for command in ${visible_commands+"${visible_commands[@]}"}; do
     else
         printf "%s %s\n" "$exe" "$command"
     fi
-done
+done | sort
 
 if [[ ${#visible_commands[@]} -eq 0 ]]; then
     echo "${GREY}None found${RESET}"
@@ -1452,7 +1452,8 @@ fi
 missing_commands=()
 for command in ${commands_listed_in_config+"${commands_listed_in_config[@]}"}; do
     executable=$(map_get command_to_executable "$command")
-    if [[ -z $executable ]]; then
+    script=$(map_get command_to_inline_script "$command")
+    if [[ -z $executable && -z $script ]]; then
         missing_commands+=("$command")
     fi
 done

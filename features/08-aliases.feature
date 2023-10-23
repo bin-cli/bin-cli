@@ -172,7 +172,7 @@ Feature: Aliases
     And the error is "bin: The alias 'three' defined in {ROOT}/project/.binconfig line 5 conflicts with the alias defined in {ROOT}/project/.binconfig line 2"
 
   Scenario: An alias can be defined by a symlink
-    Given a script '{ROOT}/project/bin/deploy' that outputs 'Copying to production...'
+    Given a script '{ROOT}/project/bin/deploy'
     And a symlink '{ROOT}/project/bin/publish' pointing to 'deploy'
     When I run 'bin'
     Then it is successful
@@ -193,6 +193,24 @@ Feature: Aliases
       Available commands
       bin deploy live       (alias: publish live)
       bin deploy staging    (alias: publish staging)
+      """
+
+  Scenario: Symlink aliases are combined with config aliases
+    Given a script '{ROOT}/project/bin/deploy'
+    And a symlink '{ROOT}/project/bin/publish' pointing to 'deploy'
+    And a file '{ROOT}/project/.binconfig' with content:
+      """
+      [deploy]
+      aliases=alpha, zappa
+      """
+    When I run 'bin'
+    Then it is successful
+    # I considered sorting them alphabetically, but it's not a good idea to combine the
+    # two methods, and keeping the order set in .binconfig gives the user more control
+    And the output is:
+      """
+      Available commands
+      bin deploy    (aliases: publish, alpha, zappa)
       """
 
   Scenario: Defining an alias that conflicts with a symlink alias causes an error

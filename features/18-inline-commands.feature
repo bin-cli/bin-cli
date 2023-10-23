@@ -67,7 +67,6 @@ Feature: Inline commands
     Then it is successful
     And the output is '1=one 2=two'
 
-  @undocumented
   Scenario: The root directory is available in $BIN_ROOT
     Given a file '{ROOT}/project/.binconfig' with content:
       """
@@ -78,7 +77,6 @@ Feature: Inline commands
     Then it is successful
     And the output is 'BIN_ROOT={ROOT}/project'
 
-  @undocumented
   Scenario: The bin directory is available in $BIN_DIR
     Given a file '{ROOT}/project/.binconfig' with content:
       """
@@ -134,3 +132,22 @@ Feature: Inline commands
     When I run 'bin hi'
     Then it is successful
     And the output is 'Hello, World!'
+
+  Scenario: Inline commands are listed alongside regular commands (alphabetically)
+    Given a file '{ROOT}/project/.binconfig' with content:
+      """
+      [hello]
+      alias=hi
+      command=echo 'Hello, World!'
+      """
+    And a script '{ROOT}/project/bin/another'
+    And a script '{ROOT}/project/bin/zebra'
+    When I run 'bin'
+    Then it is successful
+    And the output is:
+      """
+      Available commands
+      bin another
+      bin hello      (alias: hi)
+      bin zebra
+      """
