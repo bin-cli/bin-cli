@@ -41,7 +41,7 @@ Feature: CLI arguments
     And the error is:
       """
       bin: Command '<command>' not found in {ROOT}/project/bin/ or {ROOT}/project/.binconfig
-           Perhaps you meant to run 'bin --<command>'?
+      Perhaps you meant to run 'bin --<command>'?
       """
 
     Examples:
