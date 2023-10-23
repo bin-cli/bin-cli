@@ -96,7 +96,7 @@ Feature: Edit scripts
     Given an empty directory '{ROOT}/project/bin'
     When I run 'bin --edit hello world'
     Then it fails with exit code 127
-    And the error is "bin: Command 'hello' not found in {ROOT}/project/bin or {ROOT}/project/.binconfig"
+    And the error is "bin: Command 'hello' not found in {ROOT}/project/bin/ or {ROOT}/project/.binconfig"
 
   @undocumented
   Scenario: Scripts starting with '.' cannot be edited

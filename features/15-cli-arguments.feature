@@ -40,7 +40,7 @@ Feature: CLI arguments
     Then it fails with exit code 127
     And the error is:
       """
-      bin: Command '<command>' not found in {ROOT}/project/bin or {ROOT}/project/.binconfig
+      bin: Command '<command>' not found in {ROOT}/project/bin/ or {ROOT}/project/.binconfig
            Perhaps you meant to run 'bin --<command>'?
       """
 

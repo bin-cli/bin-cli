@@ -6,7 +6,7 @@ Feature: Automatic shims
     And a script '{ROOT}/usr/bin/php' that outputs 'Hello from PHP'
     When I run 'bin php'
     Then it fails with exit code 127
-    And the error is "bin: Command 'php' not found in {ROOT}/project/bin or {ROOT}/project/.binconfig"
+    And the error is "bin: Command 'php' not found in {ROOT}/project/bin/ or {ROOT}/project/.binconfig"
 
   Scenario: When specifying --shim, the global command is used as a fallback
     Given an empty directory '{ROOT}/project/bin'

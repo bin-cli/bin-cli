@@ -8,7 +8,7 @@ Feature: Config files
     And the working directory is '{ROOT}/project/root'
     When I run 'bin hello'
     Then it fails with exit code 127
-    And the error is "bin: Command 'hello' not found in {ROOT}/project/root/bin or {ROOT}/project/root/.binconfig"
+    And the error is "bin: Command 'hello' not found in {ROOT}/project/root/bin/ or {ROOT}/project/root/.binconfig"
 
   @undocumented
   Scenario: Directories below .binconfig are not searched when .binconfig exists
