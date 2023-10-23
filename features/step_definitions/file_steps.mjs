@@ -7,7 +7,6 @@ import * as paths from '../support/paths.mjs';
 import * as assert from "assert";
 import isExecutable from "is-executable";
 
-const access = promisify(fs.access);
 const readFile = promisify(fs.readFile);
 const symlink = promisify(fs.symlink);
 

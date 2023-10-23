@@ -34,14 +34,33 @@ Feature: CLI arguments
     And the error is "bin: Invalid option '--invalid'"
 
   @undocumented
+  Scenario Template: A helpful message is displayed when running the '<command>' command if it is not defined
+    Given a script '{ROOT}/project/bin/dummy'
+    When I run 'bin <command>'
+    Then it fails with exit code 127
+    And the error is:
+      """
+      bin: Command '<command>' not found in {ROOT}/project/bin or {ROOT}/project/.binconfig
+           Perhaps you meant to run 'bin --<command>'?
+      """
+
+    Examples:
+      | command    |
+      | completion |
+      | create     |
+      | edit       |
+      | help       |
+      | version    |
+
+  @undocumented
   Scenario Template: The <arg1> and <arg2> arguments are incompatible
     When I run 'bin <arg1> <arg2>'
     Then it fails with exit code 246
     And the error is "bin: The '<arg1>' and '<arg2>' arguments are incompatible"
 
     # I haven't bothered to list all combinations here, just a few combinations
-    Examples:
-      | arg1         | arg2    |
-      | --completion | --help |
-      | --completion | --print |
+    Scenarios:
+      | arg1         | arg2      |
+      | --completion | --help    |
+      | --completion | --print   |
       | --help       | --version |
