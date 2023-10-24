@@ -46,6 +46,12 @@ Feature: Custom script directory
     Then it is successful
     And the output is 'Hello, World!'
 
+  Scenario: The root directory can be configured with --dir=
+    Given a script '{ROOT}/project/scripts/hello' that outputs 'Hello, World!'
+    When I run 'bin --dir=scripts hello'
+    Then it is successful
+    And the output is 'Hello, World!'
+
   Scenario: Setting the root directory with --dir overrides .binconfig
     Given a script '{ROOT}/project/right/script' that outputs 'Right'
     And a script '{ROOT}/project/root/wrong/script' that outputs 'Wrong'

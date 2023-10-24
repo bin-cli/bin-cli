@@ -22,6 +22,13 @@ Feature: Automatic shims
     Then it is successful
     And the output is 'Hello from PHP 8.1'
 
+  Scenario: When specifying --fallback=, the given global command is used as a fallback
+    Given an empty directory '{ROOT}/project/bin'
+    And a script '{ROOT}/usr/bin/php8.1' that outputs 'Hello from PHP 8.1'
+    When I run 'bin --fallback=php8.1 php'
+    Then it is successful
+    And the output is 'Hello from PHP 8.1'
+
   Scenario: Specifying --shim disables unique prefix matching
     Given a script '{ROOT}/project/bin/hello-world-123'
     And a script '{ROOT}/usr/bin/hello-world' that outputs 'Hello, World!'
