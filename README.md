@@ -646,7 +646,6 @@ Options that do something with a COMMAND:
 
 Options that do something special and don't accept a COMMAND:
   --completion          Output a tab completion script for the current shell
-  --shell SHELL         Override the shell to use for '--completion' -- only 'bash' is currently supported
   --help, -h            Display this help
   --version, -v         Display the current version number and exit
 
