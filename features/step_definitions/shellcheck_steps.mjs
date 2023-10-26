@@ -8,6 +8,16 @@ Then('ShellCheck must report no errors', async function () {
     const command = quote([
         'shellcheck',
         '--color',
+        // See 'shellcheck --list-optional' for all the optional tests available
+        '--enable=add-default-case',
+        '--enable=avoid-nullary-conditions',
+        '--enable=check-extra-masked-returns',
+        // '--enable=check-set-e-suppressed', // Can't see any good ways to solve these!
+        '--enable=check-unassigned-uppercase',
+        '--enable=deprecate-which',
+        // '--enable=quote-safe-variables', // Too verbose
+        '--enable=require-double-brackets',
+        // '--enable=require-variable-braces', // Too verbose
         `${paths.dist}/bin`,
     ]);
 

@@ -1,7 +1,7 @@
 Feature: Custom script directory
   https://github.com/bin-cli/bin-cli#custom-script-directory
 
-  Scenario: The script directory can be overridden in .binconfig
+  Scenario: The script directory can be overridden in .binconfig with 'dir'
     Given a file '{ROOT}/project/.binconfig' with content 'dir=scripts'
     And a script '{ROOT}/project/scripts/test' that outputs 'Right'
     And a script '{ROOT}/project/bin/test' that outputs 'Wrong'
@@ -9,15 +9,15 @@ Feature: Custom script directory
     Then it is successful
     And the output is 'Right'
 
-  Scenario: Directories above .binconfig are not searched when root is specified in .binconfig
-    Given a file '{ROOT}/project/root/.binconfig' with content 'dir=scripts'
-    And a script '{ROOT}/project/scripts/hello'
+  Scenario: An error is raised if the specified directory does not exist
+    Given a file '{ROOT}/project/root/.binconfig' with content 'dir=bin'
+    And a script '{ROOT}/project/bin/hello'
     And the working directory is '{ROOT}/project/root'
     When I run 'bin hello'
-    Then it fails with exit code 127
-    And the error is "bin: Command 'hello' not found in {ROOT}/project/root/scripts/ or {ROOT}/project/root/.binconfig"
+    Then it fails with exit code 246
+    And the error is "bin: The directory specified in {ROOT}/project/root/.binconfig line 1 does not exist: {ROOT}/project/root/bin/"
 
-  Scenario: Directories below .binconfig are not searched when root is specified in .binconfig
+  Scenario: Directories below .binconfig are not searched when 'dir' is specified in .binconfig
     Given a file '{ROOT}/project/.binconfig' with content 'dir=scripts'
     And a script '{ROOT}/project/scripts/test' that outputs 'Right'
     And a script '{ROOT}/project/root/scripts/test' that outputs 'Wrong'
@@ -40,19 +40,19 @@ Feature: Custom script directory
     Then it fails with exit code 246
     And the error is "bin: Subcommands are not supported with the config option 'dir=.'"
 
-  Scenario: The root directory can be configured with --dir
+  Scenario: The script directory can be configured with --dir
     Given a script '{ROOT}/project/scripts/hello' that outputs 'Hello, World!'
     When I run 'bin --dir scripts hello'
     Then it is successful
     And the output is 'Hello, World!'
 
-  Scenario: The root directory can be configured with --dir=
+  Scenario: The script directory can be configured with --dir=
     Given a script '{ROOT}/project/scripts/hello' that outputs 'Hello, World!'
     When I run 'bin --dir=scripts hello'
     Then it is successful
     And the output is 'Hello, World!'
 
-  Scenario: Setting the root directory with --dir overrides .binconfig
+  Scenario: Setting the script directory with --dir overrides .binconfig
     Given a script '{ROOT}/project/right/script' that outputs 'Right'
     And a script '{ROOT}/project/root/wrong/script' that outputs 'Wrong'
     And a file '{ROOT}/project/root/.binconfig' with content 'dir=wrong'
@@ -61,14 +61,14 @@ Feature: Custom script directory
     Then it is successful
     And the output is 'Right'
 
-  Scenario: The root directory can be an absolute path when given with --dir
+  Scenario: The script directory can be an absolute path when given with --dir
     Given a script '{ROOT}/project/scripts/dev/hello' that outputs 'Hello, World!'
     When I run 'bin --dir {ROOT}/project/scripts/dev hello'
     Then it is successful
     And the output is 'Hello, World!'
 
   @undocumented
-  Scenario: The 'root' option cannot be an absolute path when set in .binconfig
+  Scenario: The 'dir' option cannot be an absolute path when set in .binconfig
     Given a script '{ROOT}/project/scripts/hello' that outputs 'Hello, World!'
     And a file '{ROOT}/project/.binconfig' with content 'dir=/project/scripts'
     When I run 'bin hello'
@@ -76,7 +76,7 @@ Feature: Custom script directory
     And the error is "bin: The option 'dir' cannot be an absolute path in {ROOT}/project/.binconfig line 1"
 
   @undocumented
-  Scenario: The 'root' option cannot point to a parent directory in .binconfig
+  Scenario: The 'dir' option cannot point to a parent directory in .binconfig
     Given a script '{ROOT}/project/scripts/hello' that outputs 'Hello, World!'
     And a file '{ROOT}/project/root/.binconfig' with content 'dir=../scripts'
     And the working directory is '{ROOT}/project/root'
@@ -85,7 +85,7 @@ Feature: Custom script directory
     And the error is "bin: The option 'dir' cannot point to a directory outside {ROOT}/project/root in {ROOT}/project/root/.binconfig line 1"
 
   @undocumented
-  Scenario: The 'root' option cannot point to a symlink to a parent directory in .binconfig
+  Scenario: The 'dir' option cannot point to a symlink to a parent directory in .binconfig
     Given a script '{ROOT}/project/scripts/hello' that outputs 'Hello, World!'
     And a symlink '{ROOT}/project/root/symlink' pointing to '../scripts'
     And a file '{ROOT}/project/root/.binconfig' with content 'dir=symlink'

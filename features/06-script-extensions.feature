@@ -63,6 +63,17 @@ Feature: Script extensions
       bin sample1.sh
       """
 
+  Scenario: Symlink aliases are listed without the extensions
+    Given a script '{ROOT}/project/bin/sample1.sh'
+    And a symlink '{ROOT}/project/bin/sample2.sh' pointing to 'sample1.sh'
+    When I run 'bin'
+    Then it is successful
+    And the output is:
+      """
+      Available commands
+      bin sample1    (alias: sample2)
+      """
+
   Scenario: Aliases are taken into account when checking for conflicts
     Given a script '{ROOT}/project/bin/sample1.sh'
     And a script '{ROOT}/project/bin/sample2'
@@ -78,6 +89,18 @@ Feature: Script extensions
       Available commands
       bin sample1.sh
       bin sample2       (alias: sample1)
+      """
+
+  Scenario: Aliases are taken into account when checking for conflicts for other aliases
+    Given a script '{ROOT}/project/bin/sample1.sh'
+    And a symlink '{ROOT}/project/bin/sample2' pointing to 'sample1.sh'
+    And a symlink '{ROOT}/project/bin/sample2.sh' pointing to 'sample1.sh'
+    When I run 'bin'
+    Then it is successful
+    And the output is:
+      """
+      Available commands
+      bin sample1    (aliases: sample2, sample2.sh)
       """
 
   Scenario: Subcommands are taken into account when checking for conflicts

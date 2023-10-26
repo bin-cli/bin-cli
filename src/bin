@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-set -o errexit -o nounset -o pipefail
-shopt -s nullglob
+set -euo pipefail
+shopt -s inherit_errexit nullglob
 
 ################################################################################
 # Bin - A simple task runner           Copyright (c) 2023 Dave James Miller    #
@@ -59,61 +59,85 @@ NEW_LINE=$'\n'
 # Cross-platform `realpath`
 #===============================================================================
 
-# Source: https://github.com/mkropat/sh-realpath/blob/65512368b8155b176b67122aa395ac580d9acc5b/realpath.sh
+# Based on: https://github.com/mkropat/sh-realpath/blob/65512368b8155b176b67122aa395ac580d9acc5b/realpath.sh
+# Copyright (c) 2014 Michael Kropat - MIT License
+# Modified to work with 'set -e', and to follow our code conventions
 
-# kcov-ignore-start: Not our code to test, and not every code path is covered by our tests
+# Not every code path is covered by our tests
+# kcov-ignore-start
 realpath() {
-    canonicalize_path "$(resolve_symlinks "$1")"
+    # debug '------ realpath' "$@"
+
+    local resolved
+    resolved=$(resolve_symlinks "$1")
+    canonicalize_path "$resolved"
 }
 
 resolve_symlinks() {
+    # debug '------ resolve_symlinks' "$@"
+
     _resolve_symlinks "$1"
 }
 
 _resolve_symlinks() {
+    # debug '------ _resolve_symlinks' "$@"
+
     _assert_no_path_cycles "$@" || return
 
-    local dir_context path
-    path=$(readlink -- "$1")
-    # shellcheck disable=SC2181
-    if [ $? -eq 0 ]; then
+    local dir_context new_context path
+
+    if path=$(readlink -- "$1"); then
         dir_context=$(dirname -- "$1")
-        _resolve_symlinks "$(_prepend_dir_context_if_necessary "$dir_context" "$path")" "$@"
+        new_context=$(_prepend_dir_context_if_necessary "$dir_context" "$path")
+        _resolve_symlinks "$new_context" "$@"
     else
-        printf '%s\n' "$1"
+        echo "$1"
     fi
 }
 
 _prepend_dir_context_if_necessary() {
-    if [ "$1" = . ]; then
-        printf '%s\n' "$2"
+    # debug '------ _prepend_dir_context_if_necessary' "$@"
+
+    if [[ $1 = '.' ]]; then
+        echo "$2"
     else
         _prepend_path_if_relative "$1" "$2"
     fi
 }
 
 _prepend_path_if_relative() {
+    # debug '------ _prepend_path_if_relative' "$@"
+
     case "$2" in
-        /* ) printf '%s\n' "$2" ;;
-         * ) printf '%s\n' "$1/$2" ;;
+        /*) echo "$2" ;;
+        *)  echo "$1/$2" ;;
     esac
 }
 
 _assert_no_path_cycles() {
+    # debug '------ _assert_no_path_cycles' "$@"
+
     local target path
 
     target=$1
+    # debug "-------- target=$target"
     shift
 
     for path in "$@"; do
-        if [ "$path" = "$target" ]; then
+        # debug "-------- path=$path"
+        if [[ "$path" = "$target" ]]; then
+            # debug '-------- FAIL'
             return 1
         fi
     done
+
+    # debug '-------- OK'
 }
 
 canonicalize_path() {
-    if [ -d "$1" ]; then
+    # debug '------ canonicalize_path' "$@"
+
+    if [[ -d $1 ]]; then
         _canonicalize_dir_path "$1"
     else
         _canonicalize_file_path "$1"
@@ -121,14 +145,21 @@ canonicalize_path() {
 }
 
 _canonicalize_dir_path() {
+    # debug '------ _canonicalize_dir_path' "$@"
+
     (cd "$1" 2>/dev/null && pwd -P)
 }
 
 _canonicalize_file_path() {
+    # debug '------ _canonicalize_file_path' "$@"
+
     local dir file
     dir=$(dirname -- "$1")
     file=$(basename -- "$1")
-    (cd "$dir" 2>/dev/null && printf '%s/%s\n' "$(pwd -P)" "$file")
+    # debug "-------- dir=$dir"
+    # debug "-------- file=$file"
+
+    (cd "$dir" 2>/dev/null && dir=$(pwd -P) && echo "$dir/$file")
 }
 # kcov-ignore-end
 
@@ -141,10 +172,10 @@ _canonicalize_file_path() {
 #---------------------------------------
 
 in_array() {
-    local needle=$1
-    shift
+    local needle value
 
-    local value
+    needle=$1
+    shift
 
     for value in "$@"; do
         if [[ "$value" = "$needle" ]]; then
@@ -161,12 +192,16 @@ in_array() {
 # This is to support Bash 3 (macOS - *sigh*!), which doesn't have associative arrays
 
 map_key() {
-    local key=$1
+    local char i key length map
 
-    local i
-    local length="${#key}"
+    map=$1
+    key=$2
+
+    printf '%s' "map__${map}__"
+
+    length="${#key}"
     for ((i = 0; i < length; i++)); do
-        local char="${key:i:1}"
+        char="${key:i:1}"
         case $char in
             [a-zA-Z0-9]) printf '%s' "$char" ;;
             # Encode all other characters in hex to make them valid variable names
@@ -176,32 +211,39 @@ map_key() {
 }
 
 map_set() {
-    local name=$1
-    local key=$2
-    local value=$3
+    local key map value
 
-    # Make an array containing the raw keys
-    eval "$name+=(\"\$key\")"
+    map=$1
+    key=$2
+    value=$3
+
+    # Make an array containing the raw keys, for map_clear
+    eval "$map+=(\"\$key\")"
 
     # Store the values in separate variables
-    printf -v "map__${name}__$(map_key "$2")" %s "$value"
+    key=$(map_key "$map" "$key")
+    printf -v "$key" %s "$value"
 }
 
 map_get() {
-    local name=$1
-    local key=$2
-    local default=${3-}
+    local default key map
 
-    key="map__${name}__$(map_key "$key")"
+    map=$1
+    key=$2
+    default=${3-}
+
+    key=$(map_key "$map" "$key")
 
     echo "${!key-$default}"
 }
 
 map_clear() {
-    local name=$1
+    local map
 
-    eval "unset \"\${!map__${name}__@}\""
-    eval "$name=()"
+    map=$1
+
+    eval "unset \"\${!map__${map}__@}\""
+    eval "$map=()"
 }
 
 #---------------------------------------
@@ -219,6 +261,8 @@ if { true >&3; } 2>/dev/null; then # kcov-ignore-line: Usage not detected
 fi
 
 debug() {
+    local lines
+
     # Display debug data when using --debug (only after parsing parameters)
     if ${debug-false}; then
         echo "$@" >&4
@@ -226,7 +270,7 @@ debug() {
 
     # Output debug data to FD 3 when using the 'bin tdd' script in development
     if $fd3_open; then
-        local lines="${BASH_LINENO[*]}"
+        lines="${BASH_LINENO[*]}"
         lines=${lines% 0}
         echo "$@" "${DEBUG_GREY}[line ${lines// /, }]${DEBUG_RESET}" >&3
     fi
@@ -240,8 +284,10 @@ debug_exit() {
 }
 
 fail() {
-    local message=$1
-    local code=${2-$ERR_GENERIC}
+    local code message
+
+    message=$1
+    code=${2-$ERR_GENERIC}
 
     debug "Failed with message: $message"
     debug_exit "Exit code: $code"
@@ -256,8 +302,11 @@ fail() {
 
 bug() {
     # kcov-ignore-start: This should never be needed!
-    local lines="${BASH_LINENO[*]}"
+    local lines
+
+    lines="${BASH_LINENO[*]}"
     lines=${lines% 0}
+
     fail "BUG: $1 on line ${lines// /, }"
     # kcov-ignore-end
 }
@@ -286,8 +335,10 @@ findup() (
 )
 
 relative_path() {
-    local parent=$1
-    local child=$2
+    local child parent
+
+    parent=$1
+    child=$2
 
     echo "${child#"${parent}/"}"
 }
@@ -297,13 +348,15 @@ relative_path() {
 #---------------------------------------
 
 bin_dir_for() {
-    local file=$1
-    local sanity_checks=${2-false}
+    local bin_dir_real file line result root_real sanity_checks
+
+    file=$1
+    sanity_checks=${2-false}
 
     debug "-- Checking $binconfig for a 'dir' setting"
 
-    local line=0
-    local result=''
+    line=0
+    result=''
     while IFS='=' read -r key value; do
         ((line += 1))
 
@@ -317,7 +370,7 @@ bin_dir_for() {
         elif [[ $key = 'dir' ]]; then
             # dir=scripts
             debug "---- Found $key=$value"
-            result=$value
+            result="${value%%/}"
             break
         fi
     done <"$file" # kcov-ignore-line: Usage not detected
@@ -325,26 +378,37 @@ bin_dir_for() {
     if [[ -z $result ]]; then
         debug "---- Not found (defaulting to 'bin')"
         result='bin'
+        line=0
     fi
 
     if $sanity_checks; then
+        debug "---- Performing sanity check"
+
         if [[ $result = /* ]]; then
             fail "The option 'dir' cannot be an absolute path in $file line $line"
         fi
 
-        # shellcheck disable=SC2155
-        local bin_dir_real=$(realpath "$root/$result") || true
-        # shellcheck disable=SC2155
-        local root_real=$(realpath "$root") || true
+        if [[ -d "$root/$result" ]]; then
+            bin_dir_real=$(realpath "$root/$result")
+            root_real=$(realpath "$root")
 
-        if [[ "$bin_dir_real/" != "$root_real/"* ]]; then
-            debug "---- bin_dir_real=$bin_dir_real"
-            debug "---- root_real=$root_real"
-            fail "The option 'dir' cannot point to a directory outside $root in $file line $line"
+            debug "------ root=$root"
+            debug "------ bin_dir=$root/$result"
+            debug "------ root_real=$root_real"
+            debug "------ bin_dir_real=$bin_dir_real"
+
+            if [[ "$bin_dir_real/" != "$root_real/"* ]]; then
+                fail "The option 'dir' cannot point to a directory outside $root in $file line $line"
+            fi
+        elif [[ $line -gt 0 ]]; then
+            fail "The directory specified in $file line $line does not exist: $root/$result/"
         fi
+
+        # It is not an error if (1) .binconfig exists, (2) 'dir' is not set and
+        # (3) bin/ doesn't exist, because .binconfig may contain inline commands
     fi
 
-    echo "${result%%/}"
+    echo "$result"
 }
 
 #---------------------------------------
@@ -355,9 +419,11 @@ commands=()
 matching_commands=()
 
 prevent_duplicate_command() {
-    local type=$1
-    local name=$2
-    local source=$3
+    local name source type
+
+    type=$1
+    name=$2
+    source=$3
 
     # This long-winded syntax (used here and in various other places) is to make
     # it work in Bash 3 (macOS) - https://stackoverflow.com/a/61551944/167815
@@ -367,50 +433,61 @@ prevent_duplicate_command() {
 }
 
 register_executable_command() {
-    local name=$1
-    local executable=$2
+    local executable name
+
+    name=$1
+    executable=$2
 
     prevent_duplicate_command command "$name" "$executable"
 
     commands+=("$name")
     map_set command_to_executable "$name" "$executable"
     map_set executable_to_command "$executable" "$name"
+    map_set original_commands "$name" "$name"
+
     debug "-- Registered command '$name' for executable '$executable'"
 }
 
 register_inline_command() {
-    local name=$1
-    local script=$2
-    local source=$3
+    local name script source
+
+    name=$1
+    script=$2
+    source=$3
 
     prevent_duplicate_command command "$name" "$source"
 
     commands+=("$name")
     map_set command_to_inline_script "$name" "$script"
+    map_set original_commands "$name" "$name"
+
     debug "-- Registered inline command '$name' for script '$script'"
 }
 
 command_matches() {
-    local type=$1
-    local target=$2
-    local command=$3
+    local command found target type
+
+    type=$1
+    target=$2
+    command=$3
 
     # Check for a match of the given type
+    found=false
+
     if [[ $type = exact ]]; then
-        [[ "$command" = "$target" ]]
+        [[ "$command" = "$target" ]] && found=true
     elif [[ $type = with-extension ]]; then
-        [[ "$command" = "$target".* ]]
+        [[ "$command" = "$target".* ]] && found=true
     elif [[ $type = subcommands ]]; then
-        [[ "$command" = "$target "* ]]
+        [[ "$command" = "$target "* ]] && found=true
     elif [[ $type = prefix ]]; then
-        [[ "$command" = "$target"* ]]
+        [[ "$command" = "$target"* ]] && found=true
     else
         bug "Invalid \$type '$type' passed to command_matches()" # kcov-ignore-line: This should never be happen
     fi
 
     # If it doesn't match, return false
-    # shellcheck disable=SC2181
-    if [[ $? -gt 0 ]]; then
+    if ! $found; then
         debug "---- No match for '$command'"
         return 1
     fi
@@ -419,12 +496,14 @@ command_matches() {
 }
 
 is_hidden_command() {
-    local command=$1
-    local target=${2-}
+    local command prefix_length target
+
+    command=$1
+    target=${2-}
 
     # We can't just match on $command, because it may be the parent command that
     # has already been typed that is hidden, so subcommands should be shown
-    local prefix_length=${#target}
+    prefix_length=${#target}
 
     if [[ $prefix_length -eq 0 ]]; then
         command=" $command"
@@ -436,10 +515,10 @@ is_hidden_command() {
 }
 
 find_matching_commands() {
-    local type=$1
-    local target=$2
-    local command
-    local alias
+    local alias alias_found command target type
+
+    type=$1
+    target=$2
 
     debug "-- Looking for command '$target' ($type)"
 
@@ -447,7 +526,7 @@ find_matching_commands() {
 
     for alias in ${aliases+"${aliases[@]}"}; do
         if command_matches "$type" "$target" "$alias"; then
-            command=$(map_get alias_to_command "$alias")
+            command=$(map_get original_commands "$alias")
             map_set commands_matching_aliases "$command" true
             debug "---- Found matching alias '$alias' for command '$command'"
         fi
@@ -455,8 +534,8 @@ find_matching_commands() {
 
     matching_commands=()
     for command in ${commands+"${commands[@]}"}; do
-        # shellcheck disable=SC2091
-        if $(map_get commands_matching_aliases "$command" false); then
+        alias_found=$(map_get commands_matching_aliases "$command" false)
+        if $alias_found; then
             debug "---- Found matching command '$command' (from alias)"
             matching_commands+=("$command")
         elif command_matches "$type" "$target" "$command"; then
@@ -467,21 +546,22 @@ find_matching_commands() {
 }
 
 matching_commands_shared_prefix() {
-    local prefix=$1
-    local prefix_length=${#prefix}
+    local command next_command prefix prefix_length remaining shared_next_command
 
-    local shared_next_command=''
+    prefix=$1
+    prefix_length=${#prefix}
 
-    local command
+    shared_next_command=''
+
     for command in ${matching_commands+"${matching_commands[@]}"}; do
         # Remove the common prefix
-        local remaining=${command:$prefix_length}
+        remaining=${command:$prefix_length}
 
         if [[ ! $remaining = *' '* ]]; then
             continue
         fi
 
-        local next_command=${remaining/ */}
+        next_command=${remaining/ */}
 
         if [[ -z $shared_next_command ]]; then
             shared_next_command=$next_command
@@ -500,9 +580,11 @@ matching_commands_shared_prefix() {
 }
 
 remove_extension() {
+    local command
+
     # Can't use ${command%%.*} because it could remove too much ("a.b c" => "a" instead of "a.b")
     # Can't use ${command%.*} because it could remove too little ("a.b.c" => "a.b" instead of "a")
-    local command="$1"
+    command="$1"
 
     while [[ "$command" =~ (.*)(\.[a-zA-Z0-9]+)+ ]]; do
         command=${BASH_REMATCH[1]}
@@ -512,10 +594,11 @@ remove_extension() {
 }
 
 has_duplicate() {
-    local short=$1
-    local long=$2
+    local alias command long short
 
-    local command
+    short=$1
+    long=$2
+
     for command in ${commands+"${commands[@]}"}; do
         case "$command" in
             # Ignore a match to itself
@@ -524,14 +607,15 @@ has_duplicate() {
             "$short") return 0 ;;
             "$short."*) return 0 ;;
             "$short "*) return 0 ;;
+            *) continue ;;
         esac
     done
 
-    local alias
     for alias in ${aliases+"${aliases[@]}"}; do
         case "$alias" in
             "$short") return 0 ;;
             "$short "*) return 0 ;;
+            *) continue ;;
         esac
     done
 
@@ -547,32 +631,40 @@ aliases=()
 alias_to_executable=()
 
 prevent_duplicate_alias() {
-    local name=$1
-    local source=$2
+    local existing name source
 
-    if [[ -n $(map_get alias_sources "$name") ]]; then
-        fail "The alias '$name' defined in $source conflicts with the alias defined in $(map_get alias_sources "$name")"
+    name=$1
+    source=$2
+
+    existing=$(map_get alias_sources "$name")
+
+    if [[ -n $existing ]]; then
+        fail "The alias '$name' defined in $source conflicts with the alias defined in $existing"
     fi
 }
 
 register_command_alias() {
-    local alias=$1
-    local command=$2
-    local source=$3
+    local alias command source
+
+    alias=$1
+    command=$2
+    source=$3
 
     prevent_duplicate_alias "$alias" "$source"
 
     aliases+=("$alias")
-    map_set alias_to_command "$alias" "$command"
+    map_set original_commands "$alias" "$command"
     map_set alias_sources "$alias" "$source"
 
     debug "---- Registered alias '$alias' for command '$command'"
 }
 
 register_executable_alias() {
-    local alias=$1
-    local executable=$2
-    local source=$3
+    local alias executable source
+
+    alias=$1
+    executable=$2
+    source=$3
 
     prevent_duplicate_alias "$alias" "$source"
 
@@ -588,9 +680,11 @@ register_executable_alias() {
 #---------------------------------------
 
 open_in_editor() {
-    local file=$1
+    local editor file
 
-    local editor=${VISUAL-${EDITOR-}}
+    file=$1
+
+    editor=${VISUAL-${EDITOR-}}
 
     if [[ -z $editor ]]; then
         if command -v editor &>/dev/null; then
@@ -626,12 +720,14 @@ run_command() {
 }
 
 run_command_if_only_one_match() {
+    local command executable script
+
     if [[ ${#matching_commands[@]} -ne 1 ]]; then
         debug "---- There were ${#matching_commands[@]} matches - not running command"
         return
     fi
 
-    local command=${matching_commands[0]}
+    command=${matching_commands[0]}
 
     # Export the command name so it can be displayed in help messages
     # Typically with a fallback to $0 if it is unset: ${BIN_COMMAND-$0}
@@ -640,13 +736,11 @@ run_command_if_only_one_match() {
     # And this can be used to display other command names
     export BIN_EXE="$exe"
 
-    local executable
     executable=$(map_get command_to_executable "$command")
     if [[ -n "$executable" ]]; then
         run_command "$executable" "$@"
     fi
 
-    local script
     script=$(map_get command_to_inline_script "$command")
     if [[ -n "$script" ]]; then
         # These variables are useful for inline commands, but aren't made available
@@ -884,7 +978,7 @@ if [[ -n $dir ]]; then
         binconfig_file="$binconfig_dir/.binconfig"
         debug "-- Found .binconfig file $binconfig_file"
 
-        dir_in_binconfig=$(bin_dir_for "$binconfig_file" true)
+        dir_in_binconfig=$(bin_dir_for "$binconfig_file")
         debug "-- .binconfig has dir=$dir_in_binconfig"
 
         required_dir=$(relative_path "$binconfig_dir" "$bin_dir")
@@ -948,22 +1042,19 @@ non_executable_files=()
 
 # Recursive function
 register_commands_in_directory() {
-    local directory=$1
-    local prefix=${2-}
+    local directory file name prefix realfile target
+
+    directory=$1
+    prefix=${2-}
 
     # Loop through the directory to find commands
-    local file
-
     for file in "$directory/"*; do
-        local name
         name=${file##*/}  # Remove path
         name=${name// /-} # Spaces to dashes
 
-        local realfile
         realfile=$(realpath "$file") || true
 
         if [[ -L $file ]]; then
-            local target
             target=$(readlink "$file")
             if [[ $target = /* ]]; then
                 fail "The symlink '$file' must use a relative path, not absolute ('$target')"
@@ -1035,7 +1126,8 @@ if [[ -f $binconfig ]]; then
             # exact=true
             if [[ -z $exact ]]; then
                 # Can't use ${value,,} because it doesn't work in Bash 3 (macOS)
-                if in_array "$(echo "$value" | tr '[:upper:]' '[:lower:]')" 'false' 'no' 'off' '0'; then
+                lc_value=$(echo "$value" | tr '[:upper:]' '[:lower:]')
+                if in_array "$lc_value" 'false' 'no' 'off' '0'; then
                     exact=false
                 else
                     exact=true
@@ -1086,7 +1178,7 @@ for alias in ${alias_to_executable+"${alias_to_executable[@]}"}; do
     executable=$(map_get alias_to_executable "$alias")
     if [[ -n $executable ]]; then
         command=$(map_get executable_to_command "$executable")
-        map_set alias_to_command "$alias" "$command"
+        map_set original_commands "$alias" "$command"
         debug "-- Registered alias '$alias' for executable '$executable' to command '$command'"
     fi
 done
@@ -1095,15 +1187,16 @@ debug "Processing subcommand aliases and checking for conflicts"
 
 for alias in ${aliases+"${aliases[@]}"}; do
     # Check for conflicts
-    prevent_duplicate_command alias "$alias" "$(map_get alias_sources "$alias")"
+    source=$(map_get alias_sources "$alias")
+    prevent_duplicate_command alias "$alias" "$source"
 
     # Expand aliases to cover subcommands (e.g. if 'deploy'='push' then 'deploy live'='push live')
-    target=$(map_get alias_to_command "$alias")
+    target=$(map_get original_commands "$alias")
     for command in ${commands+"${commands[@]}"}; do
         if [[ "$command" = "$target "* ]]; then
             suffix=${command:${#target}}
             aliases+=("$alias$suffix")
-            map_set alias_to_command "$alias$suffix" "$target$suffix"
+            map_set original_commands "$alias$suffix" "$target$suffix"
             debug "---- Registered alias '$alias$suffix' for command '$target$suffix'"
         fi
     done
@@ -1284,11 +1377,12 @@ while [[ $# -gt $last_parameter ]]; do
 done
 
 #===============================================================================
-# Determine unique command names
+# Determine shortened command names & aliases
 #===============================================================================
 
-debug "Determining unique command names for listing"
-unique_commands=()
+# Commands
+debug "Determining shortened command names for listing"
+shortened_commands=()
 
 for command in ${list_commands+"${list_commands[@]}"}; do
     executable=$(map_get command_to_executable "$command")
@@ -1301,13 +1395,36 @@ for command in ${list_commands+"${list_commands[@]}"}; do
 
     if [[ "$short" = "$command" ]]; then
         debug "-- '$command' can't be shortened"
-        unique_commands+=("$command")
+        shortened_commands+=("$command")
     elif has_duplicate "$short" "$command"; then
         debug "-- '$short' is not unique - using full command name '$command'"
-        unique_commands+=("$command")
+        shortened_commands+=("$command")
     else
         debug "-- '$command' shortened to '$short'"
-        unique_commands+=("$short")
+        shortened_commands+=("$short")
+        original_command=$(map_get original_commands "$command")
+        map_set original_commands "$short" "$original_command"
+    fi
+done
+
+# Aliases
+debug "Determining shortened aliases for listing"
+shortened_aliases=()
+
+for alias in ${aliases+"${aliases[@]}"}; do
+    short=$(remove_extension "$alias")
+
+    if [[ "$short" = "$alias" ]]; then
+        debug "-- '$alias' can't be shortened"
+        shortened_aliases+=("$alias")
+    elif has_duplicate "$short" "$alias"; then
+        debug "-- '$short' is not unique - using full alias name '$alias'"
+        shortened_aliases+=("$alias")
+    else
+        debug "-- '$alias' shortened to '$short'"
+        shortened_aliases+=("$short")
+        original_command=$(map_get original_commands "$alias")
+        map_set original_commands "$short" "$original_command"
     fi
 done
 
@@ -1331,7 +1448,7 @@ if [[ $action = 'complete-bash' ]]; then
     matches=()
     matching_commands=()
 
-    for command in ${unique_commands+"${unique_commands[@]}"}; do
+    for command in ${shortened_commands+"${shortened_commands[@]}"}; do
         if ! command_matches prefix "$target" "$command"; then
             continue
         fi
@@ -1343,12 +1460,12 @@ if [[ $action = 'complete-bash' ]]; then
         debug "-- Found matching command '$command' => '$match'"
     done
 
-    for alias in ${aliases+"${aliases[@]}"}; do
+    for alias in ${shortened_aliases+"${shortened_aliases[@]}"}; do
         if ! command_matches prefix "$target" "$alias"; then
             continue
         fi
 
-        command=$(map_get alias_to_command "$alias")
+        command=$(map_get original_commands "$alias")
         if in_array "$command" ${matching_commands+"${matching_commands[@]}"}; then
             debug "-- Skipping matching alias '$alias' because the command '$command' has already matched"
         else
@@ -1381,7 +1498,7 @@ fi
 # Remove hidden commands
 visible_commands=()
 
-for command in ${unique_commands+"${unique_commands[@]}"}; do
+for command in ${shortened_commands+"${shortened_commands[@]}"}; do
     if is_hidden_command "$command" "${full_command:1}"; then
         debug "-- '$command' is hidden - skipping"
     else
@@ -1401,17 +1518,24 @@ debug "Maximum matching command length is $maxlength"
 
 # Output the list
 get_command_aliases() {
-    local command=$1
-    local command_aliases=''
-    local command_alias_count=0
+    local alias command command_alias_count command_aliases original_command target
 
-    local alias
-    for alias in ${aliases+"${aliases[@]}"}; do
-        local target
-        target=$(map_get alias_to_command "$alias")
-        if [[ "$target" = "$command" ]]; then
+    command=$1
+
+    command_alias_count=0
+    command_aliases=''
+
+    original_command=$(map_get original_commands "$command")
+    debug "Looking for aliases for '$command' (originally '$original_command')"
+
+    for alias in ${shortened_aliases+"${shortened_aliases[@]}"}; do
+        target=$(map_get original_commands "$alias")
+        if [[ "$target" = "$original_command" ]]; then
+            debug "-- Matched '$alias' (target='$target')"
             ((command_alias_count += 1))
             command_aliases+=", $alias"
+        else
+            debug "-- No match for '$alias' (target='$target')"
         fi
     done
 
