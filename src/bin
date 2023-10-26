@@ -348,7 +348,7 @@ relative_path() {
 #---------------------------------------
 
 bin_dir_for() {
-    local bin_dir_real file line result root_real sanity_checks
+    local bin_dir_real file key line result root_real sanity_checks value
 
     file=$1
     sanity_checks=${2-false}
