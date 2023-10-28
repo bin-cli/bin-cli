@@ -660,6 +660,11 @@ For more details see https://github.com/bin-cli/bin-cli#readme
 <!-- END auto-update-cli-reference-docs -->
 
 ## Get involved
-- Discussions & ideas: https://github.com/bin-cli/bin-cli/discussions
-- Bug reports: https://github.com/bin-cli/bin-cli/issues
-- Pull requests: https://github.com/bin-cli/bin-cli/pulls
+
+- [Discussions & ideas](https://github.com/bin-cli/bin-cli/discussions)
+- [Bug reports](https://github.com/bin-cli/bin-cli/issues)
+- [Pull requests](https://github.com/bin-cli/bin-cli/pulls)
+
+## License
+
+[MIT License](LICENSE.md)
