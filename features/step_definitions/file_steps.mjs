@@ -4,10 +4,11 @@ import {ensureDir, exists, outputFile} from 'fs-extra';
 import {dirname} from 'path';
 import {promisify} from 'util';
 import * as paths from '../support/paths.mjs';
-import * as assert from "assert";
-import isExecutable from "is-executable";
+import * as assert from 'assert';
+import isExecutable from 'is-executable';
 
 const readFile = promisify(fs.readFile);
+const stat = promisify(fs.stat);
 const symlink = promisify(fs.symlink);
 
 Given('an empty directory {string}', async function (directory) {
@@ -74,4 +75,9 @@ Then('there is a script {string} with content:', async function (file, content) 
     assert.ok(await isExecutable(file), `${file} exists but is not executable`);
     // Add EOF new line because Cucumber removes the trailing new line and Node doesn't
     assert.strictEqual(await readFile(file, 'utf-8'), `${content}\n`);
+});
+
+Given('Code size must be under {int} KB', async function (expected_size_in_kb) {
+    const codeStat = await stat(`${paths.dist}/bin`);
+    assert.ok(codeStat.size < expected_size_in_kb * 1024, `Code size is ${codeStat.size} bytes (${Math.round(codeStat.size / 1024)} KB)`);
 });
