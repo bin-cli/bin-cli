@@ -3,11 +3,10 @@ import {quote} from 'shell-quote';
 import {spawnSync} from 'child_process';
 import {createRequire} from 'module';
 import {Then} from '@cucumber/cucumber';
-import {platform} from "os";
 
 Then('Code coverage must be at least {float}%', async function (minPercent) {
 
-    if (platform() === 'darwin') {
+    if (process.env.DISABLE_KCOV) {
         return 'skipped';
     }
 

@@ -1,11 +1,10 @@
-import {Given, setDefaultTimeout, Then, When} from '@cucumber/cucumber';
+import {Given, Then, When} from '@cucumber/cucumber';
 import {strict as assert} from 'assert';
 import {spawnSync} from 'child_process';
 import {ensureDir, exists, outputFile} from 'fs-extra';
 import {move} from 'fs-extra/lib/move/index.js';
 import * as paths from '../support/paths.mjs';
 import * as coverage from '../support/coverage.mjs';
-import {platform} from 'os';
 
 Given('the working directory is {string}', async function (directory) {
     directory = paths.replace(directory);
@@ -33,10 +32,9 @@ async function run(command, env = {}) {
 
     // Use kcov to measure code coverage
     // Except on one particular test where it doesn't work
-    // And it's is really slow on macOS (even with --include-path), so disable it there completely
     let kcovId;
 
-    if (!this.disableKcov && platform() !== 'darwin') {
+    if (!this.disableKcov && !process.env.DISABLE_KCOV) {
         await ensureDir(paths.coverage);
 
         kcovId = coverage.nextId();

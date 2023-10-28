@@ -1,4 +1,4 @@
-import {dirname} from 'path';
+import {dirname, isAbsolute} from 'path';
 import {fileURLToPath} from 'url';
 import fs from 'fs-extra';
 
@@ -13,7 +13,7 @@ export function replace(string) {
 }
 
 export async function ensureInRoot(path) {
-    if (path[0] !== '/') {
+    if (!isAbsolute(path)) {
         throw new Error(`Path '${path}' must be absolute (use '{ROOT}' placeholder)`);
     }
 

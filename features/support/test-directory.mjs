@@ -1,6 +1,5 @@
 import {After, Before} from '@cucumber/cucumber';
 import {copy, emptyDir, ensureDir, ensureSymlink, remove} from 'fs-extra';
-import {platform} from 'os';
 import which from 'which';
 import * as paths from './paths.mjs';
 
@@ -25,9 +24,7 @@ Before({name: 'Create test directory'}, async function () {
         'uniq', // coreutils
     ];
 
-    if (!this.disableKcov && platform() !== 'darwin') {
-        // kcov is only needed to determine code coverage in tests
-        // It doesn't work properly (for us) on macOS, and may be disabled with @disable-kcov
+    if (!this.disableKcov && !process.env.DISABLE_KCOV) {
         executables.push('kcov');
     }
 

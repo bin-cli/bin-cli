@@ -7,12 +7,6 @@ LCYAN=$'\e[96m'
 
 to_install=()
 
-if [[ $(uname -a) = Darwin* ]]; then
-    macos=true
-else
-    macos=false
-fi
-
 sudo() {
     # This is mainly to allow running in Docker
     if [[ $UID -eq 0 ]]; then
@@ -24,24 +18,12 @@ sudo() {
 
 require() {
     local command=$1
-    local ubuntu_package=$2
-    local homebrew_package=$3
+    local package=${2-$1}
 
     printf '%-13s' "$command"
 
     if command -v "$command" &>/dev/null; then
         echo 'Already installed'
-        return
-    fi
-
-    if $macos; then
-        package=$homebrew_package
-    else
-        package=$ubuntu_package
-    fi
-
-    if [[ $package = '-' ]]; then
-        echo 'Not available / not required'
     else
         echo 'Missing'
         to_install+=("$package")
@@ -49,27 +31,18 @@ require() {
 }
 
 echo "${LCYAN}Checking for missing dependencies...${RESET}"
-#       Command     Ubuntu pkg      Homebrew pkg
-require gawk        gawk            gawk
-require inotifywait inotify-tools   -
-require kcov        kcov            -
-require npm         npm             node
-require shellcheck  shellcheck      shellcheck
+require gawk
+require inotifywait inotify-tools
+require kcov
+require npm
+require shellcheck
 echo
 
 if [[ ${#to_install[@]} -gt 0 ]]; then
     echo "${LCYAN}Installing missing dependencies...${RESET}"
-
-    if $macos; then
-        brew update
-        echo
-        brew install "${to_install[@]}"
-    else
-        sudo apt-get update
-        echo
-        sudo apt-get -y install "${to_install[@]}"
-    fi
-
+    sudo apt-get update
+    echo
+    sudo apt-get -y install "${to_install[@]}"
     echo
 fi
 

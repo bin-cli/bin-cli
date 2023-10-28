@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -o errexit -o nounset -o pipefail
+cd "$(dirname "$0")/.."
+
+# Build
+bin/build
+echo
+
+bin="$PWD/temp/dist/bin"
+
+cd simple-test
+
+result=0
+output=$($bin hi World 2>&1) || result=$?
+
+if [[ $result -gt 0 ]] ; then
+    echo "Failed with exit code $result:"
+    echo "$output"
+    exit $result
+fi
+
+if [[ $output != 'Hello, World!' ]]; then
+    echo "Unexpected output:"
+    echo "$output"
+    exit 1
+fi
+
+echo "Success:"
+echo "$output"

@@ -18,6 +18,8 @@ env:
 
 jobs:
 
+  # On Linux, we run every test including coverage checking, then upload the
+  # compiled script and coverage report in case they are needed
   test-on-ubuntu:
     name: Test on Ubuntu
     runs-on: ubuntu-latest
@@ -27,10 +29,13 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
+          node-version: 12
           cache: npm
       - name: Install other dependencies
-        run: bin/setup
-      - name: Test
+        run: sudo apt-get update && sudo apt-get install -y inotify-tools kcov
+      - name: Install JavaScript packages
+        run: npm ci
+      - name: Run all tests
         run: bin/test
       - name: Upload 'bin' artifact
         if: always()
@@ -45,6 +50,8 @@ jobs:
           name: coverage
           path: temp/coverage/merged/
 
+  # On macOS, we run almost all tests, except those that require kcov
+  # While kcov can run on macOS, it's *really* slow (even with --include-path)
   test-on-macos:
     name: Test on macOS
     runs-on: macos-latest
@@ -54,8 +61,49 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
+          node-version: 12
           cache: npm
       - name: Install other dependencies
-        run: bin/setup
-      - name: Test
+        run: brew update && brew install gawk shellcheck
+      - name: Install JavaScript packages
+        run: npm ci
+      - name: Run all tests (except coverage)
         run: bin/test
+        env:
+          DISABLE_KCOV: true
+
+  # On Windows, we just run some very basic tests - because translating
+  # between Windows and Unix-style paths in Node.js gets too complicated!
+  test-on-git-for-windows:
+    name: Test on Windows (Git for Windows)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Run simple tests
+        shell: bash
+        run: bin/simple-test
+
+  test-on-cygwin:
+    name: Test on Windows (Cygwin)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install Cygwin
+        uses: egor-tensin/setup-cygwin@v4
+      - name: Run simple tests
+        shell: C:\tools\cygwin\bin\bash.exe -e {0}
+        run: bin/simple-test
+
+  test-on-msys2:
+    name: Test on Windows (MSYS2)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install MSYS2
+        uses: msys2/setup-msys2@v2
+      - name: Run simple tests
+        shell: msys2 {0}
+        run: bin/simple-test
