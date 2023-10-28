@@ -173,7 +173,7 @@ bin -e sam
 
 *Bin* config files are named `.binconfig`, and are written in [INI format](https://en.wikipedia.org/wiki/INI_file).
 
-They are entirely **optional** - you don't need to create a config file unless you want to use [aliases](aliases.md), [help text](help-text.md), a [custom script directory](custom-script-directory.md) or disable [unique prefix matching](unique-prefix-matching.md). Here is an example with all of these:
+They are entirely **optional** - you don't need to create a config file unless you want to use [aliases](#aliases), [help text](#help-text), [inline commands](#inline-commands), a [custom script directory](#custom-script-directory) or disable [unique prefix matching](#unique-prefix-matching). Here is an example with all of these:
 
 ```ini
 root=scripts
@@ -182,6 +182,9 @@ exact=true
 [hello]
 alias=hi
 help=Say "Hello, World!"
+
+[phpunit]
+command="$BIN_ROOT/vendor/bin/phpunit" "%@"
 ```
 
 They should be placed in the project root directory, alongside the `bin/` directory:
@@ -260,7 +263,7 @@ repo/
     └── sample3.rb
 ```
 
-The extensions will be removed when listing scripts and in [tab completion](installation.md#tab-completion) (as long as there are no conflicts):
+The extensions will be removed when listing scripts and in [tab completion](#tab-completion) (as long as there are no conflicts):
 
 ```bash
 $ bin
@@ -406,7 +409,7 @@ Available commands
 b hello
 ```
 
-You can set up [tab completion](installation.md#tab-completion) too:
+You can set up [tab completion](#tab-completion) too:
 
 ```bash
 eval "$(bin --completion --exe b)"
@@ -456,7 +459,7 @@ It can also be an absolute path - e.g. if you have some global scripts that you 
 alias dev="bin --exe dev --dir $HOME/scripts/dev"
 ```
 
-You can set up [tab completion](installation.md#tab-completion) too:
+You can set up [tab completion](#tab-completion) too:
 
 ```bash
 eval "$(bin --completion --exe scr --dir scripts)"
@@ -465,7 +468,7 @@ eval "$(bin --completion --exe dev --dir $HOME/scripts/dev)"
 
 ### Automatic shims
 
-I often use *Bin* to create shims for other executables - for example, [different PHP versions](php-shim.md) or [running scripts inside Docker](docker-shim.md).
+I often use *Bin* to create shims for other executables - for example, [different PHP versions](https://github.com/bin-cli/bin-cli/wiki/PHP-version-shim) or [running scripts inside Docker](https://github.com/bin-cli/bin-cli/wiki/Docker-shim).
 
 Rather than typing `bin php` every time, I use a Bash alias to run it automatically:
 
@@ -487,7 +490,7 @@ If you want to run a fallback command that is different to the script name, use 
 alias php='bin --fallback php8.1 php'
 ```
 
-Both of these options imply `--exact` - i.e. [unique prefix matching](unique-prefix-matching.md) is disabled.
+Both of these options imply `--exact` - i.e. [unique prefix matching](#unique-prefix-matching) is disabled.
 
 ### Getting the command name
 
