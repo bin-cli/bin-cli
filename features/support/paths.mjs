@@ -9,7 +9,7 @@ export const dist = `${temp}/dist`;
 export const root = `${temp}/root`;
 
 export function replace(string) {
-    return string.replace(/\{ROOT}/g, root);
+    return string.replaceAll('{ROOT}', root);
 }
 
 export async function ensureInRoot(path) {
