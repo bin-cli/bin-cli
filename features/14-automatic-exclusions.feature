@@ -193,9 +193,9 @@ Feature: Automatic exclusions
     And the output is 'Hello, World!'
 
     Examples:
-      | bin            | config                | workdir                |
-      | /bin           | /.binconfig           | /example               |
-      | /usr/bin       | /usr/.binconfig       | /usr/example           |
-      | /snap/bin      | /snap/.binconfig      | /snap/example          |
-      | /usr/local/bin | /usr/local/.binconfig | /usr/local/bin/example |
-      | /home/user/bin | /home/user/.binconfig | /home/user/example     |
+      | bin            | config                | workdir            |
+      | /bin           | /.binconfig           | /example           |
+      | /usr/bin       | /usr/.binconfig       | /usr/example       |
+      | /snap/bin      | /snap/.binconfig      | /snap/example      |
+      | /usr/local/bin | /usr/local/.binconfig | /usr/local/example |
+      | /home/user/bin | /home/user/.binconfig | /home/user/example |

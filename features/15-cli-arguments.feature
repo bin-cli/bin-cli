@@ -59,8 +59,8 @@ Feature: CLI arguments
     And the error is "bin: The '<arg1>' and '<arg2>' arguments are incompatible"
 
     # I haven't bothered to list all combinations here, just a few combinations
-    Scenarios:
-      | arg1         | arg2      |
-      | --completion | --help    |
-      | --completion | --print   |
-      | --help       | --version |
+    Examples:
+      | arg1         | arg2         |
+      | --completion | --help       |
+      | --edit       | --completion |
+      | --help       | --version    |

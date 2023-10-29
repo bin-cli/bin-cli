@@ -54,6 +54,13 @@ Feature: Unique prefix matching
       | no    |
       | 0     |
 
+  Scenario: Any other value for 'exact=' raises an error
+    Given a script '{ROOT}/project/bin/hello'
+    And a file '{ROOT}/project/.binconfig' with content 'exact=blah'
+    When I run 'bin hel'
+    Then it fails with exit code 246
+    And the error is "bin: Invalid value for 'exact' in {ROOT}/project/.binconfig line 1: blah"
+
   Scenario: Unique prefix matching can be disabled with --exact
     Given a script '{ROOT}/project/bin/hello'
     When I run 'bin --exact hel'
