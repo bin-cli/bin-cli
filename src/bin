@@ -1031,7 +1031,7 @@ debug "-- root=$root"
 debug "-- binconfig=$binconfig"
 debug "-- bin_dir=$bin_dir"
 debug "-- bin_dir_from_root=$bin_dir_from_root"
-debug "-- is_root_dir=$bin_dir_from_root"
+debug "-- is_root_dir=$is_root_dir"
 
 #===============================================================================
 # Find and register available commands
