@@ -599,12 +599,14 @@ Options that do something with a COMMAND:
   --create, -c          Create the given script and open in your $EDITOR (implies '--exact')
   --edit, -e            Open the given script in your $EDITOR
   --print               Output the command that would have been run, instead of running it
-  --debug               Display debugging information instead of running the command
 
 Options that do something special and don't accept a COMMAND:
   --completion          Output a tab completion script for the current shell
   --help, -h            Display this help
   --version, -v         Display the current version number and exit
+
+Other options:
+  --debug               Display debugging information instead of performing the requested action
 
 Any options must be given before the command, because everything after the command will be passed as parameters to the script.
 
@@ -634,7 +636,7 @@ Determining paths...
 -- binconfig=/example/project/.binconfig
 -- bin_dir=/example/project/bin
 -- bin_dir_from_root=bin
--- is_root_dir=bin
+-- is_root_dir=false
 Searching '/example/project/bin/' for scripts to register
 -- Registered command 'test' for executable '/example/project/bin/test'
 'exact' defaulted to 'false'

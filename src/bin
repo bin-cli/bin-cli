@@ -773,12 +773,14 @@ help() {
     echo "  --create, -c          Create the given script and open in your \$EDITOR (implies '--exact')"
     echo "  --edit, -e            Open the given script in your \$EDITOR"
     echo "  --print               Output the command that would have been run, instead of running it"
-    echo "  --debug               Display debugging information instead of running the command"
     echo
     echo "Options that do something special and don't accept a COMMAND:"
     echo "  --completion          Output a tab completion script for the current shell"
     echo "  --help, -h            Display this help"
     echo "  --version, -v         Display the current version number and exit"
+    echo
+    echo "Other options:"
+    echo "  --debug               Display debugging information instead of performing the requested action"
     echo
     echo "Any options must be given before the command, because everything after the command will be passed as parameters to the script."
     echo
