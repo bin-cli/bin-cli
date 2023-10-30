@@ -130,7 +130,6 @@ Feature: Script extensions
       bin sample.sh    (alias: sample two)
       """
 
-  @undocumented
   Scenario: Multiple extensions may be removed from the filename
     Given a script '{ROOT}/project/bin/sample1.blah.sh'
     When I run 'bin'

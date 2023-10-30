@@ -20,7 +20,6 @@ Feature: Tab completion for aliases
       publish
       """
 
-  @undocumented
   Scenario: If both the command and the alias match, only the command is listed in tab completion
     Given a script '{ROOT}/project/bin/deploy'
     And a file '{ROOT}/project/.binconfig' with content:
@@ -35,7 +34,6 @@ Feature: Tab completion for aliases
       deploy
       """
 
-  @undocumented
   Scenario: If multiple aliases for the same command match, only one is returned in tab completion
     Given a script '{ROOT}/project/bin/deploy'
     And a file '{ROOT}/project/.binconfig' with content:

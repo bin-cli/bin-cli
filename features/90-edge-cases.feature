@@ -1,13 +1,11 @@
 Feature: Edge cases
 
-  @undocumented
   Scenario: Spaces in filenames are converted to dashes when running
     Given a script '{ROOT}/project/bin/hello world script' that outputs 'Hello, World!'
     When I run 'bin hello-world-script'
     Then it is successful
     And the output is 'Hello, World!'
 
-  @undocumented
   Scenario: Spaces in filenames are converted to dashes when listing
     Given a script '{ROOT}/project/bin/hello world script'
     When I run 'bin'
@@ -18,14 +16,12 @@ Feature: Edge cases
       bin hello-world-script
       """
 
-  @undocumented
   Scenario: Spaces in directories are converted to dashes when running
     Given a script '{ROOT}/project/bin/hello world/script' that outputs 'Hello, World!'
     When I run 'bin hello-world script'
     Then it is successful
     And the output is 'Hello, World!'
 
-  @undocumented
   Scenario: Spaces in directories are converted to dashes when listing
     Given a script '{ROOT}/project/bin/hello world/script'
     When I run 'bin hello-world'
@@ -36,7 +32,6 @@ Feature: Edge cases
       bin hello-world script
       """
 
-  @undocumented
   Scenario: Symlink aliases are handled correctly when inside a symlinked root
     # Need to test this because 'readlink -f' will expand paths fully
     Given a script '{ROOT}/project/bin/deploy' that outputs 'Copying to production...'
@@ -51,7 +46,6 @@ Feature: Edge cases
       bin deploy    (alias: publish)
       """
 
-  @undocumented
   Scenario: Directory aliases are handled correctly when inside a symlinked root
     # As above
     Given a script '{ROOT}/project/bin/deploy/live'

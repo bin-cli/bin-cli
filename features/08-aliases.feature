@@ -68,7 +68,6 @@ Feature: Aliases
     Then it is successful
     And the output is 'Copying to production...'
 
-  @undocumented
   Scenario: Aliases can be subcommands
     Given a script '{ROOT}/project/bin/publish' that outputs 'Copying to production...'
     And a file '{ROOT}/project/.binconfig' with content:
@@ -233,7 +232,6 @@ Feature: Aliases
     Then it fails with exit code 246
     And the error is "bin: The symlink '{ROOT}/project/bin/two' must use a relative path, not absolute ('{ROOT}/project/bin/one')"
 
-  @undocumented
   Scenario: A broken symlink
     Given a symlink '{ROOT}/project/bin/broken' pointing to 'missing'
     When I run 'bin'

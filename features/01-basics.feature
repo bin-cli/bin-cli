@@ -45,7 +45,6 @@ Feature: Basics
       bin hello
       """
 
-  @undocumented
   Scenario: The exit code from the command is passed through
     Given a script '{ROOT}/project/bin/fail' with content:
       """sh
@@ -56,7 +55,6 @@ Feature: Basics
     Then it fails with exit code 123
     And there is no error
 
-  @undocumented
   Scenario: The error from the command is passed through
     Given a script '{ROOT}/project/bin/warn' with content:
       """sh
@@ -68,7 +66,6 @@ Feature: Basics
     And there is no output
     And the error is 'Something is wrong'
 
-  @undocumented
   Scenario: If there are no scripts, it outputs "None found"
     Given an empty directory '{ROOT}/project/bin'
     When I run 'bin'
@@ -79,7 +76,6 @@ Feature: Basics
       None found
       """
 
-  @undocumented
   Scenario: If no bin/ directory is found, an error is displayed
     When I run 'bin'
     Then it fails with exit code 127

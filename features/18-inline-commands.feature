@@ -87,7 +87,6 @@ Feature: Inline commands
     Then it is successful
     And the output is 'BIN_DIR={ROOT}/project/bin'
 
-  @undocumented
   Scenario: The bin executable is available in $BIN_EXE
     Given a file '{ROOT}/project/.binconfig' with content:
       """
@@ -98,7 +97,6 @@ Feature: Inline commands
     Then it is successful
     And the output is 'BIN_EXE=bin'
 
-  @undocumented
   Scenario: The bin command name is available in $BIN_COMMAND
     Given a file '{ROOT}/project/.binconfig' with content:
       """
@@ -109,7 +107,6 @@ Feature: Inline commands
     Then it is successful
     And the output is 'BIN_COMMAND=bin test'
 
-  @undocumented
   Scenario: If an inline command conflicts with a script command, an error is raised
     Given a file '{ROOT}/project/.binconfig' with content:
       """
@@ -121,7 +118,6 @@ Feature: Inline commands
     Then it fails with exit code 246
     And the error is "bin: The command 'hello' defined in {ROOT}/project/.binconfig line 2 conflicts with an existing command"
 
-  @undocumented
   Scenario: Inline commands can have aliases
     Given a file '{ROOT}/project/.binconfig' with content:
       """

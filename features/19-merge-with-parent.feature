@@ -1,7 +1,6 @@
 Feature: Merge with parent directory
   Not documented yet...
 
-  @undocumented
   Scenario Template: Commands can be merged with the immediate parent bin/ directory with 'merge=<value>
     Given a file '{ROOT}/project/subdir/.binconfig' with content 'merge=<value>'
     And a script '{ROOT}/project/subdir/bin/child'
@@ -24,7 +23,6 @@ Feature: Merge with parent directory
       | yes   |
       | 1     |
 
-  @undocumented
   Scenario: Commands from the parent directory can be executed
     Given a file '{ROOT}/project/subdir/.binconfig' with content 'merge=true'
     And a script '{ROOT}/project/subdir/bin/child'
@@ -34,7 +32,6 @@ Feature: Merge with parent directory
     Then it is successful
     And the output is 'Hello, parent!'
 
-  @undocumented
   Scenario: Commands can be merged with a higher level bin/ directory
     Given a file '{ROOT}/project/subdir/subsubdir/.binconfig' with content 'merge=true'
     And a script '{ROOT}/project/subdir/subsubdir/bin/grandchild'
@@ -49,7 +46,6 @@ Feature: Merge with parent directory
       bin parent
       """
 
-  @undocumented
   Scenario: Commands can be merged with a higher level .binconfig
     Given a file '{ROOT}/project/subdir/subsubdir/.binconfig' with content 'merge=true'
     And a script '{ROOT}/project/subdir/subsubdir/bin/grandchild'
@@ -68,7 +64,6 @@ Feature: Merge with parent directory
       bin parent
       """
 
-  @undocumented
   Scenario: Inline commands with no bin/ directories can be merged
     Given a file '{ROOT}/project/subdir/.binconfig' with content:
       """
@@ -92,14 +87,12 @@ Feature: Merge with parent directory
       bin parent
       """
 
-  @undocumented
   Scenario: If the parent directory doesn't exist and 'merge=true', an error is raised
     Given a file '{ROOT}/project/.binconfig' with content 'merge=true'
     When I run 'bin'
     Then it fails with exit code 246
     And the error is "bin: Could not find 'bin/' directory or '.binconfig' file starting from '{ROOT}' (merge=true)"
 
-  @undocumented
   Scenario: If the parent directory doesn't exist and 'merge=optional', no error is raised
     Given a file '{ROOT}/project/.binconfig' with content 'merge=optional'
     When I run 'bin'
@@ -110,7 +103,6 @@ Feature: Merge with parent directory
       None found
       """
 
-  @undocumented
   Scenario: Help text is merged from the relevant config file
     Given a file '{ROOT}/project/subdir/.binconfig' with content:
       """
@@ -136,7 +128,6 @@ Feature: Merge with parent directory
       bin parent    Parent help
       """
 
-  @undocumented
   Scenario: A third level can be merged if enabled
     Given a file '{ROOT}/project/subdir/subsubdir/.binconfig' with content 'merge=true'
     And a script '{ROOT}/project/subdir/subsubdir/bin/grandchild'
@@ -154,7 +145,6 @@ Feature: Merge with parent directory
       bin parent
       """
 
-  @undocumented
   Scenario: The third level is not merged if it was not explicitly enabled
     Given a file '{ROOT}/project/subdir/subsubdir/.binconfig' with content 'merge=true'
     And a script '{ROOT}/project/subdir/subsubdir/bin/grandchild'
@@ -171,7 +161,6 @@ Feature: Merge with parent directory
       bin grandchild
       """
 
-  @undocumented
   Scenario Template: The third level is not merged if 'merge=<value>
     Given a file '{ROOT}/project/subdir/subsubdir/.binconfig' with content 'merge=true'
     And a script '{ROOT}/project/subdir/subsubdir/bin/grandchild'

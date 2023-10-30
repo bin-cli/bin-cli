@@ -73,7 +73,6 @@ Feature: Automatic exclusions
     Then it is successful
     And the output is 'Hidden script'
 
-  @undocumented
   Scenario: Commands in directories starting with '_' are listed when the directory name is given
     Given a script '{ROOT}/project/bin/_sub/child'
     Given a script '{ROOT}/project/bin/_sub/_hidden'
@@ -85,7 +84,6 @@ Feature: Automatic exclusions
       bin _sub child
       """
 
-  @undocumented
   Scenario: Commands in directories starting with '_' are listed when the prefix is given
     Given a script '{ROOT}/project/bin/_sub/child'
     And a script '{ROOT}/project/bin/_sub/_hidden'
