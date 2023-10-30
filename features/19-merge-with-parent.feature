@@ -249,3 +249,12 @@ Feature: Merge with parent directory
 
 
       """
+
+  Scenario: Error messages should reference the lowest level bin/ directory and .binconfig file
+    Given a file '{ROOT}/project/subdir/.binconfig' with content 'merge=true'
+    And an empty directory '{ROOT}/project/subdir/bin'
+    And an empty directory '{ROOT}/project/bin'
+    And the working directory is '{ROOT}/project/subdir'
+    When I run 'bin hello'
+    Then it fails with exit code 127
+    And the error is "bin: Command 'hello' not found in {ROOT}/project/subdir/bin/ or {ROOT}/project/subdir/.binconfig"

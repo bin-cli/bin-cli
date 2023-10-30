@@ -621,7 +621,11 @@ register_commands_in_directory() {
                 non_executable_files+=("$file")
             fi
         else
-            register_executable_command "$prefix$name" "$realfile"
+            # Ignore known plain text files if scripts are in the root directory,
+            # mostly in case they're on a filesystem where all files are executable
+            if ! ($is_root_dir && [[ $name =~ \.(json|md|txt|yaml|yml)$ ]]); then
+                register_executable_command "$prefix$name" "$realfile"
+            fi
         fi
     done
 }
@@ -919,7 +923,10 @@ commands_listed_in_config=()
 
 error_if_not_found=true
 keep_looking=true
+main_binconfig=''
 main_bin_dir=''
+main_bin_dir_from_root=''
+main_is_root_dir=false
 main_root=''
 merging=false
 start_directory=$PWD
@@ -980,7 +987,11 @@ while $keep_looking; do
         if root=$(cd "$start_directory" && findup -f .binconfig); then
             binconfig="${root%/}/.binconfig"
             bin_dir_from_root=$(bin_dir_for "$binconfig" true)
-            bin_dir="${root%/}/$bin_dir_from_root"
+            if [[ $bin_dir_from_root = '.' ]]; then
+                bin_dir=${root%/}
+            else
+                bin_dir="${root%/}/$bin_dir_from_root"
+            fi
         else
             if ! root=$(cd "$start_directory" && findup -d bin); then
                 if ! $error_if_not_found; then
@@ -1140,7 +1151,10 @@ while $keep_looking; do
     #---------------------------------------
 
     if [[ -z $main_root ]]; then
+        main_binconfig=$binconfig
         main_bin_dir=$bin_dir
+        main_bin_dir_from_root=$bin_dir_from_root
+        main_is_root_dir=$is_root_dir
         main_root=$root
     fi
 
@@ -1201,8 +1215,8 @@ while [[ $# -gt $last_parameter ]]; do
             fi
 
             ( # kcov-ignore-line: Usage not detected
-                if [[ $bin_dir_from_root != 'bin' ]]; then
-                    echo "dir=$bin_dir_from_root"
+                if [[ $main_bin_dir_from_root != 'bin' ]]; then
+                    echo "dir=$main_bin_dir_from_root"
                 else
                     echo
                 fi
@@ -1216,8 +1230,8 @@ while [[ $# -gt $last_parameter ]]; do
             fi
 
             bin_dir_for_binconfig=$(bin_dir_for "$main_root/.binconfig")
-            if [[ "$bin_dir_for_binconfig" != "$bin_dir_from_root" ]]; then
-                fail ".binconfig belongs to $bin_dir_for_binconfig/ not $bin_dir_from_root/"
+            if [[ "$bin_dir_for_binconfig" != "$main_bin_dir_from_root" ]]; then
+                fail ".binconfig belongs to $bin_dir_for_binconfig/ not $main_bin_dir_from_root/"
             fi
 
             open_in_editor "$main_root/.binconfig"
@@ -1292,8 +1306,8 @@ while [[ $# -gt $last_parameter ]]; do
 
     # If there were no prefix matches, stop searching
     if [[ ${#matching_commands[@]} -eq 0 ]]; then
-        if $is_root_dir && [[ -d "$current_directory/$subcommand" ]]; then
-            fail "Subcommands are not supported with the config option 'dir=$bin_dir_from_root'"
+        if $main_is_root_dir && [[ -d "$current_directory/$subcommand" ]]; then
+            fail "Subcommands are not supported with the config option 'dir=$main_bin_dir_from_root'"
         fi
         if [[ $subcommand = .* && -e "$current_directory/$subcommand" ]]; then
             fail "Command names may not start with '.'"
@@ -1306,7 +1320,7 @@ while [[ $# -gt $last_parameter ]]; do
         if in_array "${full_command:1}" completion create edit help version; then
             append="${NEW_LINE}${GREY}Perhaps you meant to run 'bin --${full_command:1}'?${RESET}"
         fi
-        fail "Command '${full_command:1}' not found in $bin_dir/ or $binconfig$append" $ERR_NOT_FOUND
+        fail "Command '${full_command:1}' not found in $main_bin_dir/ or $main_binconfig$append" $ERR_NOT_FOUND
     fi
 
     # Otherwise display the list of matches
@@ -1324,10 +1338,6 @@ shortened_commands=()
 
 for command in ${list_commands+"${list_commands[@]}"}; do
     executable=$(map_get command_to_executable "$command")
-    if $is_root_dir && [[ $executable =~ \.(json|md|txt|yaml|yml)$ ]]; then
-        continue
-    fi
-
     short=$(remove_extension "$command")
 
     if [[ "$short" = "$command" ]]; then
@@ -1516,7 +1526,7 @@ done
 
 if [[ ${#missing_commands[@]} -gt 0 ]]; then
     echo
-    echo "${YELLOW}Warning: The following commands listed in $binconfig do not exist:${RESET}"
+    echo "${YELLOW}Warning: The following commands listed in .binconfig do not exist:${RESET}"
     for command in ${missing_commands+"${missing_commands[@]}"}; do
         echo "[$command]"
     done

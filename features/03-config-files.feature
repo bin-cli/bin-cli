@@ -59,6 +59,6 @@ Feature: Config files
       Available commands
       bin sample
 
-      Warning: The following commands listed in {ROOT}/project/.binconfig do not exist:
+      Warning: The following commands listed in .binconfig do not exist:
       [my-command]
       """

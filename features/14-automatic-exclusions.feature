@@ -160,12 +160,12 @@ Feature: Automatic exclusions
       bin executable1
       """
 
-  Scenario: Common non-executable file types can still be run manually
+  Scenario: Common non-executable file types cannot be executed in the project root
     Given a file '{ROOT}/project/.binconfig' with content 'dir=.'
-    And a script '{ROOT}/project/executable.json' that outputs 'Executable'
+    And a script '{ROOT}/project/executable.json'
     When I run 'bin executable'
-    Then it is successful
-    And the output is 'Executable'
+    Then it fails with exit code 127
+    And the error is "bin: Command 'executable' not found in {ROOT}/project/ or {ROOT}/project/.binconfig"
 
   Scenario Template: Common bin directories are ignored when searching parent directories
     Given a script '{ROOT}<bin>/hello'

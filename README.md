@@ -522,7 +522,7 @@ Files starting with `.` (dot / period) are always ignored and cannot be executed
 
 Files that are not executable (not `chmod +x`) are listed as warnings, and will error if you try to run them. The exception is when using `root=.`, where they are just ignored.
 
-A number of common non-executable file types (`*.json`, `*.md`, `*.yml` and so on) are also excluded from listings when using `root=.`, even if they are executable, to reduce the noise when all files are executable (e.g. on FAT32 filesystems).
+A number of common non-executable file types (`*.json`, `*.md`, `*.txt`, `*.yaml`, `*.yml`) are also excluded when using `root=.`, even if they are executable, to reduce the noise when all files are executable (e.g. on FAT32 filesystems).
 
 The directories `/bin`, `/snap/bin`, `/usr/bin`, `/usr/local/bin` and `~/bin` are ignored when searching parent directories, unless there is a corresponding `.binconfig` file, because they are common locations for global executables.
 
