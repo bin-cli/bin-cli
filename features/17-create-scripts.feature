@@ -7,18 +7,17 @@ Feature: Create scripts
     And a script '{ROOT}/usr/bin/myeditor' that outputs 'EXECUTED: myeditor "$@"'
     When I run 'bin --create hello world'
     Then it is successful
+    And the output is:
+      """
+      Created script {ROOT}/project/bin/hello/world
+      EXECUTED: myeditor {ROOT}/project/bin/hello/world
+      """
     And there is a script '{ROOT}/project/bin/hello/world' with content:
       """
       #!/usr/bin/env bash
       set -eno pipefail
 
 
-      """
-    And the output is:
-      """
-      Created subdirectory {ROOT}/project/bin/hello/
-      Created script {ROOT}/project/bin/hello/world
-      EXECUTED: myeditor {ROOT}/project/bin/hello/world
       """
 
   Scenario: A new script can be created and opened in the editor set in $VISUAL with '-c'
@@ -27,18 +26,17 @@ Feature: Create scripts
     And a script '{ROOT}/usr/bin/myeditor' that outputs 'EXECUTED: myeditor "$@"'
     When I run 'bin --create hello world'
     Then it is successful
+    And the output is:
+      """
+      Created script {ROOT}/project/bin/hello/world
+      EXECUTED: myeditor {ROOT}/project/bin/hello/world
+      """
     And there is a script '{ROOT}/project/bin/hello/world' with content:
       """
       #!/usr/bin/env bash
       set -eno pipefail
 
 
-      """
-    And the output is:
-      """
-      Created subdirectory {ROOT}/project/bin/hello/
-      Created script {ROOT}/project/bin/hello/world
-      EXECUTED: myeditor {ROOT}/project/bin/hello/world
       """
 
   Scenario: If the script already exists, an error is displayed
@@ -53,18 +51,17 @@ Feature: Create scripts
     And a script '{ROOT}/usr/bin/myeditor' that outputs 'EXECUTED: myeditor "$@"'
     When I run 'bin --create a b'
     Then it is successful
+    And the output is:
+      """
+      Created script {ROOT}/project/bin/a/b
+      EXECUTED: myeditor {ROOT}/project/bin/a/b
+      """
     And there is a script '{ROOT}/project/bin/a/b' with content:
       """
       #!/usr/bin/env bash
       set -eno pipefail
 
 
-      """
-    And the output is:
-      """
-      Created subdirectory {ROOT}/project/bin/a/
-      Created script {ROOT}/project/bin/a/b
-      EXECUTED: myeditor {ROOT}/project/bin/a/b
       """
 
   Scenario: Scripts starting with '.' cannot be created
@@ -85,13 +82,13 @@ Feature: Create scripts
     And an environment variable 'VISUAL' set to 'myeditor'
     When I run 'bin --create .binconfig'
     Then it is successful
-    And there is a file '{ROOT}/project/.binconfig' with content:
-      """
-      """
     And the output is:
       """
       Created file {ROOT}/project/.binconfig
       EXECUTED: myeditor {ROOT}/project/.binconfig
+      """
+    And there is a file '{ROOT}/project/.binconfig' with content:
+      """
       """
 
   # TODO
@@ -102,6 +99,11 @@ Feature: Create scripts
 #    And an environment variable 'VISUAL' set to 'myeditor'
 #    When I run 'bin --create .binconfig'
 #    Then it is successful
+#    And the output is:
+#      """
+#      Created file {ROOT}/project/.binconfig
+#      EXECUTED: myeditor {ROOT}/project/.binconfig
+#      """
 #    And there is a file '{ROOT}/project/.binconfig' with content:
 #      """
 #      [hello]
@@ -109,11 +111,6 @@ Feature: Create scripts
 #
 #      [world]
 #      help=
-#      """
-#    And the output is:
-#      """
-#      Created file {ROOT}/project/.binconfig
-#      EXECUTED: myeditor {ROOT}/project/.binconfig
 #      """
 
   Scenario: Running '--create .binconfig' gives an error if .binconfig already exists
@@ -129,14 +126,14 @@ Feature: Create scripts
     And an environment variable 'VISUAL' set to 'myeditor'
     When I run 'bin --dir scripts --create .binconfig'
     Then it is successful
-    And there is a file '{ROOT}/project/.binconfig' with content:
-      """
-      dir=scripts
-      """
     And the output is:
       """
       Created file {ROOT}/project/.binconfig
       EXECUTED: myeditor {ROOT}/project/.binconfig
+      """
+    And there is a file '{ROOT}/project/.binconfig' with content:
+      """
+      dir=scripts
       """
 
   Scenario: If an absolute directory is specified when creating a config file, a relative path is written to the file
@@ -145,12 +142,12 @@ Feature: Create scripts
     And an environment variable 'VISUAL' set to 'myeditor'
     When I run 'bin --dir {ROOT}/project/scripts --create .binconfig'
     Then it is successful
-    And there is a file '{ROOT}/project/.binconfig' with content:
-      """
-      dir=scripts
-      """
     And the output is:
       """
       Created file {ROOT}/project/.binconfig
       EXECUTED: myeditor {ROOT}/project/.binconfig
+      """
+    And there is a file '{ROOT}/project/.binconfig' with content:
+      """
+      dir=scripts
       """

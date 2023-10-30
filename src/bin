@@ -919,6 +919,8 @@ commands_listed_in_config=()
 
 error_if_not_found=true
 keep_looking=true
+main_bin_dir=''
+main_root=''
 merging=false
 start_directory=$PWD
 
@@ -1134,6 +1136,15 @@ while $keep_looking; do
     done
 
     #---------------------------------------
+    # Remember the lowest level for --create
+    #---------------------------------------
+
+    if [[ -z $main_root ]]; then
+        main_bin_dir=$bin_dir
+        main_root=$root
+    fi
+
+    #---------------------------------------
     # Merge with parent?
     #---------------------------------------
 
@@ -1175,7 +1186,7 @@ list_title='Available commands'
 list_commands=(${registered_commands+"${registered_commands[@]}"})
 
 # Loop through each argument until we find a matching command
-current_directory=$bin_dir
+current_directory=$main_bin_dir
 full_command=''
 
 while [[ $# -gt $last_parameter ]]; do
@@ -1185,8 +1196,8 @@ while [[ $# -gt $last_parameter ]]; do
     # Special case for creating/editing the .binconfig file
     if [[ -z $full_command && $subcommand = '.binconfig' ]]; then
         if [[ $action = 'create' ]]; then
-            if [[ -e "$root/.binconfig" ]]; then
-                fail "$root/.binconfig already exists (use --edit to edit it)"
+            if [[ -e "$main_root/.binconfig" ]]; then
+                fail "$main_root/.binconfig already exists (use --edit to edit it)"
             fi
 
             ( # kcov-ignore-line: Usage not detected
@@ -1195,21 +1206,21 @@ while [[ $# -gt $last_parameter ]]; do
                 else
                     echo
                 fi
-            ) > "$root/.binconfig" # kcov-ignore-line: Usage not detected
+            ) > "$main_root/.binconfig" # kcov-ignore-line: Usage not detected
 
-            echo "Created file $root/.binconfig"
-            open_in_editor "$root/.binconfig"
+            echo "Created file $main_root/.binconfig"
+            open_in_editor "$main_root/.binconfig"
         elif [[ $action = 'edit' ]]; then
-            if [[ ! -e "$root/.binconfig" ]]; then
+            if [[ ! -e "$main_root/.binconfig" ]]; then
                 fail 'No .binconfig file found (use --create to create one)'
             fi
 
-            bin_dir_for_binconfig=$(bin_dir_for "$root/.binconfig")
+            bin_dir_for_binconfig=$(bin_dir_for "$main_root/.binconfig")
             if [[ "$bin_dir_for_binconfig" != "$bin_dir_from_root" ]]; then
                 fail ".binconfig belongs to $bin_dir_for_binconfig/ not $bin_dir_from_root/"
             fi
 
-            open_in_editor "$root/.binconfig"
+            open_in_editor "$main_root/.binconfig"
         fi
     fi
 
@@ -1242,11 +1253,10 @@ while [[ $# -gt $last_parameter ]]; do
 
         if [[ $# -gt 0 ]]; then
             current_directory="$current_directory/$subcommand"
-            mkdir "$current_directory"
-            echo "Created subdirectory $current_directory/"
             continue
         fi
 
+        mkdir -p "$current_directory"
         script="$current_directory/$subcommand"
         echo -e "#!/usr/bin/env bash\nset -eno pipefail\n\n" >"$script"
         chmod +x "$script"

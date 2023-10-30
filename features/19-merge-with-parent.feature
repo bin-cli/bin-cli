@@ -228,3 +228,24 @@ Feature: Merge with parent directory
       | /snap/bin      | /snap/example      |
       | /usr/local/bin | /usr/local/example |
       | /home/user/bin | /home/user/example |
+
+  Scenario: Using '--create' should create a script in the lowest level bin/ directory
+    Given an environment variable 'VISUAL' set to 'myeditor'
+    And a script '{ROOT}/usr/bin/myeditor' that outputs 'EXECUTED: myeditor "$@"'
+    And a file '{ROOT}/project/subdir/.binconfig' with content 'merge=true'
+    And a script '{ROOT}/project/bin/parent'
+    And the working directory is '{ROOT}/project/subdir'
+    When I run 'bin --create child'
+    Then it is successful
+    And the output is:
+      """
+      Created script {ROOT}/project/subdir/bin/child
+      EXECUTED: myeditor {ROOT}/project/subdir/bin/child
+      """
+    And there is a script '{ROOT}/project/subdir/bin/child' with content:
+      """
+      #!/usr/bin/env bash
+      set -eno pipefail
+
+
+      """
