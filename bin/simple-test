@@ -4,26 +4,37 @@ cd "$(dirname "$0")/.."
 
 # Build
 bin/build
-echo
 
 bin="$PWD/temp/dist/bin"
 
 cd simple-test
 
-result=0
-output=$($bin hi World 2>&1) || result=$?
+run-test() {
+    local command expected_output output result
 
-if [[ $result -gt 0 ]] ; then
-    echo "Failed with exit code $result:"
+    command=$1
+    expected_output=$2
+
+    echo
+
+    result=0
+    output=$($command 2>&1) || result=$?
+
+    if [[ $result -gt 0 ]] ; then
+        echo "'$command' failed with exit code $result:"
+        echo "$output"
+        exit $result
+    fi
+
+    if [[ $output != $expected_output ]]; then
+        echo "'$command' produced unexpected output:"
+        echo "$output"
+        exit 1
+    fi
+
+    echo "'$command' succeeded with output:"
     echo "$output"
-    exit $result
-fi
+}
 
-if [[ $output != 'Hello, World!' ]]; then
-    echo "Unexpected output:"
-    echo "$output"
-    exit 1
-fi
-
-echo "Success:"
-echo "$output"
+run-test "$bin hi World" "Hello, World!"
+run-test "$bin hi-symlink World" "Hello, World!"
