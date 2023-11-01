@@ -11,6 +11,9 @@ help=Create a new release of Bin with the given version number
 [setup]
 help=Install development dependencies (on Ubuntu)
 
+[simple-test]
+help=Build and run only a few simple tests - mainly used as smoke tests on Windows
+
 [tdd]
 alias=watch
 help=Watch for changes to source files and run all tests automatically
