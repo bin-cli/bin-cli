@@ -1,5 +1,5 @@
 [build]
-help=Build Bin from source files into the dist/ directory
+help=Generate a build of Bin into temp/dist/ (not normally called directly)
 
 [cucumber]
 help=Run Cucumber.js directly
