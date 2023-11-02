@@ -28,7 +28,7 @@ bin/test
 echo
 
 echo "${LCYAN}Building release version...${RESET}"
-bin/build "$version"
+bin/build "v$version"
 echo
 
 echo "${LCYAN}Tagging in Git (will trigger release via GitHub Actions)...${RESET}"
