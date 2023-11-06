@@ -1272,7 +1272,7 @@ while [[ $# -gt $last_parameter ]]; do
 
         mkdir -p "$current_directory"
         script="$current_directory/$subcommand"
-        echo -e "#!/usr/bin/env bash\nset -eno pipefail\n\n" >"$script"
+        echo -e "#!/usr/bin/env bash\nset -euo pipefail\n\n" >"$script"
         chmod +x "$script"
         echo "Created script $script"
         open_in_editor "$script"

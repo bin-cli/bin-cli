@@ -245,7 +245,7 @@ Feature: Merge with parent directory
     And there is a script '{ROOT}/project/subdir/bin/child' with content:
       """
       #!/usr/bin/env bash
-      set -eno pipefail
+      set -euo pipefail
 
 
       """

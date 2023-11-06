@@ -15,7 +15,7 @@ Feature: Create scripts
     And there is a script '{ROOT}/project/bin/hello/world' with content:
       """
       #!/usr/bin/env bash
-      set -eno pipefail
+      set -euo pipefail
 
 
       """
@@ -34,7 +34,7 @@ Feature: Create scripts
     And there is a script '{ROOT}/project/bin/hello/world' with content:
       """
       #!/usr/bin/env bash
-      set -eno pipefail
+      set -euo pipefail
 
 
       """
@@ -59,7 +59,7 @@ Feature: Create scripts
     And there is a script '{ROOT}/project/bin/a/b' with content:
       """
       #!/usr/bin/env bash
-      set -eno pipefail
+      set -euo pipefail
 
 
       """
