@@ -43,19 +43,3 @@ After({tags: '@auto-update-cli-reference-docs'}, async function (hook) {
         '\n\n```\n' + this.runResult.stdout + '```\n\n',
     );
 });
-
-After({tags: '@auto-update-debugging-docs'}, async function (hook) {
-    if (hook.result.status === 'FAILED') {
-        return 'skipped';
-    }
-
-    const output = this.runResult.stdout
-        .replaceAll('v1.2.3-dev', 'v1.2.3')
-        .replaceAll(paths.root, '/example');
-
-    await autoUpdate(
-        `${paths.bin}/README.md`,
-        'auto-update-debugging-docs',
-        '\n\n```bash\n' + output + '```\n\n',
-    );
-});
