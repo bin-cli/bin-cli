@@ -1,24 +1,18 @@
-# Bin – A simple task runner
+# Bin CLI – A simple task/script runner
 
-[![GitHub Actions Status](https://github.com/bin-cli/bin-cli/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/bin-cli/bin-cli/actions/workflows/test.yml)
+Bin is a simple task runner, designed to be used in code repositories, with scripts written in any programming language.
 
-## Introduction
+It automatically [searches in parent directories](#how-it-works), so you can run scripts from anywhere in the project tree. It also supports [aliases](#aliases), [unique prefix matching](#unique-prefix-matching) and [tab completion](#tab-completion), reducing the amount you need to type.
 
-*Bin* is a simple task/script runner, designed to be used in code repositories, with scripts written in any programming language.
+It is implemented as a self-contained Bash script, small enough to bundle with your dotfiles or projects if you want to.  It only requires Bash 3+ and a small number of [coreutils](https://www.gnu.org/software/coreutils/manual/) commands, so it should work on almost any Unix-like system (Linux, macOS, etc.). On Windows, it can be used via [WSL](https://learn.microsoft.com/en-us/windows/wsl/about), [Git Bash](https://gitforwindows.org/), [Cygwin](https://www.cygwin.com/) or [MSYS2](https://www.msys2.org/).
 
-It automatically searches in parent directories, so you can run scripts from anywhere in the project tree.
+Collaborators / contributors who choose not to install Bin can run the scripts directly, so you can enjoy the benefits without adding a hard dependency or extra barrier to entry.
 
-It supports aliases and unique prefix matching, as well as tab completion, reducing the amount you need to type.
+_To see how Bin compares to some of the alternatives (Just, Task, Make, etc.), see [the wiki](https://github.com/bin-cli/bin-cli/wiki/Alternatives-to-Bin-CLI)._
 
-It is implemented as a self-contained shell script, small enough to bundle with your dotfiles or projects if you want to.
+## How It Works
 
-Its use is completely optional - users who choose not to install *Bin* can run the scripts directly.
-
-*It doesn't natively support Windows - though it can be used via [WSL](https://learn.microsoft.com/en-us/windows/wsl/about), [Git Bash](https://gitforwindows.org/), [MSYS2](https://www.msys2.org/) or [Cygwin](https://www.cygwin.com/).*
-
-### How it works
-
-A project just needs a `bin/` folder and some executable scripts:
+A project just needs a `bin/` folder and some executable scripts - for example:
 
 ```
 repo/
@@ -29,7 +23,7 @@ repo/
 └── ...
 ```
 
-The scripts can be written in any language, or can even be compiled binaries. Here is a simple `bin/hello` shell script:
+The scripts can be written in any language, or can even be compiled binaries, as long as they are executable (`chmod +x`). Here is a very simple `bin/hello` shell script:
 
 ```bash
 #!/bin/sh
@@ -38,26 +32,63 @@ echo "Hello, ${1:-World}!"
 
 To execute it, run:
 
-```bash
+```
 $ bin hello
+Hello, World!
 ```
 
-Now you may be thinking why not just do this:
+Now you may be thinking why not just run it directly, like this:
 
-```bash
+```
 $ bin/hello
 ```
 
-And you're right, that would do the same thing... But *Bin* will also search in parent directories, so you can use it from anywhere in the project:
+And that would do the same thing - but Bin will also search in parent directories, so you can use it from anywhere in the project:
 
 ```bash
 $ cd app/Http/Controllers/
-$ bin hello # still works
-$ bin/hello # doesn't work!
-$ ../../../bin/hello # works, but is rather tedious to type!
+$ bin/hello                # Doesn't work :-(
+$ ../../../bin/hello       # Works, but is rather tedious to type :-/
+$ bin hello                # Still works :-)
 ```
 
-It also supports unique prefix matching, so if `hello` is the only script starting with `h`, all of these will work too:
+### Listing Commands
+
+If you run `bin` on its own, it will list all available commands:
+
+<pre>
+$ bin hel
+<strong>Available commands</strong>
+bin build
+bin deploy
+bin hello
+</pre>
+
+### Subcommands
+
+If you have multiple related commands, you may want to group them together and make subcommands. To do that, just create a subdirectory:
+
+```
+repo/
+├── bin/
+│   └── deploy/
+│       ├── production
+│       └── staging
+└── ...
+```
+
+Now `bin deploy production` will run `bin/deploy/production`, and `bin deploy` will list the available subcommands:
+
+<pre>
+$ bin deploy
+<strong>Available subcommands</strong>
+bin deploy production
+bin deploy staging
+</pre>
+
+### Unique Prefix Matching
+
+Any unique prefix is enough to run a command - so if `bin/hello` is the only script starting with `h`, all of these will work too:
 
 ```bash
 $ bin hell
@@ -66,80 +97,181 @@ $ bin he
 $ bin h
 ```
 
-If you type a prefix that isn't unique, *Bin* will display a list of possible matches. Similarly, if you run `bin` on its own, it will list all available scripts.
+This also works with subcommands - e.g. `bin dep prod` might run `bin/deploy/production`.
 
-There are a few more optional features, but that's all you really need to know to use it.
+If you type a prefix that isn't unique, Bin will display a list of matches instead:
 
-## Getting started
+<pre>
+$ bin hel
+<strong>Matching commands</strong>
+bin hello
+bin help
+</pre>
 
-### Installation
+<details>
+<summary><em>How can I disable unique prefix matching?</em></summary>
 
-System-wide:
+> If you prefer to disable unique prefix matching, use `--exact` on the command line:
+>
+> ```bash
+> bin --exact hello
+> ```
+>
+> You'll probably want to set up a shell alias rather than typing it manually:
+>
+> ```bash
+> alias bin='bin --exact'
+> ```
+>
+> To disable it for a project, add this at the top of [`.binconfig`](#config-files):
+>
+> ```ini
+> exact=true
+> ```
+>
+> To enable it again, overriding the config file, use `--prefix`:
+>
+> ```bash
+> bin --prefix hel
+> ```
+>
+> Again, you'll probably want to set up a shell alias:
+>
+> ```bash
+> alias bin='bin --prefix'
+> ```
+
+</details>
+
+## Installation
+
+Bin CLI is a [single script](https://github.com/bin-cli/bin-cli/releases/latest/download/bin) that you can download to anywhere in your `$PATH`.
+
+To install it system-wide (for all users) in `/usr/local/bin`:
 
 ```bash
 sudo wget https://github.com/bin-cli/bin-cli/releases/latest/download/bin -O /usr/local/bin/bin
 sudo chmod +x /usr/local/bin/bin
 ```
 
-Or for the current user only:
+Or to install it for the current user only in `~/bin`:
 
 ```bash
 mkdir -p ~/bin
 wget https://github.com/bin-cli/bin-cli/releases/latest/download/bin -O ~/bin/bin
 chmod +x ~/bin/bin
+
+# If ~/bin is not already in your $PATH:
 echo 'PATH="$HOME/bin:$PATH"' >> ~/.bash_profile
+PATH="$HOME/bin:$PATH"
 ```
 
-#### Tab completion
+<details>
+<summary><em>What if <code>wget</code> is not available?</em></summary>
 
-Add this:
+> You can use `curl` instead:
+>
+> ```bash
+> sudo curl https://github.com/bin-cli/bin-cli/releases/latest/download/bin -Lo /usr/local/bin/bin
+> curl https://github.com/bin-cli/bin-cli/releases/latest/download/bin -Lo ~/bin/bin
+> ```
+>
+> At least one of `curl` or `wget` are usually installed, or can easily be installed, so that covers 99.99% of cases.
+>
+> But just for completeness - you can also use [HTTPie](https://httpie.io/docs/cli):
+>
+> ```bash
+> sudo http get https://github.com/bin-cli/bin-cli/releases/latest/download/bin -do /usr/local/bin/bin
+> http get https://github.com/bin-cli/bin-cli/releases/latest/download/bin -do ~/bin/bin
+> ```
+>
+> Or [Node.js](https://docs.npmjs.com/cli/commands/npx):
+>
+> ```bash
+> sudo npx download-cli https://github.com/bin-cli/bin-cli/releases/latest/download/bin -o /usr/local/bin/
+> npx download-cli https://github.com/bin-cli/bin-cli/releases/latest/download/bin -o ~/bin/
+> ```
+>
+> Or just click [this link](https://github.com/bin-cli/bin-cli/releases/latest/download/bin) to download it.
+
+</details>
+
+### Upgrading
+
+To upgrade to the latest version at any time, just repeat the same `wget` command as above.
+
+You may want to watch [this repo](https://github.com/bin-cli/bin-cli) to be notified when a new version is released - select either Watch > Custom > Releases, or Watch > All Activity.
+
+### Tab Completion
+
+To enable tab completion in Bash, add this:
 
 ```bash
-eval "$(bin --completion)"
+command -v bin &>/dev/null && eval "$(bin --completion)"
 ```
 
-To one of the following files:
+To any of the following files:
 
-- `/usr/share/bash-completion/completions/bin` (recommended for system-wide install)
+- `/usr/share/bash-completion/completions/bin` (recommended for system-wide installs)
 - `/etc/bash_completion.d/bin`
-- `~/.local/share/bash-completion/completions/bin` (recommended for per-user install)
+- `~/.local/share/bash-completion/completions/bin` (recommended for per-user installs)
 - `~/.bash_completion`
 - `~/.bashrc`
 
-You may want to wrap it in a conditional, in case *Bin* is not installed:
+_Only Bash is supported at this time. I will add other shells if there is [demand for it](https://github.com/bin-cli/bin-cli/discussions/categories/ideas), or gladly accept [pull requests](https://github.com/bin-cli/bin-cli/pulls)._
 
-```bash
-if command -v bin &>/dev/null; then
-    eval "$(bin --completion)"
-fi
-```
+<details>
+<summary><em>How to use tab completion with custom aliases?</em></summary>
 
-(Only `bash` is supported at the moment. I may add `zsh` and others in the future.)
+> If you are using a simple [shell alias](#aliasing-the-bin-command), e.g. `alias b=bin`, update the filename to match and add `--exe <name>`:
+>
+> ```bash
+> # e.g. in /usr/share/bash-completion/completions/b
+> command -v bin &>/dev/null && eval "$(bin --completion --exe b)"
+> ```
+>
+> If you have globally disabled [unique prefix matching](#unique-prefix-matching), e.g. `alias bin='bin --exact'`, add the same parameter here:
+>
+> ```bash
+> # e.g. in /usr/share/bash-completion/completions/bin
+> command -v bin &>/dev/null && eval "$(bin --completion --exact)"
+> ```
+>
+> Similarly, if you are using an alias with a [custom script directory](#custom-script-directory), e.g. `alias src='bin --dir scripts'`, add the same parameter here:
+>
+> ```bash
+> # e.g. in /usr/share/bash-completion/completions/scr
+> command -v bin &>/dev/null && eval "$(bin --completion --exe scr --dir scripts)"
+> ```
+>
+> If you have multiple aliases, just create a file for each one (or put them all together in `~/.bash_completion` or `~/.bashrc`).
 
-### Creating scripts
+</details>
 
-In the root of the repository, create a `bin` directory:
+<details>
+<summary><em>Why use <code>eval</code>?</em></summary>
+
+> Using `eval` makes it more future-proof - in case I need to change how tab completion works in the future.
+>
+> If you prefer, you can manually run `bin --completion` and paste the output into the file instead.
+
+</details>
+
+## Per-Project Setup
+
+In the root of the repository, create a `bin/` directory. For example:
 
 ```bash
 mkdir bin
 ```
 
-Then create some scripts, in the language of your choice, using the text editor of your choice:
+Then create some scripts inside it, in the language of your choice, using the text editor of your choice:
 
 ```bash
-vim bin/sample1
-nano bin/sample2
-code bin/sample3
+nano bin/sample
 ```
 
-For example:
-
-```bash
-#!/bin/sh
-echo 'Hello, World!'
-```
-
-And make the scripts executable:
+And make them executable:
 
 ```bash
 chmod +x bin/*
@@ -151,43 +283,25 @@ That's all there is to it. Now you can run them:
 bin sample
 ```
 
-### Creating/editing scripts in your preferred editor
+<details>
+<summary><em>Can I change the directory name?</em></summary>
 
-There are built-in commands you can use to create/edit scripts in your preferred editor (`$VISUAL` or `$EDITOR`, with `editor`, `nano` or `vi` as a fallback):
+> Yes - see [custom script directory](#custom-script-directory), below.
 
-```bash
-bin --create sample
-bin -c sample
+</details>
 
-bin --edit sample
-bin -e sample
-```
+<details>
+<summary><em>Does the <code>bin/</code> directory have to exist?</em></summary>
 
-The `--edit` command supports unique prefix matching:
+> No - if you define all commands [inline in the config file](#inline-commands), you can omit the `bin/` directory.
+>
+> You can also put the scripts [in the root directory](#custom-script-directory) - but then [subcommands](#subcommands) won't be supported.
 
-```bash
-bin -e sam
-```
+</details>
 
-### Config files
+### Config Files
 
-*Bin* config files are named `.binconfig`, and are written in [INI format](https://en.wikipedia.org/wiki/INI_file).
-
-They are entirely **optional** - you don't need to create a config file unless you want to use [aliases](#aliases), [help text](#help-text), [inline commands](#inline-commands), a [custom script directory](#custom-script-directory) or disable [unique prefix matching](#unique-prefix-matching). Here is an example with all of these:
-
-```ini
-root=scripts
-exact=true
-
-[hello]
-alias=hi
-help=Say "Hello, World!"
-
-[phpunit]
-command="$BIN_ROOT/vendor/bin/phpunit" "%@"
-```
-
-They should be placed in the project root directory, alongside the `bin/` directory:
+Some of the features below require you to create a config file. It should be named `.binconfig` and placed in the project root directory, alongside the `bin/` directory:
 
 ```
 repo/
@@ -196,52 +310,109 @@ repo/
 └── .binconfig
 ```
 
-You can use these commands to create/edit it in your preferred editor (`$VISUAL` or `$EDITOR`, with `editor`, `nano` or `vi` as a fallback):
+Config files are written in [INI format](https://en.wikipedia.org/wiki/INI_file). Here is an example:
 
-```bash
-bin --create .binconfig
-bin --edit .binconfig
+```ini
+; Global settings
+dir=scripts
+exact=true
+
+; Settings for each command (script)
+[hello]
+alias=hi
+help=Say "Hello, World!"
+
+[phpunit]
+command="$BIN_ROOT/vendor/bin/phpunit" "%@"
 ```
 
-## Other features
+The supported global keys are:
 
-### Help text
+- `dir` (string) - Sets a [custom script directory](#custom-script-directory)
+- `exact` (boolean) - Disables [unique prefix matching](#unique-prefix-matching)
 
-To add a short description for a command, enter it in `.binconfig` as follows:
+The supported per-command keys are:
+
+- `alias`/`aliases` (comma-separated strings) - [Aliases](#aliases)
+- `help` (string) - [Help text](#help-text)
+- `command` (string) - [Inline commands](#inline-commands)
+
+<details>
+<summary><em>Do I need to create a <code>.binconfig</code> file?</em></summary>
+
+> No - `.binconfig` only needs to exist if you want to use the features described below.
+
+</details>
+
+<details>
+<summary><em>What dialect of INI file is used?</em></summary>
+
+> The INI file is parsed according to the following rules:
+>
+> - No spaces are allowed before the key names or around the `=` signs. (I may change this in a future release.)
+> - Values should not be quoted - quotes will be treated as part of the value. This avoids the need to escape inner quotes.
+> - Boolean values can be set to `true`/`false` (recommended), `yes`/`no`, `on`/`off` or `1`/`0` (case-insensitive). Anything else triggers an error.
+> - Lines that start with `;` or `#` are comments, which are ignored. No other lines can contain comments.
+
+</details>
+
+<details>
+<summary><em>Why isn't <code>.binconfig</code> inside <code>bin/</code>?</em></summary>
+
+> `.binconfig` can't be inside the `bin/` directory because the [`dir` setting](#custom-script-directory) may change the name of the `bin/` directory, creating a chicken-and-egg problem (how would we find it in the first place?).
+>
+> Technically it would be possible to support both locations for every setting _except_ `dir` - and I may if there is demand for it... But then we would have to decide what happens if there are two files - error, or merge them? If merged, how should we handle conflicts? Which one should `bin --edit .binconfig` open? And so on.
+
+</details>
+
+<details>
+<summary><em>What happens if an invalid key name is used?</em></summary>
+
+> Invalid keys are ignored, to allow for forwards-compatibility with future versions of Bin CLI which may support additional settings. (The downside of this is you won't be warned if you make a typo, so I may change this in the future.)
+>
+> Invalid command names are displayed as a warning when you run `bin`, after the command listing.
+
+</details>
+
+## Other Features
+
+### Creating / Editing Scripts
+
+You can use these commands to more easily create/edit scripts in your preferred editor (`$VISUAL` or `$EDITOR`, with `editor`, `nano` or `vi` as fallbacks):
+
+```bash
+bin --create sample
+bin --edit sample
+```
+
+The `--create` (`-c`) command will pre-fill the script with a typical Bash script template and make it executable.
+
+The `--edit` (`-e`) command supports [unique prefix matching](#unique-prefix-matching) (e.g. `bin -e sam`).
+
+You can also use `bin --create .binconfig` to create a [config file](#config-files), and `bin --edit .binconfig` to edit it.
+
+### Help Text
+
+To add a short (one-line) description of each command, enter it in `.binconfig` as follows:
 
 ```ini
 [deploy]
 help=Sync the code to the live server
 ```
 
-This will be displayed when running `bin` with no parameters (or with an ambiguous prefix). For example:
+This will be displayed when you run `bin` with no parameters (or with an ambiguous prefix). For example:
 
-```bash
+<pre>
 $ bin
-Available commands
-bin artisan    Run Laravel Artisan command with the appropriate version of PHP
+<strong>Available commands</strong>
+bin artisan    Run Laravel Artisan with the appropriate version of PHP
 bin deploy     Sync the code to the live server
 bin php        Run the appropriate version of PHP for this project
-```
+</pre>
 
-I recommend keeping the description short, and implementing a `--help` parameter if further explanation is required.
+I recommend keeping the descriptions short. The scripts could then support a `--help` parameter, or similar, if further explanation is required.
 
-### Subcommands
-
-If you have multiple related commands, you may want to group them together and make subcommands. To do that, just create a subdirectory:
-
-```
-repo/
-├── bin/
-│   └── deploy/
-│       ├── live
-│       └── staging
-└── ...
-```
-
-Now `bin deploy live` will run `bin/deploy/live`, and `bin deploy` will list the available subcommands.
-
-In `.binconfig`, use the full command names:
+For subcommands, use the full command name, not the filename:
 
 ```ini
 [deploy live]
@@ -249,57 +420,6 @@ help=Deploy to the production site
 
 [deploy staging]
 help=Deploy to the staging site
-```
-
-### Script extensions
-
-If you prefer, you can create scripts with an extension to represent the language:
-
-```
-repo/
-└── bin/
-    ├── sample1.sh
-    ├── sample2.py
-    └── sample3.rb
-```
-
-The extensions will be removed when listing scripts and in [tab completion](#tab-completion) (as long as there are no conflicts):
-
-```bash
-$ bin
-Available commands
-bin sample1
-bin sample2
-bin sample3
-```
-
-You can run them with or without the extension:
-
-```bash
-$ bin sample1
-$ bin sample1.sh
-```
-
-### Unique prefix matching
-
-As noted above, if you type a prefix that uniquely identifies a command, that command will be executed.
-
-If you prefer to disable unique prefix matching, add this at the top of `.binconfig`:
-
-```ini
-exact=true
-```
-
-Or you can use `--exact` on the command line (perhaps using a shell alias):
-
-```bash
-bin --exact hello
-```
-
-To enable it again, overriding the config file, use `--prefix`:
-
-```bash
-bin --prefix hel
 ```
 
 ### Aliases
@@ -311,164 +431,207 @@ You can define aliases in `.binconfig` like this:
 alias=publish
 ```
 
-This means `bin publish` is an alias for `bin deploy`, and would call `bin/deploy`.
+This means `bin publish` is an alias for `bin deploy`, and running either would execute the `bin/deploy` script.
 
-You can define multiple aliases by separating them with commas (and optional spaces). You can use the key "`aliases`" if you prefer:
+You can define multiple aliases by separating them with commas (and optional spaces). You can use the key `aliases` if you prefer to be pedantic:
 
 ```ini
 [deploy]
 aliases=publish, push
 ```
 
-Or you can list them on separate lines:
+Or you can list them on separate lines instead:
 
 ```ini
 [deploy]
 alias=publish
 alias=push
 ```
-
-This also works for subcommands:
-
-```ini
-[deploy]
-alias=push
-
-[deploy live]
-alias=publish
-
-[deploy staging]
-alias=stage
-```
-
-Here, `bin push live` and `bin publish` would both be aliases for `bin deploy live`.
 
 Alternatively, you can use symlinks to define aliases:
 
 ```bash
 $ cd bin
-$ ln -s deploy push
-$ ln -s deploy/live publish
-$ ln -s deploy/staging stage
+$ ln -s deploy publish
 ```
 
 Be sure to use relative targets, not absolute ones, so they work in any location. (Absolute targets will be rejected, for safety.)
 
-In either case, aliases are listed alongside the help text when you run `bin` with no parameters (or with a non-unique prefix). For example:
+In any case, aliases are listed alongside the help text when you run `bin` with no parameters (or with a non-unique prefix). For example:
 
-```bash
+<pre>
 $ bin
-Available commands
-bin artisan    Run Laravel Artisan command with the appropriate version of PHP (alias: art)
-bin deploy     Sync the code to the live server (aliases: publish, push)
-```
+<strong>Available commands</strong>
+bin artisan    Run Laravel Artisan command with the appropriate version of PHP <em>(alias: art)</em>
+bin deploy     Sync the code to the live server <em>(aliases: publish, push)</em>
+</pre>
 
-Aliases are also subject to unique prefix matching - so here `bin pub` would match `bin publish`. `bin pu` would match both `bin publish` and `bin push`, but since both are aliases for the same script, that would be treated as a unique prefix and would therefore also run `bin deploy`.
+<details>
+<summary><em>Can I define aliases for commands that have subcommands?</em></summary>
 
-Defining an alias that conflicts with a script or another alias will cause *Bin* to exit with an error code and print a message to stdout (for safety).
+> Yes - for example, given a script `bin/deploy/live` and this config file:
+>
+> ```ini
+> [deploy]
+> alias=push
+> ```
+>
+> `bin push live` would be an alias for `bin deploy live`, and so on.
 
-### Inline commands
+</details>
+
+<details>
+<summary><em>How do aliases affect unique prefix matching?</em></summary>
+
+> Aliases are checked when looking for unique prefixes. In this example:
+>
+> ```ini
+> [deploy]
+> aliases=publish, push
+> ```
+>
+> - `bin pub` would match `bin publish`, which is an alias for `bin deploy`, which runs the `bin/deploy` script
+> - `bin pu` would match both `bin publish` and `bin push` - but since both are aliases for `bin deploy`, that would be treated as a unique prefix and would therefore also run `bin/deploy`
+
+</details>
+
+<details>
+<summary><em>What happens if an alias conflicts with another command?</em></summary>
+
+> Defining an alias that conflicts with a script or another alias will cause Bin to exit with error code 246 and print a message to stderr.
+
+</details>
+
+### Inline Commands
 
 If you have a really short script, you can instead write it as an inline command in `.binconfig`:
 
 ```ini
 [hello]
-command=echo 'Hello World'
+command=echo "Hello, ${1:-World}!"
 
 [phpunit]
 command="$BIN_ROOT/vendor/bin/phpunit" "$@"
+
+[watch]
+command="$BIN_DIR/build" --watch "$@"
 ```
 
 The following variables are available:
 
+- `$1`, `$2`, ... and `$@` contain the additional arguments, as normal
+- `$BIN_ROOT` points to the project root directory (where `.binconfig` is found)
 - `$BIN_DIR` points to the directory containing the scripts (usually `$BIN_ROOT/bin`, unless configured otherwise)
-- `$BIN_ROOT` points to the project root directory (usually one level above `bin/`)
-- `$1`, `$2`, ... and `$@` contain the additional arguments
 
-The command is executed within a Bash shell, so may contain logic operators if desired... But I recommend only using it for simple aliases to other scripts that can be called directly, such as the PHPUnit example above, since it won't be possible to call it without Bin CLI installed.
+<details>
+<summary><em>How complex can the command be?</em></summary>
 
-### Aliasing the `bin` command
+> The command is executed within a Bash shell (`bash -c "$command"`), so it may contain logic operators (`&&`, `||`), multiple commands separated by `;`, and pretty much anything else that you can fit into a single line.
 
-If you prefer to shorten the script prefix from `bin` to `b`, you can create a symlink. The exact command will depend on how and where you installed *Bin* - for example:
+</details>
 
-```bash
-$ sudo ln -s /usr/bin/bin /usr/local/bin/b
+<details>
+<summary><em>Why is this not the standard / recommended way to write commands?</em></summary>
+
+> If you're using Bin as a replacement for the one-line tasks typically [defined in package.json](https://docs.npmjs.com/cli/commands/npm-run-script), it might seem perfectly natural to write all tasks this way (and you can do that if you want to).
+>
+> However, I generally recommend writing slightly longer, more robust scripts. For example, checking that dependencies are installed before you attempt to do something that requires them, or even [installing them automatically](https://github.com/bin-cli/bin-cli/wiki/Automatically-installing-dependencies). It's hard to do that when you're limited to a single line of code.
+>
+> It also violates this fundamental principle of Bin, listed in the introduction above:
+>
+> > Collaborators / contributors who choose not to install Bin can run the scripts directly, so you can enjoy the benefits without adding a hard dependency or extra barrier to entry.
+>
+> That's why I recommend only using inline commands for very simple commands, such as calling a third-party script installed by a package manager (as in the `phpunit` example) or creating a shorthand for a command that could easily be run directly (as in the `watch` example).
+
+</details>
+
+### Script Extensions
+
+You can create scripts with an extension to represent the language, if you prefer that:
+
+```
+repo/
+└── bin/
+    ├── sample1.sh
+    ├── sample2.py
+    └── sample3.rb
 ```
 
-Or you can create an alias in your shell's config. For example, in `~/.bashrc`:
+The extensions will be removed when [listing commands](#listing-commands) and in [tab completion](#tab-completion) (as long as there are no conflicts):
+
+<pre>
+$ bin
+<strong>Available commands</strong>
+bin sample1
+bin sample2
+bin sample3
+</pre>
+
+You can run them with or without the extension:
 
 ```bash
-alias b='bin --exe b'
+$ bin sample1
+$ bin sample1.sh
 ```
 
-We use the optional parameter `--exe` here to set the name used in the list of scripts:
-
-```bash
-$ b
-Available commands
-b hello
-```
-
-You can set up [tab completion](#tab-completion) too:
-
-```bash
-eval "$(bin --completion --exe b)"
-```
-
-### Custom script directory
+### Custom Script Directory
 
 If you prefer the directory to be named `scripts` (or something else), you can configure that at the top of `.binconfig`:
 
 ```ini
-root=scripts
+dir=scripts
 ```
 
-The root path is relative to the `.binconfig` file - it won't search any parent or child directories.
+The path is relative to the `.binconfig` file - it won't search any parent or child directories.
 
 This option is provided for use in projects that already have a `scripts` directory or similar. I recommend renaming the directory to `bin` if you can, for consistency with the executable name and [standard UNIX naming conventions](https://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard).
 
-#### Scripts in the root directory
+<details>
+<summary><em>Can I put the scripts in the project root directory?</em></summary>
 
 If you have your scripts directly in the project root, you can use this:
 
 ```ini
-root=.
+dir=.
 ```
 
-However, subcommands will <u>not</u> be supported, because that would require searching the whole (potentially [very large](https://i.redd.it/tfugj4n3l6ez.png)) directory tree to find all of scripts.
+However, subcommands will **not** be supported, because that would require searching the whole (potentially [very large](https://i.redd.it/tfugj4n3l6ez.png)) directory tree to find all the scripts.
 
-#### Overriding it at runtime
+</details>
 
-You can also set the root directory at the command line, which will override the config file:
+<details>
+<summary><em>What if I can't create a config file?</em></summary>
+
+You can also set the script directory at the command line:
 
 ```bash
 $ bin --dir scripts
 ```
 
-In this case, it will search the parent directories as normal, and ignore the `root` setting in any `.binconfig` files it finds.
+Bin will search the parent directories as normal, but ignore any `.binconfig` files it finds. This is mostly useful to support repositories you don't control.
 
-This is mostly useful when defining a custom alias, to support repositories you don't control:
+You will probably want to define an alias:
 
 ```bash
 alias scr='bin --exe scr --dir scripts'
 ```
 
-It can also be an absolute path - e.g. if you have some global scripts that you don't want to add to `$PATH`:
+</details>
+
+<details>
+<summary><em>Can I use an absolute path?</em></summary>
+
+Not in a `.binconfig` file, but you can use an absolute path at the command line. For example, you could put your all generic development tools in `~/bin/dev/` and run them as `dev <script>`:
 
 ```bash
-alias dev="bin --exe dev --dir $HOME/scripts/dev"
+alias dev="bin --exe dev --dir $HOME/bin/dev"
 ```
 
-You can set up [tab completion](#tab-completion) too:
+</details>
 
-```bash
-eval "$(bin --completion --exe scr --dir scripts)"
-eval "$(bin --completion --exe dev --dir $HOME/scripts/dev)"
-```
+### Automatic Shims
 
-### Automatic shims
-
-I often use *Bin* to create shims for other executables - for example, [different PHP versions](https://github.com/bin-cli/bin-cli/wiki/PHP-version-shim) or [running scripts inside Docker](https://github.com/bin-cli/bin-cli/wiki/Docker-shim).
+I often use Bin to create shims for other executables - for example, [different PHP versions](https://github.com/bin-cli/bin-cli/wiki/PHP-version-shim) or [running scripts inside Docker](https://github.com/bin-cli/bin-cli/wiki/Docker-shim).
 
 Rather than typing `bin php` every time, I use a Bash alias to run it automatically:
 
@@ -476,7 +639,7 @@ Rather than typing `bin php` every time, I use a Bash alias to run it automatica
 alias php='bin php'
 ```
 
-However, that only works when inside a project directory. The `--shim` parameter tells *Bin* to run the global command of the same name if no local script is found:
+However, that only works when inside a project directory. The `--shim` parameter tells Bin to run the global command of the same name if no local script is found:
 
 ```bash
 alias php='bin --shim php'
@@ -490,11 +653,11 @@ If you want to run a fallback command that is different to the script name, use 
 alias php='bin --fallback php8.1 php'
 ```
 
-Both of these options imply `--exact` - i.e. [unique prefix matching](#unique-prefix-matching) is disabled.
+Both of these options imply `--exact` - i.e. [unique prefix matching](#unique-prefix-matching) is disabled (otherwise it might call `bin/phpunit`, for example).
 
-### Getting the command name
+### Environment Variables To Use in Scripts
 
-*Bin* will set the environment variable `$BIN_COMMAND` to the command that was executed, for use in help messages:
+Bin will set the environment variable `$BIN_COMMAND` to the command that was executed, for use in help messages:
 
 ```bash
 echo "Usage: ${BIN_COMMAND-$0} [...]"
@@ -512,75 +675,56 @@ But if you ran the script manually with `bin/sample -h`, it would output the fal
 Usage: bin/sample [...]
 ```
 
-There is also `$BIN_EXE`, which you can use to display other commands, if required.
+There is also `$BIN_EXE`, which is set to the name of the executable (typically just `bin`, but that [may be overridden](#aliasing-the-bin-command)).
 
-### Automatic exclusions
+### Aliasing the `bin` Command
 
-Scripts starting with `_` (underscore) are excluded from listings, but can be executed. This can be used for helper scripts that are not intended to be executed directly. (Or you could use a separate [`libexec` directory](https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch04s07.html) if you prefer.)
-
-Files starting with `.` (dot / period) are always ignored and cannot be executed with *Bin*.
-
-Files that are not executable (not `chmod +x`) are listed as warnings, and will error if you try to run them. The exception is when using `root=.`, where they are just ignored.
-
-A number of common non-executable file types (`*.json`, `*.md`, `*.txt`, `*.yaml`, `*.yml`) are also excluded when using `root=.`, even if they are executable, to reduce the noise when all files are executable (e.g. on FAT32 filesystems).
-
-The directories `/bin`, `/snap/bin`, `/usr/bin`, `/usr/local/bin` and `~/bin` are ignored when searching parent directories, unless there is a corresponding `.binconfig` file, because they are common locations for global executables.
-
-## Writing scripts
-
-This is a very simple shell script, as listed above:
+If you prefer to shorten the script prefix from `bin` to `b`, for example, you can create an alias in your shell's config. For example, in `~/.bashrc`:
 
 ```bash
-#!/bin/sh
-echo 'Hello, World!'
+alias b='bin --exe b'
 ```
 
-It will run using the default system shell - in Ubuntu, that is Dash rather than Bash, which is a little faster but doesn't have all the same features.
+The `--exe` parameter is used to override the executable name used in the [environment variables](#environment-variables-to-use-in-scripts) (`$BIN_COMMAND`, `$BIN_EXE`) and the [list of commands](#listing-commands):
 
-If you want to use Bash instead, you could use `#!/bin/bash`, but it is better to use this variant, which should work even if Bash is installed in another location (e.g. by [Homebrew](https://brew.sh/)):
+<pre>
+$ b
+<strong>Available commands</strong>
+b hello
+</pre>
 
-```bash
-#!/usr/bin/env bash
-echo 'Hello, World!'
-```
+You can skip it (i.e. use `alias b='bin'`) if you prefer it to say `bin`.
 
-For non-trivial scripts, I recommend adding `set -euo pipefail`, or equivalent, [for safety](https://www.howtogeek.com/782514/how-to-use-set-and-pipefail-in-bash-scripts-on-linux/).
+<details>
+<summary><em>Alternatively, you can use a symlink</em></summary>
 
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
+> System-wide installation:
+>
+> ```bash
+> $ sudo ln -s bin /usr/local/bin/b
+> ```
+>
+> Per-user installation:
+>
+> ```bash
+> $ ln -s bin ~/bin/b
+> ```
 
-# ...
-```
+</details>
 
-For scripts written in other programming languages, just change the executable name as appropriate:
+### Automatic Exclusions
 
-```python
-#!/usr/bin/env python3
-print('Hello, World!')
-```
+Scripts starting with `_` (underscore) are excluded from listings, but can still be executed. This can be used for hidden tools and helper scripts that are not intended to be executed directly. (Or you could use a separate [`libexec` directory](https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch04s07.html) in the project root if you prefer.)
 
-```ruby
-#!/usr/bin/env ruby
-puts 'Hello, World!'
-```
+Files starting with `.` (dot / period) are always ignored and cannot be executed with Bin.
 
-```perl
-#!/usr/bin/env perl
-print "Hello, World!\n";
-```
+Files that are not executable (not `chmod +x`) are listed as warnings in the command listing, and will error if you try to run them. The exception is when using `dir=.`, where they are just ignored.
 
-```php
-#!/usr/bin/env php
-<?php
-echo "Hello, World!\n";
-```
+A number of common non-executable file types (`*.json`, `*.md`, `*.txt`, `*.yaml`, `*.yml`) are also excluded when using `dir=.`, even if they are executable, to reduce the noise when all files are executable (e.g. on FAT32 filesystems).
 
-See [the wiki](https://github.com/bin-cli/bin-cli/wiki) for more example scripts and script-writing tips, and share your own in [the discussions section](https://github.com/bin-cli/bin-cli/discussions/categories/example-scripts-script-writing-tips).
+The directories `/bin`, `/snap/bin`, `/usr/bin`, `/usr/local/bin` and `~/bin` are ignored when searching parent directories, unless there is a corresponding `.binconfig` file, because they are common locations for global executables (typically in `$PATH`).
 
-## Miscellaneous
-
-### CLI reference
+## CLI Reference
 
 <!-- START auto-update-cli-reference-docs -->
 
@@ -610,12 +754,6 @@ For more details see https://github.com/bin-cli/bin-cli#readme
 ```
 
 <!-- END auto-update-cli-reference-docs -->
-
-## Get involved
-
-- [Discussions & ideas](https://github.com/bin-cli/bin-cli/discussions)
-- [Bug reports](https://github.com/bin-cli/bin-cli/issues)
-- [Pull requests](https://github.com/bin-cli/bin-cli/pulls)
 
 ## License
 
