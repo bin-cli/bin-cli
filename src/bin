@@ -302,6 +302,18 @@ in_array() {
     return 1
 }
 
+trim() {
+    local string
+
+    string=$1
+
+    # https://stackoverflow.com/a/3352015/167815
+    string="${string#"${string%%[![:space:]]*}"}"
+    string="${string%"${string##*[![:space:]]}"}"
+
+    echo "$string"
+}
+
 #---------------------------------------
 # Maps (associative arrays)
 #---------------------------------------
@@ -488,6 +500,10 @@ bin_dir_for() {
     result=''
     while IFS='=' read -r key value; do
         ((line += 1))
+
+        # Trim leading/trailing white space
+        key=$(trim "$key")
+        value=$(trim "$value")
 
         if [[ $key = '' || $key = '#'* || $key = ';'* ]]; then
             # Skip blank lines & comments
@@ -1048,6 +1064,10 @@ while $keep_looking; do
         while IFS='=' read -r key value; do
             ((line += 1))
 
+            # Trim leading/trailing white space
+            key=$(trim "$key")
+            value=$(trim "$value")
+
             if [[ $key = '' || $key = '#'* || $key = ';'* ]]; then
                 # Skip blank lines & comments
                 :
@@ -1090,14 +1110,13 @@ while $keep_looking; do
                 fi
             elif [[ -z $command ]]; then
                 # Unknown keys don't trigger an error for forwards compatibility (global)
-                :
+                debug "Ignored unknown key '$key' in $binconfig line $line"
             elif [[ ($key = 'alias' || $key = 'aliases') ]]; then
                 # alias=blah
                 # aliases=blah1, blah2
                 IFS=',' read -ra line_aliases <<<"$value"
                 for alias in ${line_aliases+"${line_aliases[@]}"}; do
-                    alias=${alias## }
-                    alias=${alias%% }
+                    alias=$(trim "$alias")
                     register_command_alias "$alias" "$command" "$binconfig line $line"
                 done
             elif [[ $key = 'command' ]]; then
@@ -1108,7 +1127,7 @@ while $keep_looking; do
                 map_set help "$command" "$value"
             else
                 # Unknown keys don't trigger an error for forwards compatibility (command)
-                :
+                debug "Ignored unknown key '$key' in $binconfig line $line"
             fi
         done <"$binconfig" # kcov-ignore-line: Usage not detected
     fi
@@ -1216,7 +1235,7 @@ while [[ $# -gt $last_parameter ]]; do
 
             ( # kcov-ignore-line: Usage not detected
                 if [[ $main_bin_dir_from_root != 'bin' ]]; then
-                    echo "dir=$main_bin_dir_from_root"
+                    echo "dir = $main_bin_dir_from_root"
                 else
                     echo
                 fi
@@ -1307,7 +1326,7 @@ while [[ $# -gt $last_parameter ]]; do
     # If there were no prefix matches, stop searching
     if [[ ${#matching_commands[@]} -eq 0 ]]; then
         if $main_is_root_dir && [[ -d "$current_directory/$subcommand" ]]; then
-            fail "Subcommands are not supported with the config option 'dir=$main_bin_dir_from_root'"
+            fail "Subcommands are not supported with the config option 'dir = $main_bin_dir_from_root'"
         fi
         if [[ $subcommand = .* && -e "$current_directory/$subcommand" ]]; then
             fail "Command names may not start with '.'"

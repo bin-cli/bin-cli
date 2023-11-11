@@ -110,7 +110,7 @@ Feature: Script extensions
       And a file '{ROOT}/project/.binconfig' with content:
         """
         [sample2]
-        alias=sample1
+        alias = sample1
         """
       When I run 'bin'
       Then it is successful
@@ -150,7 +150,7 @@ Feature: Script extensions
       And a file '{ROOT}/project/.binconfig' with content:
         """
         [sample.sh]
-        alias=sample two
+        alias = sample two
         """
       When I run 'bin'
       Then it is successful

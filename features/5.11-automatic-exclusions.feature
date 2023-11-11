@@ -129,7 +129,7 @@ Feature: Automatic exclusions
 
   Rule: Files that are not executable are listed as warnings
 
-    | Files that are not executable (not `chmod +x`) are listed as warnings in the command listing, and will error if you try to run them. The exception is when using `dir=.`, where they are just ignored.
+    | Files that are not executable (not `chmod +x`) are listed as warnings in the command listing, and will error if you try to run them. The exception is when using `dir = .`, where they are just ignored.
 
     Scenario: Files that are not executable are listed as warnings
       Given a script '{ROOT}/project/bin/executable'
@@ -153,11 +153,11 @@ Feature: Automatic exclusions
 
   Rule: Text file types are ignored when using dir=.
 
-    | A number of common non-executable file types (`*.json`, `*.md`, `*.txt`, `*.yaml`, `*.yml`) are also excluded when using `dir=.`, even if they are executable, to reduce the noise when all files are executable (e.g. on FAT32 filesystems).
+    | A number of common non-executable file types (`*.json`, `*.md`, `*.txt`, `*.yaml`, `*.yml`) are also excluded when using `dir = .`, even if they are executable, to reduce the noise when all files are executable (e.g. on FAT32 filesystems).
 
 
     Scenario: Non-executable files are not listed in the project root
-      Given a file '{ROOT}/project/.binconfig' with content 'dir=.'
+      Given a file '{ROOT}/project/.binconfig' with content 'dir = .'
       And a script '{ROOT}/project/executable'
       And an empty file '{ROOT}/project/not-executable'
       When I run 'bin'
@@ -169,7 +169,7 @@ Feature: Automatic exclusions
         """
 
     Scenario: Common non-executable file types are not listed in the project root even if they are executable
-      Given a file '{ROOT}/project/.binconfig' with content 'dir=.'
+      Given a file '{ROOT}/project/.binconfig' with content 'dir = .'
       And a script '{ROOT}/project/executable1.sh'
       And a script '{ROOT}/project/executable2.json'
       And a script '{ROOT}/project/executable3.md'
@@ -185,7 +185,7 @@ Feature: Automatic exclusions
         """
 
     Scenario: Common non-executable file types cannot be executed in the project root
-      Given a file '{ROOT}/project/.binconfig' with content 'dir=.'
+      Given a file '{ROOT}/project/.binconfig' with content 'dir = .'
       And a script '{ROOT}/project/executable.json'
       When I run 'bin executable'
       Then it fails with exit code 127

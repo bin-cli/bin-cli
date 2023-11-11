@@ -7,7 +7,7 @@ Feature: Custom script directory
     | If you prefer the directory to be named `scripts` (or something else), you can configure that at the top of `.binconfig`:
     |
     | ```ini
-    | dir=scripts
+    | dir = scripts
     | ```
     |
     | The path is relative to the `.binconfig` file - it won't search any parent or child directories.
@@ -15,7 +15,7 @@ Feature: Custom script directory
     | This option is provided for use in projects that already have a `scripts` directory or similar. I recommend renaming the directory to `bin` if you can, for consistency with the executable name and [standard UNIX naming conventions](https://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard).
 
     Scenario: The script directory can be overridden in .binconfig with 'dir'
-      Given a file '{ROOT}/project/.binconfig' with content 'dir=scripts'
+      Given a file '{ROOT}/project/.binconfig' with content 'dir = scripts'
       And a script '{ROOT}/project/scripts/test' that outputs 'Right'
       And a script '{ROOT}/project/bin/test' that outputs 'Wrong'
       When I run 'bin test'
@@ -23,7 +23,7 @@ Feature: Custom script directory
       And the output is 'Right'
 
     Scenario: An error is raised if the specified directory does not exist
-      Given a file '{ROOT}/project/root/.binconfig' with content 'dir=bin'
+      Given a file '{ROOT}/project/root/.binconfig' with content 'dir = bin'
       And a script '{ROOT}/project/bin/hello'
       And the working directory is '{ROOT}/project/root'
       When I run 'bin hello'
@@ -31,7 +31,7 @@ Feature: Custom script directory
       And the error is "bin: The directory specified in {ROOT}/project/root/.binconfig line 1 does not exist: {ROOT}/project/root/bin/"
 
     Scenario: Directories below .binconfig are not searched when 'dir' is specified in .binconfig
-      Given a file '{ROOT}/project/.binconfig' with content 'dir=scripts'
+      Given a file '{ROOT}/project/.binconfig' with content 'dir = scripts'
       And a script '{ROOT}/project/scripts/test' that outputs 'Right'
       And a script '{ROOT}/project/root/scripts/test' that outputs 'Wrong'
       And the working directory is '{ROOT}/project/root'
@@ -41,7 +41,7 @@ Feature: Custom script directory
 
     Scenario: The 'dir' option cannot point to a parent directory
       Given a script '{ROOT}/project/scripts/hello' that outputs 'Hello, World!'
-      And a file '{ROOT}/project/root/.binconfig' with content 'dir=../scripts'
+      And a file '{ROOT}/project/root/.binconfig' with content 'dir = ../scripts'
       And the working directory is '{ROOT}/project/root'
       When I run 'bin hello'
       Then it fails with exit code 246
@@ -50,7 +50,7 @@ Feature: Custom script directory
     Scenario: The 'dir' option cannot point to a symlink to a parent directory
       Given a script '{ROOT}/project/scripts/hello' that outputs 'Hello, World!'
       And a symlink '{ROOT}/project/root/symlink' pointing to '../scripts'
-      And a file '{ROOT}/project/root/.binconfig' with content 'dir=symlink'
+      And a file '{ROOT}/project/root/.binconfig' with content 'dir = symlink'
       And the working directory is '{ROOT}/project/root'
       When I run 'bin hello'
       Then it fails with exit code 246
@@ -63,24 +63,24 @@ Feature: Custom script directory
     | If you have your scripts directly in the project root, you can use this:
     |
     | ```ini
-    | dir=.
+    | dir = .
     | ```
     |
     | However, subcommands will **not** be supported, because that would require searching the whole (potentially [very large](https://i.redd.it/tfugj4n3l6ez.png)) directory tree to find all the scripts.
 
     Scenario: Scripts can be in the project root
-      Given a file '{ROOT}/project/.binconfig' with content 'dir=.'
+      Given a file '{ROOT}/project/.binconfig' with content 'dir = .'
       And a script '{ROOT}/project/hello' that outputs 'Hello, World!'
       When I run 'bin hello'
       Then it is successful
       And the output is 'Hello, World!'
 
     Scenario: Subcommands are not supported in the project root
-      Given a file '{ROOT}/project/.binconfig' with content 'dir=.'
+      Given a file '{ROOT}/project/.binconfig' with content 'dir = .'
       And a script '{ROOT}/project/hello/world'
       When I run 'bin hello world'
       Then it fails with exit code 246
-      And the error is "bin: Subcommands are not supported with the config option 'dir=.'"
+      And the error is "bin: Subcommands are not supported with the config option 'dir = .'"
 
   Rule: The script directory can be set at the command line
 
@@ -115,7 +115,7 @@ Feature: Custom script directory
     Scenario: Setting the script directory with --dir overrides .binconfig
       Given a script '{ROOT}/project/right/script' that outputs 'Right'
       And a script '{ROOT}/project/root/wrong/script' that outputs 'Wrong'
-      And a file '{ROOT}/project/root/.binconfig' with content 'dir=wrong'
+      And a file '{ROOT}/project/root/.binconfig' with content 'dir = wrong'
       And the working directory is '{ROOT}/project/root'
       When I run 'bin --dir right script'
       Then it is successful
@@ -129,10 +129,10 @@ Feature: Custom script directory
     Scenario: When --dir matches .binconfig, .binconfig should be parsed as normal
       Given a file '{ROOT}/project/.binconfig' with content:
         """
-        dir=scripts
+        dir = scripts
 
         [hello]
-        help=Hello, World!
+        help = Hello, World!
         """
       And a script '{ROOT}/project/scripts/hello'
       When I run 'bin --dir scripts'
@@ -147,7 +147,7 @@ Feature: Custom script directory
       Given a file '{ROOT}/project/.binconfig' with content:
         """
         [hello]
-        help=Hello, World!
+        help = Hello, World!
         """
       And a script '{ROOT}/project/scripts/hello'
       When I run 'bin --dir scripts'
@@ -170,7 +170,7 @@ Feature: Custom script directory
 
     Scenario: The 'dir' option cannot be an absolute path when set in .binconfig
       Given a script '{ROOT}/project/scripts/hello' that outputs 'Hello, World!'
-      And a file '{ROOT}/project/.binconfig' with content 'dir=/project/scripts'
+      And a file '{ROOT}/project/.binconfig' with content 'dir = /project/scripts'
       When I run 'bin hello'
       Then it fails with exit code 246
       And the error is "bin: The option 'dir' cannot be an absolute path in {ROOT}/project/.binconfig line 1"

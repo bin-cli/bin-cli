@@ -33,7 +33,7 @@ Feature: Environment Variables To Use in Scripts
       And a file '{ROOT}/project/.binconfig' with content:
         """
         [sample]
-        alias=alias
+        alias = alias
         """
       When I run 'bin alias'
       Then it is successful

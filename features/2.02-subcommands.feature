@@ -63,10 +63,10 @@ Feature: Subcommands
       And a file '{ROOT}/project/.binconfig' with content:
         """
         [deploy live]
-        help=Deploy to the production site
+        help = Deploy to the production site
 
         [deploy staging]
-        help=Deploy to the staging site
+        help = Deploy to the staging site
         """
       When I run 'bin deploy'
       Then it is successful

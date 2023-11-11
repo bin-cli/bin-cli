@@ -139,7 +139,7 @@ alias bin='bin --exact'
 To disable it for a project, add this at the top of [`.binconfig`](#config-files):
 
 ```ini
-exact=true
+exact = true
 ```
 
 To enable it again, overriding the config file, use `--prefix`:
@@ -339,17 +339,17 @@ Config files are written in [INI format](https://en.wikipedia.org/wiki/INI_file)
 
 ```ini
 ; Global settings
-dir=scripts
-exact=true
-merge=true
+dir = scripts
+exact = true
+merge = true
 
 ; Settings for each command (script)
 [hello]
-alias=hi
-help=Say "Hello, World!"
+alias = hi
+help = Say "Hello, World!"
 
 [phpunit]
-command="$BIN_ROOT/vendor/bin/phpunit" "%@"
+command = "$BIN_ROOT/vendor/bin/phpunit" "%@"
 ```
 
 The supported global keys are:
@@ -374,9 +374,9 @@ No - `.binconfig` only needs to exist if you want to use the features described 
 
 The INI file is parsed according to the following rules:
 
-- No spaces are allowed before the key names or around the `=` signs. (I may change this in a future release.)
+- Spaces are allowed around the `=` signs, and are automatically trimmed from the start/end of lines.
 - Values should not be quoted - quotes will be treated as part of the value. This avoids the need to escape inner quotes.
-- Boolean values can be set to `true`/`false` (recommended), `yes`/`no`, `on`/`off` or `1`/`0` (case-insensitive). Anything else triggers an error.
+- Boolean values can be set to `true`/`false` (recommended), `yes`/`no`, `on`/`off` or `1`/`0` (all case-insensitive). Anything else triggers an error.
 - Lines that start with `;` or `#` are comments, which are ignored. No other lines can contain comments.
 
 </blockquote></details>
@@ -426,7 +426,7 @@ To add a short (one-line) description of each command, enter it in `.binconfig` 
 
 ```ini
 [deploy]
-help=Sync the code to the live server
+help = Sync the code to the live server
 ```
 
 This will be displayed when you run `bin` with no parameters (or with an ambiguous prefix). For example:
@@ -445,10 +445,10 @@ For subcommands, use the full command name, not the filename:
 
 ```ini
 [deploy live]
-help=Deploy to the production site
+help = Deploy to the production site
 
 [deploy staging]
-help=Deploy to the staging site
+help = Deploy to the staging site
 ```
 
 <!-- features/5.03-aliases.feature -->
@@ -459,7 +459,7 @@ You can define aliases in `.binconfig` like this:
 
 ```ini
 [deploy]
-alias=publish
+alias = publish
 ```
 
 This means `bin publish` is an alias for `bin deploy`, and running either would execute the `bin/deploy` script.
@@ -468,15 +468,15 @@ You can define multiple aliases by separating them with commas (and optional spa
 
 ```ini
 [deploy]
-aliases=publish, push
+aliases = publish, push
 ```
 
 Or you can list them on separate lines instead:
 
 ```ini
 [deploy]
-alias=publish
-alias=push
+alias = publish
+alias = push
 ```
 
 Alternatively, you can use symlinks to define aliases:
@@ -503,7 +503,7 @@ Yes - for example, given a script `bin/deploy/live` and this config file:
 
 ```ini
 [deploy]
-alias=push
+alias = push
 ```
 
 `bin push live` would be an alias for `bin deploy live`, and so on.
@@ -516,7 +516,7 @@ Aliases are checked when looking for unique prefixes. In this example:
 
 ```ini
 [deploy]
-aliases=publish, push
+aliases = publish, push
 ```
 
 - `bin pub` would match `bin publish`, which is an alias for `bin deploy`, which runs the `bin/deploy` script
@@ -538,13 +538,13 @@ If you have a really short script, you can instead write it as an inline command
 
 ```ini
 [hello]
-command=echo "Hello, ${1:-World}!"
+command = echo "Hello, ${1:-World}!"
 
 [phpunit]
-command="$BIN_ROOT/vendor/bin/phpunit" "$@"
+command = "$BIN_ROOT/vendor/bin/phpunit" "$@"
 
 [watch]
-command="$BIN_DIR/build" --watch "$@"
+command = "$BIN_DIR/build" --watch "$@"
 ```
 
 The following variables are available:
@@ -612,7 +612,7 @@ $ bin sample1.sh
 If you prefer the directory to be named `scripts` (or something else), you can configure that at the top of `.binconfig`:
 
 ```ini
-dir=scripts
+dir = scripts
 ```
 
 The path is relative to the `.binconfig` file - it won't search any parent or child directories.
@@ -624,7 +624,7 @@ This option is provided for use in projects that already have a `scripts` direct
 If you have your scripts directly in the project root, you can use this:
 
 ```ini
-dir=.
+dir = .
 ```
 
 However, subcommands will **not** be supported, because that would require searching the whole (potentially [very large](https://i.redd.it/tfugj4n3l6ez.png)) directory tree to find all the scripts.
@@ -774,7 +774,7 @@ Normally, if you are in the `themes/one/` directory:
 But if you add this to `.binconfig` (in the child project):
 
 ```ini
-merge=true
+merge = true
 ```
 
 Then the two `bin/` directories are merged, so:
@@ -798,15 +798,15 @@ Yes - you can use any combination of scripts, inline commands and aliases in bot
 
 <details><summary><em>What if no parent project is found?</em></summary><blockquote>
 
-If you set `merge=true` but there is no parent `bin/` directory (or `.binconfig` file), Bin will exit with an error.
+If you set `merge = true` but there is no parent `bin/` directory (or `.binconfig` file), Bin will exit with an error.
 
-To avoid that, set `merge=optional` instead. This may be useful in sub-projects that have separate repositories, so you can't guarantee they will be cloned together.
+To avoid that, set `merge = optional` instead. This may be useful in sub-projects that have separate repositories, so you can't guarantee they will be cloned together.
 
 </blockquote></details>
 
 <details><summary><em>Can three (or more) directories be merged?</em></summary><blockquote>
 
-Yes - just set `merge=true` at each level below the first.
+Yes - just set `merge = true` at each level below the first.
 
 </blockquote></details>
 
@@ -818,9 +818,9 @@ Scripts starting with `_` (underscore) are excluded from listings, but can still
 
 Files starting with `.` (dot / period) are always ignored and cannot be executed with Bin.
 
-Files that are not executable (not `chmod +x`) are listed as warnings in the command listing, and will error if you try to run them. The exception is when using `dir=.`, where they are just ignored.
+Files that are not executable (not `chmod +x`) are listed as warnings in the command listing, and will error if you try to run them. The exception is when using `dir = .`, where they are just ignored.
 
-A number of common non-executable file types (`*.json`, `*.md`, `*.txt`, `*.yaml`, `*.yml`) are also excluded when using `dir=.`, even if they are executable, to reduce the noise when all files are executable (e.g. on FAT32 filesystems).
+A number of common non-executable file types (`*.json`, `*.md`, `*.txt`, `*.yaml`, `*.yml`) are also excluded when using `dir = .`, even if they are executable, to reduce the noise when all files are executable (e.g. on FAT32 filesystems).
 
 The directories `/bin`, `/snap/bin`, `/usr/bin`, `/usr/local/bin` and `~/bin` are ignored when searching parent directories, unless there is a corresponding `.binconfig` file, because they are common locations for global executables (typically in `$PATH`).
 

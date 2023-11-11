@@ -8,7 +8,7 @@ Feature: Help text
     |
     | ```ini
     | [deploy]
-    | help=Sync the code to the live server
+    | help = Sync the code to the live server
     | ```
     |
     | This will be displayed when you run `bin` with no parameters (or with an ambiguous prefix). For example:
@@ -30,13 +30,13 @@ Feature: Help text
       And a file '{ROOT}/project/.binconfig' with content:
         """
         [artisan]
-        help=Run Laravel Artisan command with the appropriate version of PHP
+        help = Run Laravel Artisan command with the appropriate version of PHP
 
         [deploy]
-        help=Sync the code to the live server
+        help = Sync the code to the live server
 
         [php]
-        help=Run the appropriate version of PHP for this project
+        help = Run the appropriate version of PHP for this project
         """
       When I run 'bin'
       Then it is successful
@@ -55,10 +55,10 @@ Feature: Help text
       And a file '{ROOT}/project/.binconfig' with content:
         """
         [artisan]
-        help=Run Laravel Artisan command with the appropriate version of PHP
+        help = Run Laravel Artisan command with the appropriate version of PHP
 
         [php]
-        help=Run the appropriate version of PHP for this project
+        help = Run the appropriate version of PHP for this project
         """
       When I run 'bin'
       Then it is successful
@@ -75,7 +75,7 @@ Feature: Help text
       And a file '{ROOT}/project/.binconfig' with content:
         """
         [php]
-        help=Run the appropriate version of PHP for this project
+        help = Run the appropriate version of PHP for this project
         """
       When I run 'bin'
       Then it is successful
@@ -91,10 +91,10 @@ Feature: Help text
     |
     | ```ini
     | [deploy live]
-    | help=Deploy to the production site
+    | help = Deploy to the production site
     |
     | [deploy staging]
-    | help=Deploy to the staging site
+    | help = Deploy to the staging site
     | ```
 
     Scenario: Help text is supported for subcommands
@@ -104,13 +104,13 @@ Feature: Help text
       And a file '{ROOT}/project/.binconfig' with content:
         """
         [deploy live]
-        help=Deploy to the production site
+        help = Deploy to the production site
 
         [deploy staging]
-        help=Deploy to the staging site
+        help = Deploy to the staging site
 
         [another]
-        help=Another command
+        help = Another command
         """
       When I run 'bin'
       Then it is successful

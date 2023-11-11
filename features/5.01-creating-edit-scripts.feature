@@ -250,10 +250,10 @@ Feature: Creating/editing scripts
     #  And there is a file '{ROOT}/project/.binconfig' with content:
     #    """
     #    [hello]
-    #    help=
+    #    help =
     #
     #    [world]
-    #    help=
+    #    help =
     #    """
 
     Scenario: Running '--create .binconfig' gives an error if .binconfig already exists
@@ -276,7 +276,7 @@ Feature: Creating/editing scripts
         """
       And there is a file '{ROOT}/project/.binconfig' with content:
         """
-        dir=scripts
+        dir = scripts
         """
 
     Scenario: If an absolute directory is specified when creating a config file, a relative path is written to the file
@@ -292,5 +292,5 @@ Feature: Creating/editing scripts
         """
       And there is a file '{ROOT}/project/.binconfig' with content:
         """
-        dir=scripts
+        dir = scripts
         """

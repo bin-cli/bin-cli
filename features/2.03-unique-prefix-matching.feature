@@ -90,7 +90,7 @@ Feature: Unique prefix matching
     | To disable it for a project, add this at the top of [`.binconfig`](#config-files):
     |
     | ```ini
-    | exact=true
+    | exact = true
     | ```
     |
     | To enable it again, overriding the config file, use `--prefix`:
@@ -105,9 +105,9 @@ Feature: Unique prefix matching
     | alias bin='bin --prefix'
     | ```
 
-    Scenario Template: Unique prefix matching can be disabled in .binconfig using 'exact=<value>'
+    Scenario Template: Unique prefix matching can be disabled in .binconfig using 'exact = <value>'
       Given a script '{ROOT}/project/bin/hello'
-      And a file '{ROOT}/project/.binconfig' with content 'exact=<value>'
+      And a file '{ROOT}/project/.binconfig' with content 'exact = <value>'
       When I run 'bin hel'
       Then it is successful
       And the output is:
@@ -124,9 +124,9 @@ Feature: Unique prefix matching
         | yes   |
         | 1     |
 
-    Scenario Template: Unique prefix matching can be explicitly enabled in .binconfig using 'exact=<value>'
+    Scenario Template: Unique prefix matching can be explicitly enabled in .binconfig using 'exact = <value>'
       Given a script '{ROOT}/project/bin/hello' that outputs 'Hello, World!'
-      And a file '{ROOT}/project/.binconfig' with content 'exact=<value>'
+      And a file '{ROOT}/project/.binconfig' with content 'exact = <value>'
       When I run 'bin hel'
       Then it is successful
       And the output is 'Hello, World!'
@@ -139,9 +139,9 @@ Feature: Unique prefix matching
         | no    |
         | 0     |
 
-    Scenario: Any other value for 'exact=' raises an error
+    Scenario: Any other value for 'exact' raises an error
       Given a script '{ROOT}/project/bin/hello'
-      And a file '{ROOT}/project/.binconfig' with content 'exact=blah'
+      And a file '{ROOT}/project/.binconfig' with content 'exact = blah'
       When I run 'bin hel'
       Then it fails with exit code 246
       And the error is "bin: Invalid value for 'exact' in {ROOT}/project/.binconfig line 1: blah"
@@ -158,7 +158,7 @@ Feature: Unique prefix matching
 
     Scenario: Unique prefix matching can be enabled with --prefix, overriding the config file
       Given a script '{ROOT}/project/bin/hello' that outputs 'Hello, World!'
-      And a file '{ROOT}/project/.binconfig' with content 'exact=true'
+      And a file '{ROOT}/project/.binconfig' with content 'exact = true'
       When I run 'bin --prefix hel'
       Then it is successful
       And the output is 'Hello, World!'

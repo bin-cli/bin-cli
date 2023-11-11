@@ -8,20 +8,20 @@ Feature: Inline commands
     |
     | ```ini
     | [hello]
-    | command=echo "Hello, ${1:-World}!"
+    | command = echo "Hello, ${1:-World}!"
     |
     | [phpunit]
-    | command="$BIN_ROOT/vendor/bin/phpunit" "$@"
+    | command = "$BIN_ROOT/vendor/bin/phpunit" "$@"
     |
     | [watch]
-    | command="$BIN_DIR/build" --watch "$@"
+    | command = "$BIN_DIR/build" --watch "$@"
     | ```
 
     Scenario: An inline command can be defined in .binconfig
       Given a file '{ROOT}/project/.binconfig' with content:
         """
         [hello]
-        command=echo 'Hello, World!'
+        command = echo 'Hello, World!'
         """
       When I run 'bin hello'
       Then it is successful
@@ -31,7 +31,7 @@ Feature: Inline commands
       Given a file '{ROOT}/project/.binconfig' with content:
         """
         [hello]
-        command=helper
+        command = helper
         """
       And a script '{ROOT}/usr/bin/helper' that outputs '1=$1 2=$2'
       When I run 'bin hello one two'
@@ -42,7 +42,7 @@ Feature: Inline commands
       Given a file '{ROOT}/project/.binconfig' with content:
         """
         [hello]
-        command=echo 'Hello, World!'
+        command = echo 'Hello, World!'
         """
       And a script '{ROOT}/project/bin/hello'
       When I run 'bin hello'
@@ -53,8 +53,8 @@ Feature: Inline commands
       Given a file '{ROOT}/project/.binconfig' with content:
         """
         [hello]
-        alias=hi
-        command=echo 'Hello, World!'
+        alias = hi
+        command = echo 'Hello, World!'
         """
       When I run 'bin hi'
       Then it is successful
@@ -64,8 +64,8 @@ Feature: Inline commands
       Given a file '{ROOT}/project/.binconfig' with content:
         """
         [hello]
-        alias=hi
-        command=echo 'Hello, World!'
+        alias = hi
+        command = echo 'Hello, World!'
         """
       And a script '{ROOT}/project/bin/another'
       And a script '{ROOT}/project/bin/zebra'
@@ -92,7 +92,7 @@ Feature: Inline commands
       Given a file '{ROOT}/project/.binconfig' with content:
         """
         [hello]
-        command=echo "1=$1 2=$2"
+        command = echo "1=$1 2=$2"
         """
       When I run 'bin hello one two'
       Then it is successful
@@ -102,7 +102,7 @@ Feature: Inline commands
       Given a file '{ROOT}/project/.binconfig' with content:
         """
         [hello]
-        command=helper "$@"
+        command = helper "$@"
         """
       And a script '{ROOT}/usr/bin/helper' that outputs '1=$1 2=$2'
       When I run 'bin hello one two'
@@ -113,7 +113,7 @@ Feature: Inline commands
       Given a file '{ROOT}/project/.binconfig' with content:
         """
         [test]
-        command=echo "BIN_ROOT=$BIN_ROOT"
+        command = echo "BIN_ROOT=$BIN_ROOT"
         """
       When I run 'bin test'
       Then it is successful
@@ -123,7 +123,7 @@ Feature: Inline commands
       Given a file '{ROOT}/project/.binconfig' with content:
         """
         [test]
-        command=echo "BIN_DIR=$BIN_DIR"
+        command = echo "BIN_DIR=$BIN_DIR"
         """
       When I run 'bin test'
       Then it is successful
@@ -133,7 +133,7 @@ Feature: Inline commands
       Given a file '{ROOT}/project/.binconfig' with content:
         """
         [test]
-        command=echo "BIN_COMMAND=$BIN_COMMAND"
+        command = echo "BIN_COMMAND=$BIN_COMMAND"
         """
       When I run 'bin test'
       Then it is successful
@@ -143,7 +143,7 @@ Feature: Inline commands
       Given a file '{ROOT}/project/.binconfig' with content:
         """
         [test]
-        command=echo "BIN_EXE=$BIN_EXE"
+        command = echo "BIN_EXE=$BIN_EXE"
         """
       When I run 'bin test'
       Then it is successful
@@ -159,7 +159,7 @@ Feature: Inline commands
       Given a file '{ROOT}/project/.binconfig' with content:
         """
         [hello]
-        command=echo one; echo two
+        command = echo one; echo two
         """
       When I run 'bin hello'
       Then it is successful
@@ -173,7 +173,7 @@ Feature: Inline commands
       Given a file '{ROOT}/project/.binconfig' with content:
         """
         [hello]
-        command=echo one || echo two
+        command = echo one || echo two
         """
       When I run 'bin hello'
       Then it is successful

@@ -8,7 +8,7 @@ Feature: Aliases
     |
     | ```ini
     | [deploy]
-    | alias=publish
+    | alias = publish
     | ```
     |
     | This means `bin publish` is an alias for `bin deploy`, and running either would execute the `bin/deploy` script.
@@ -18,7 +18,7 @@ Feature: Aliases
       And a file '{ROOT}/project/.binconfig' with content:
         """
         [deploy]
-        alias=publish
+        alias = publish
         """
       When I run 'bin publish'
       Then it is successful
@@ -29,7 +29,7 @@ Feature: Aliases
       And a file '{ROOT}/project/.binconfig' with content:
         """
         [deploy live]
-        alias=publish
+        alias = publish
         """
       When I run 'bin publish'
       Then it is successful
@@ -40,7 +40,7 @@ Feature: Aliases
       And a file '{ROOT}/project/.binconfig' with content:
         """
         [publish]
-        alias=deploy live
+        alias = deploy live
         """
       When I run 'bin deploy live'
       Then it is successful
@@ -52,15 +52,15 @@ Feature: Aliases
     |
     | ```ini
     | [deploy]
-    | aliases=publish, push
+    | aliases = publish, push
     | ```
     |
     | Or you can list them on separate lines instead:
     |
     | ```ini
     | [deploy]
-    | alias=publish
-    | alias=push
+    | alias = publish
+    | alias = push
     | ```
 
     Scenario: Multiple aliases can be defined on one line
@@ -68,7 +68,7 @@ Feature: Aliases
       And a file '{ROOT}/project/.binconfig' with content:
         """
         [deploy]
-        alias=publish, push
+        alias = publish, push
         """
       When I run 'bin push'
       Then it is successful
@@ -79,7 +79,7 @@ Feature: Aliases
       And a file '{ROOT}/project/.binconfig' with content:
         """
         [deploy]
-        aliases=publish, push
+        aliases = publish, push
         """
       When I run 'bin push'
       Then it is successful
@@ -90,8 +90,8 @@ Feature: Aliases
       And a file '{ROOT}/project/.binconfig' with content:
         """
         [deploy]
-        alias=publish
-        alias=push
+        alias = publish
+        alias = push
         """
       When I run 'bin push'
       Then it is successful
@@ -138,7 +138,7 @@ Feature: Aliases
       And a file '{ROOT}/project/.binconfig' with content:
         """
         [deploy]
-        aliases=alpha, zappa
+        aliases = alpha, zappa
         """
       When I run 'bin'
       Then it is successful
@@ -187,10 +187,10 @@ Feature: Aliases
       And a file '{ROOT}/project/.binconfig' with content:
         """
         [artisan]
-        alias=art
+        alias = art
 
         [deploy]
-        alias=publish, push
+        alias = publish, push
         """
       When I run 'bin'
       Then it is successful
@@ -207,12 +207,12 @@ Feature: Aliases
       And a file '{ROOT}/project/.binconfig' with content:
         """
         [artisan]
-        alias=art
-        help=Run Laravel Artisan command with the appropriate version of PHP
+        alias = art
+        help = Run Laravel Artisan command with the appropriate version of PHP
 
         [deploy]
-        alias=publish, push
-        help=Sync the code to the live server
+        alias = publish, push
+        help = Sync the code to the live server
         """
       When I run 'bin'
       Then it is successful
@@ -231,7 +231,7 @@ Feature: Aliases
     |
     | ```ini
     | [deploy]
-    | alias=push
+    | alias = push
     | ```
     |
     | `bin push live` would be an alias for `bin deploy live`, and so on.
@@ -241,7 +241,7 @@ Feature: Aliases
       And a file '{ROOT}/project/.binconfig' with content:
         """
         [deploy]
-        alias=push
+        alias = push
         """
       When I run 'bin push live'
       Then it is successful
@@ -256,7 +256,7 @@ Feature: Aliases
     #  And a file '{ROOT}/project/.binconfig' with content:
     #    """
     #    [deploy]
-    #    alias=push
+    #    alias = push
     #    """
     #  When I run 'bin'
     #  Then it is successful
@@ -275,7 +275,7 @@ Feature: Aliases
     |
     | ```ini
     | [deploy]
-    | aliases=publish, push
+    | aliases = publish, push
     | ```
     |
     | - `bin pub` would match `bin publish`, which is an alias for `bin deploy`, which runs the `bin/deploy` script
@@ -286,7 +286,7 @@ Feature: Aliases
       And a file '{ROOT}/project/.binconfig' with content:
         """
         [deploy]
-        alias=publish
+        alias = publish
         """
       When I run 'bin pub'
       Then it is successful
@@ -297,7 +297,7 @@ Feature: Aliases
       And a file '{ROOT}/project/.binconfig' with content:
         """
         [deploy]
-        alias=publish, push
+        alias = publish, push
         """
       When I run 'bin pu'
       Then it is successful
@@ -315,7 +315,7 @@ Feature: Aliases
       And a file '{ROOT}/project/.binconfig' with content:
         """
         [one]
-        alias=two
+        alias = two
         """
       When I run 'bin'
       Then it fails with exit code 246
@@ -327,10 +327,10 @@ Feature: Aliases
       And a file '{ROOT}/project/.binconfig' with content:
         """
         [one]
-        alias=three
+        alias = three
 
         [two]
-        alias=three
+        alias = three
         """
       When I run 'bin'
       Then it fails with exit code 246
@@ -343,7 +343,7 @@ Feature: Aliases
       And a file '{ROOT}/project/.binconfig' with content:
         """
         [two]
-        alias=three
+        alias = three
         """
       When I run 'bin'
       Then it fails with exit code 246

@@ -119,10 +119,10 @@ Feature: Tab completion
       And a file '{ROOT}/project/.binconfig' with content:
         """
         [artisan]
-        alias=art
+        alias = art
 
         [deploy]
-        alias=publish
+        alias = publish
         """
       When I tab complete 'bin p'
       Then it is successful
@@ -136,7 +136,7 @@ Feature: Tab completion
       And a file '{ROOT}/project/.binconfig' with content:
         """
         [deploy]
-        alias=publish
+        alias = publish
         """
       When I tab complete 'bin '
       Then it is successful
@@ -150,8 +150,8 @@ Feature: Tab completion
       And a file '{ROOT}/project/.binconfig' with content:
         """
         [deploy]
-        alias=publish
-        alias=push
+        alias = publish
+        alias = push
         """
       When I tab complete 'bin p'
       Then it is successful
@@ -331,7 +331,7 @@ Feature: Tab completion
         """
 
     Scenario: Common non-executable file types are not tab completed in the project root even if they are executable
-      Given a file '{ROOT}/project/.binconfig' with content 'dir=.'
+      Given a file '{ROOT}/project/.binconfig' with content 'dir = .'
       And a script '{ROOT}/project/executable1.sh'
       And a script '{ROOT}/project/executable2.json'
       And a script '{ROOT}/project/executable3.md'

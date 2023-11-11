@@ -17,17 +17,17 @@ Feature: Config files
     |
     | ```ini
     | ; Global settings
-    | dir=scripts
-    | exact=true
-    | merge=true
+    | dir = scripts
+    | exact = true
+    | merge = true
     |
     | ; Settings for each command (script)
     | [hello]
-    | alias=hi
-    | help=Say "Hello, World!"
+    | alias = hi
+    | help = Say "Hello, World!"
     |
     | [phpunit]
-    | command="$BIN_ROOT/vendor/bin/phpunit" "%@"
+    | command = "$BIN_ROOT/vendor/bin/phpunit" "%@"
     | ```
     |
     | The supported global keys are:
@@ -71,10 +71,31 @@ Feature: Config files
     |
     | The INI file is parsed according to the following rules:
     |
-    | - No spaces are allowed before the key names or around the `=` signs. (I may change this in a future release.)
+    | - Spaces are allowed around the `=` signs, and are automatically trimmed from the start/end of lines.
     | - Values should not be quoted - quotes will be treated as part of the value. This avoids the need to escape inner quotes.
-    | - Boolean values can be set to `true`/`false` (recommended), `yes`/`no`, `on`/`off` or `1`/`0` (case-insensitive). Anything else triggers an error.
+    | - Boolean values can be set to `true`/`false` (recommended), `yes`/`no`, `on`/`off` or `1`/`0` (all case-insensitive). Anything else triggers an error.
     | - Lines that start with `;` or `#` are comments, which are ignored. No other lines can contain comments.
+
+    Scenario: Spaces around the = sign are optional
+      Given a file '{ROOT}/project/.binconfig' with content:
+        """
+        dir=scripts
+        """
+      And a script '{ROOT}/project/scripts/hello' that outputs 'Hello, World!'
+      When I run 'bin hello'
+      Then it is successful
+      And the output is 'Hello, World!'
+
+    Scenario: Spaces may appear at the start/end of a key
+      Given a file '{ROOT}/project/.binconfig' with content:
+        """
+        # Indented
+          dir = scripts
+        """
+      And a script '{ROOT}/project/scripts/hello' that outputs 'Hello, World!'
+      When I run 'bin hello'
+      Then it is successful
+      And the output is 'Hello, World!'
 
     Scenario: Both '#' and ';' denote comments
       Given a file '{ROOT}/project/.binconfig' with content:
@@ -82,12 +103,44 @@ Feature: Config files
         ; Comment 1
         # Comment 2
 
-        dir=scripts
+        dir = scripts
         """
       And a script '{ROOT}/project/scripts/hello' that outputs 'Hello, World!'
       When I run 'bin hello'
       Then it is successful
       And the output is 'Hello, World!'
+
+    Scenario: Comments may be preceeded by white space
+      Given a file '{ROOT}/project/.binconfig' with content:
+        """
+        dir = scripts
+          ; Comment 1
+          # Comment 2
+        """
+      And a script '{ROOT}/project/scripts/hello' that outputs 'Hello, World!'
+      When I run 'bin hello'
+      Then it is successful
+      And the output is 'Hello, World!'
+
+    Scenario: Comments may not appear at the end of a value
+      Given a file '{ROOT}/project/.binconfig' with content:
+        """
+        [sample1]
+        help = Description ; Not a comment
+
+        [sample2]
+        help = Description # Not a comment
+        """
+      And a script '{ROOT}/project/bin/sample1'
+      And a script '{ROOT}/project/bin/sample2'
+      When I run 'bin'
+      Then it is successful
+      And the output is:
+        """
+        Available commands
+        bin sample1    Description ; Not a comment
+        bin sample2    Description # Not a comment
+        """
 
   Rule: .binconfig can't be inside the bin/ folder
 
@@ -108,11 +161,11 @@ Feature: Config files
     Scenario: Unknown keys are ignored for forwards compatibility
       Given a file '{ROOT}/project/.binconfig' with content:
         """
-        ignored=global
-        dir=scripts
+        ignored = global
+        dir = scripts
 
         [command]
-        ignored=command
+        ignored = command
         """
       And a script '{ROOT}/project/scripts/hello' that outputs 'Hello, World!'
       When I run 'bin hello'
@@ -123,7 +176,7 @@ Feature: Config files
       Given a file '{ROOT}/project/.binconfig' with content:
         """
         [my-command]
-        help=Description of command
+        help = Description of command
         """
       And a script '{ROOT}/project/bin/sample'
       When I run 'bin'
