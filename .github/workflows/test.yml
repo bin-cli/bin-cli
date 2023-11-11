@@ -116,9 +116,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install MSYS2
-        uses: msys2/setup-msys2@v2
+      - name: Run simple tests
+        shell: C:\msys64\usr\bin\bash.exe {0}
+        run: bin/simple-test
+
+  test-on-wsl:
+    name: Test on Windows (WSL)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
 
       - name: Run simple tests
-        shell: msys2 {0}
+        shell: C:\Windows\System32\bash.exe {0}
         run: bin/simple-test
