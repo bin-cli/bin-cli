@@ -32,14 +32,14 @@ async function autoUpdate(filename, tag, output) {
     await writeFile(filename, newContent);
 }
 
-After({tags: '@auto-update-cli-reference-docs'}, async function (hook) {
+After({tags: '@auto-update-cli-reference'}, async function (hook) {
     if (hook.result.status === 'FAILED') {
         return 'skipped';
     }
 
     await autoUpdate(
-        `${paths.bin}/README.md`,
-        'auto-update-cli-reference-docs',
+        `${paths.bin}/features/6.00-cli-reference.md`,
+        'auto-update-cli-reference',
         '\n\n```\n' + this.runResult.stdout + '```\n\n',
     );
 });

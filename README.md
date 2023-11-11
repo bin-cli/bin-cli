@@ -522,6 +522,7 @@ The following variables are available:
 - `$1`, `$2`, ... and `$@` contain the additional arguments, as normal
 - `$BIN_ROOT` points to the project root directory (where `.binconfig` is found)
 - `$BIN_DIR` points to the directory containing the scripts (usually `$BIN_ROOT/bin`, unless configured otherwise)
+- The [standard environment variables](#environment-variables-to-use-in-scripts) listed below
 
 <details>
 <summary><em>How complex can the command be?</em></summary>
@@ -712,6 +713,74 @@ You can skip it (i.e. use `alias b='bin'`) if you prefer it to say `bin`.
 
 </details>
 
+### Merging Directories
+
+Occasionally, you may want to define commands that are specific to a certain subdirectory, without losing access to the main (parent) project commands.
+
+For example, you may have several different themes, each with its own `build` command:
+
+```
+repo/                  ← parent project
+├── bin/
+│   └── deploy
+├── themes/
+│   ├── one/           ← child project
+│   │   ├── bin/
+│   │   │   └── build
+│   │   ├── .binconfig
+│   │   └── ...
+│   └── ...
+└── ...
+```
+
+Normally, if you are in the `themes/one/` directory:
+
+- `bin build` runs `themes/one/bin/build`
+- `bin deploy` gives an error, because the parent directory is ignored
+
+But if you add this to `.binconfig` (in the child project):
+
+```ini
+merge=true
+```
+
+Then:
+
+- `bin build` still runs `themes/one/bin/build`
+- `bin deploy` runs `bin/deploy`
+
+<details>
+<summary><em>Can child project commands override parent project commands?</em></summary>
+
+> No - any conflicts will be reported as an error, the same as if they were defined at the same level (e.g. by defining a command and an alias with the same name).
+>
+> This is mostly because it would make the conflict-checking code too complex - but it has the benefit of enforcing simplicity.
+
+</details>
+
+<details>
+<summary><em>Does this work with inline commands and aliases?</em></summary>
+
+> Yes - you can use any combination of scripts, inline commands and aliases in both the parent and child projects.
+
+</details>
+
+<details>
+<summary><em>What if no parent <code>bin/</code> directory exists?</em></summary>
+
+> If you set `merge=true` but no parent `bin/` directory (or `.binconfig` file) is found, Bin will exit with an error.
+>
+> To avoid that, set `merge=optional` instead. This may be useful in sub-projects that have separate repositories, so you can't guarantee they will be cloned together.
+
+</details>
+
+<details>
+<summary><em>Can three (or more) directories be merged?</em></summary>
+
+> Yes - just set `merge=true` at each level below the first.
+
+</details>
+
 ### Automatic Exclusions
 
 Scripts starting with `_` (underscore) are excluded from listings, but can still be executed. This can be used for hidden tools and helper scripts that are not intended to be executed directly. (Or you could use a separate [`libexec` directory](https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch04s07.html) in the project root if you prefer.)
@@ -726,7 +795,7 @@ The directories `/bin`, `/snap/bin`, `/usr/bin`, `/usr/local/bin` and `~/bin` ar
 
 ## CLI Reference
 
-<!-- START auto-update-cli-reference-docs -->
+<!-- START auto-update-cli-reference -->
 
 ```
 Usage: bin [OPTIONS] [--] [COMMAND] [ARGUMENTS...]
@@ -753,7 +822,7 @@ Any options must be given before the command, because everything after the comma
 For more details see https://github.com/bin-cli/bin-cli#readme
 ```
 
-<!-- END auto-update-cli-reference-docs -->
+<!-- END auto-update-cli-reference -->
 
 ## License
 

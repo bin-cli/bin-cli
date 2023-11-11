@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -o errexit -o nounset -o pipefail
+cd "$(dirname "$0")/.."
+
+while true; do
+
+    # Clear the screen
+    clear
+
+    # Quickly update the README, if possible, so I don't have to wait too long to view changes
+    bin/generate-readme 2>/dev/null || true
+
+    # Run the tests, then update the README again, because the tests may update the content
+    (
+        bin/test "$@"
+        bin/generate-readme
+    ) || true
+
+    # Wait until something changes
+    inotifywait -qqr \
+        -e create -e modify -e move -e attrib -e delete \
+        bin/build features src
+
+done

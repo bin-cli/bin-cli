@@ -1,0 +1,78 @@
+#!/usr/bin/env node
+process.chdir(`${__dirname}/..`);
+
+const Gherkin = require('@cucumber/gherkin');
+const Messages = require('@cucumber/messages');
+const fs = require('fs');
+
+const uuidFn = Messages.IdGenerator.uuid();
+const builder = new Gherkin.AstBuilder(uuidFn);
+const matcher = new Gherkin.GherkinClassicTokenMatcher();
+const parser = new Gherkin.Parser(builder, matcher);
+
+// Using the '| ' prefix to indicate Markdown lines because it ensures Cucumber
+// treats all lines as text - otherwise '#' is treated as a comment. Maybe this
+// is / will be fixed in a later version, since the docs say "Descriptions can
+// be in the form of Markdown".
+const lineRegex = /\r?\n/;
+const markdownRegex = /^\s*\|\s?(.*)$/;
+
+function extractPrefixedMarkdown(content) {
+    const lines = [];
+
+    if (!content) {
+        return '';
+    }
+
+    for (const line of content.split(lineRegex)) {
+        const matches = line.match(markdownRegex);
+        if (matches) {
+            lines.push(matches[1]);
+        }
+    }
+
+    return lines.join('\n').trim();
+}
+
+const markdownBlocks = [];
+
+function addPrefixedBlock(block) {
+    const markdown = extractPrefixedMarkdown(block);
+    if (markdown) {
+        markdownBlocks.push(markdown);
+    }
+}
+
+function addFeatureFile(filename) {
+    const fileContent = fs.readFileSync(filename, 'utf8');
+    const gherkinDocument = parser.parse(fileContent);
+
+    if (gherkinDocument.feature.description) {
+        addPrefixedBlock(gherkinDocument.feature.description);
+    }
+
+    for (const child of gherkinDocument.feature.children) {
+        if (child.rule) {
+            addPrefixedBlock(child.rule.description);
+        }
+        if (child.scenario) {
+            addPrefixedBlock(child.scenario.description);
+        }
+    }
+}
+
+function addMarkdownFile(filename) {
+    markdownBlocks.push(fs.readFileSync(filename, 'utf8').trim());
+}
+
+for (const filename of fs.readdirSync('features')) {
+    if (filename.match(/\.feature$/)) {
+        addFeatureFile(`features/${filename}`);
+    } else if (filename.match(/\.md$/)) {
+        addMarkdownFile(`features/${filename}`);
+    }
+}
+
+fs.writeFile('README.md', markdownBlocks.join('\n\n') + '\n', (err) => {
+    if (err) throw err;
+});

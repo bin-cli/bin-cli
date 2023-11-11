@@ -4,6 +4,10 @@ help=Generate a build of Bin into temp/dist/ (not normally called directly)
 [cucumber]
 help=Run Cucumber.js directly
 
+[generate-readme]
+alias=docs, readme
+help=Update the README file from the files in features/
+
 [release]
 alias=deploy
 help=Create a new release of Bin with the given version number
@@ -14,9 +18,9 @@ help=Install development dependencies (on Ubuntu)
 [simple-test]
 help=Build and run only a few simple tests - mainly used as smoke tests on Windows
 
-[tdd]
-alias=watch
-help=Watch for changes to source files and run all tests automatically
+[watch]
+alias=tdd
+help=Watch for changes to source files, run all tests automatically and update the README
 
 [test]
 help=Build and run tests, and display debugging information if it fails
