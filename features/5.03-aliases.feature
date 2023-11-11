@@ -247,25 +247,22 @@ Feature: Aliases
       Then it is successful
       And the output is 'Copying to production...'
 
-    # TODO: This currently outputs a warning:
-    #       Warning: The following commands listed in .binconfig do not exist:
-    #       [deploy]
-    #Scenario: Aliases defined for directories are displayed in command listings
-    #  Given a script '{ROOT}/project/bin/deploy/live'
-    #  And a script '{ROOT}/project/bin/deploy/staging'
-    #  And a file '{ROOT}/project/.binconfig' with content:
-    #    """
-    #    [deploy]
-    #    alias = push
-    #    """
-    #  When I run 'bin'
-    #  Then it is successful
-    #  And the output is:
-    #    """
-    #    Available commands
-    #    bin deploy live       (alias: push live)
-    #    bin deploy staging    (alias: push staging)
-    #    """
+    Scenario: Aliases defined for directories are displayed in command listings
+      Given a script '{ROOT}/project/bin/deploy/live'
+      And a script '{ROOT}/project/bin/deploy/staging'
+      And a file '{ROOT}/project/.binconfig' with content:
+        """
+        [deploy]
+        alias = push
+        """
+      When I run 'bin'
+      Then it is successful
+      And the output is:
+        """
+        Available commands
+        bin deploy live       (alias: push live)
+        bin deploy staging    (alias: push staging)
+        """
 
   Rule: Aliases are considered by unique prefix matching
 

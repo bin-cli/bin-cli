@@ -370,6 +370,17 @@ map_get() {
     echo "${!key-$default}"
 }
 
+map_has() {
+    local key map
+
+    map=$1
+    key=$2
+
+    key=$(map_key "$map" "$key")
+
+    [[ -v $key ]]
+}
+
 #---------------------------------------
 # Filesystem
 #---------------------------------------
@@ -695,10 +706,11 @@ is_hidden_command() {
 }
 
 find_matching_commands() {
-    local alias alias_found command target type
+    local alias command target type
 
     type=$1
     target=$2
+    stop_after_first=${3-false}
 
     map_init commands_matching_aliases
 
@@ -711,13 +723,29 @@ find_matching_commands() {
 
     matching_commands=()
     for command in ${registered_commands+"${registered_commands[@]}"}; do
-        alias_found=$(map_get commands_matching_aliases "$command" false)
-        if $alias_found; then
+        if map_has commands_matching_aliases "$command"; then
             matching_commands+=("$command")
         elif command_matches "$type" "$target" "$command"; then
             matching_commands+=("$command")
+        else
+            continue
+        fi
+
+        if $stop_after_first; then
+            break
         fi
     done
+}
+
+has_matching_commands() {
+    local alias command target type
+
+    type=$1
+    target=$2
+
+    find_matching_commands "$type" "$target" true
+
+    [[ ${#matching_commands[@]} -gt 0 ]]
 }
 
 matching_commands_shared_prefix() {
@@ -1357,7 +1385,6 @@ done
 shortened_commands=()
 
 for command in ${list_commands+"${list_commands[@]}"}; do
-    executable=$(map_get command_to_executable "$command")
     short=$(remove_extension "$command")
 
     if [[ "$short" = "$command" ]]; then
@@ -1537,11 +1564,23 @@ fi
 # Missing commands in .binconfig
 missing_commands=()
 for command in ${commands_listed_in_config+"${commands_listed_in_config[@]}"}; do
-    executable=$(map_get command_to_executable "$command")
-    script=$(map_get command_to_inline_script "$command")
-    if [[ -z $executable && -z $script ]]; then
-        missing_commands+=("$command")
+
+    # Regular script
+    if map_has command_to_executable "$command"; then
+        continue
     fi
+
+    # Inline command
+    if map_has command_to_inline_script "$command"; then
+        continue
+    fi
+
+    # Directory
+    if has_matching_commands subcommands "$command"; then
+        continue
+    fi
+
+    missing_commands+=("$command")
 done
 
 if [[ ${#missing_commands[@]} -gt 0 ]]; then
