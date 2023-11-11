@@ -31,7 +31,17 @@ function extractPrefixedMarkdown(content) {
         }
     }
 
-    return lines.join('\n').trim();
+    let detailsTitle = null;
+    if (lines[0].startsWith('COLLAPSE:')) {
+        detailsTitle = lines.shift().slice(9).trim();
+    }
+
+    let markdown = lines.join('\n').trim();
+    if (detailsTitle) {
+        markdown = `<details><summary><em>${detailsTitle}</em></summary><blockquote>\n\n${markdown}\n\n</blockquote></details>`;
+    }
+
+    return markdown;
 }
 
 const markdownBlocks = [];

@@ -8,11 +8,10 @@ Feature: Subcommands
     |
     | ```
     | repo/
-    | ├── bin/
-    | │   └── deploy/
-    | │       ├── production
-    | │       └── staging
-    | └── ...
+    | └── bin/
+    |     └── deploy/
+    |         ├── production
+    |         └── staging
     | ```
     |
     | Now `bin deploy production` will run `bin/deploy/production`, and `bin deploy` will list the available subcommands:

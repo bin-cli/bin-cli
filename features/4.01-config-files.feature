@@ -59,26 +59,20 @@ Feature: Config files
 
   Rule: .binconfig files are optional
 
-    | <details>
-    | <summary><em>Do I need to create a <code>.binconfig</code> file?</em></summary>
+    | COLLAPSE: Do I need to create a <code>.binconfig</code> file?
     |
-    | > No - `.binconfig` only needs to exist if you want to use the features described below.
-    |
-    | </details>
+    | No - `.binconfig` only needs to exist if you want to use the features described below.
 
   Rule: .binconfig formatting rules
 
-    | <details>
-    | <summary><em>What dialect of INI file is used?</em></summary>
+    | COLLAPSE: What dialect of INI file is used?
     |
-    | > The INI file is parsed according to the following rules:
-    | >
-    | > - No spaces are allowed before the key names or around the `=` signs. (I may change this in a future release.)
-    | > - Values should not be quoted - quotes will be treated as part of the value. This avoids the need to escape inner quotes.
-    | > - Boolean values can be set to `true`/`false` (recommended), `yes`/`no`, `on`/`off` or `1`/`0` (case-insensitive). Anything else triggers an error.
-    | > - Lines that start with `;` or `#` are comments, which are ignored. No other lines can contain comments.
+    | The INI file is parsed according to the following rules:
     |
-    | </details>
+    | - No spaces are allowed before the key names or around the `=` signs. (I may change this in a future release.)
+    | - Values should not be quoted - quotes will be treated as part of the value. This avoids the need to escape inner quotes.
+    | - Boolean values can be set to `true`/`false` (recommended), `yes`/`no`, `on`/`off` or `1`/`0` (case-insensitive). Anything else triggers an error.
+    | - Lines that start with `;` or `#` are comments, which are ignored. No other lines can contain comments.
 
     Scenario: Both '#' and ';' denote comments
       Given a file '{ROOT}/project/.binconfig' with content:
@@ -95,25 +89,19 @@ Feature: Config files
 
   Rule: .binconfig can't be inside the bin/ folder
 
-    | <details>
-    | <summary><em>Why isn't <code>.binconfig</code> inside <code>bin/</code>?</em></summary>
+    | COLLAPSE: Why isn't <code>.binconfig</code> inside <code>bin/</code>?
     |
-    | > `.binconfig` can't be inside the `bin/` directory because the [`dir` setting](#custom-script-directory) may change the name of the `bin/` directory, creating a chicken-and-egg problem (how would we find it in the first place?).
-    | >
-    | > Technically it would be possible to support both locations for every setting _except_ `dir` - and I may if there is demand for it... But then we would have to decide what happens if there are two files - error, or merge them? If merged, how should we handle conflicts? Which one should `bin --edit .binconfig` open? And so on.
+    | `.binconfig` can't be inside the `bin/` directory because the [`dir` setting](#custom-script-directory) may change the name of the `bin/` directory, creating a chicken-and-egg problem (how would we find it in the first place?).
     |
-    | </details>
+    | Technically it would be possible to support both locations for every setting _except_ `dir` - and I may if there is demand for it... But then we would have to decide what happens if there are two files - error, or merge them? If merged, how should we handle conflicts? Which one should `bin --edit .binconfig` open? And so on.
 
   Rule: Invalid key names are ignored
 
-    | <details>
-    | <summary><em>What happens if an invalid key name is used?</em></summary>
+    | COLLAPSE: What happens if an invalid key name is used?
     |
-    | > Invalid keys are ignored, to allow for forwards-compatibility with future versions of Bin CLI which may support additional settings. (The downside of this is you won't be warned if you make a typo, so I may change this in the future.)
-    | >
-    | > Invalid command names are displayed as a warning when you run `bin`, after the command listing.
+    | Invalid keys are ignored, to allow for forwards-compatibility with future versions of Bin CLI which may support additional settings. (The downside of this is you won't be warned if you make a typo, so I may change this in the future.)
     |
-    | </details>
+    | Invalid command names are displayed as a warning when you run `bin`, after the command listing.
 
     Scenario: Unknown keys are ignored for forwards compatibility
       Given a file '{ROOT}/project/.binconfig' with content:

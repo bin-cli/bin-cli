@@ -151,12 +151,9 @@ Feature: Inline commands
 
   Rule: Inline commands are executed within a Bash shell
 
-    | <details>
-    | <summary><em>How complex can the command be?</em></summary>
+    | COLLAPSE: How complex can the command be?
     |
-    | > The command is executed within a Bash shell (`bash -c "$command"`), so it may contain logic operators (`&&`, `||`), multiple commands separated by `;`, and pretty much anything else that you can fit into a single line.
-    |
-    | </details>
+    | The command is executed within a Bash shell (`bash -c "$command"`), so it may contain logic operators (`&&`, `||`), multiple commands separated by `;`, and pretty much anything else that you can fit into a single line.
 
     Scenario: Inline commands can contain multiple commands
       Given a file '{ROOT}/project/.binconfig' with content:
@@ -184,17 +181,14 @@ Feature: Inline commands
 
   Rule: Inline commands are not the recommended way to write commands
 
-    | <details>
-    | <summary><em>Why is this not the standard / recommended way to write commands?</em></summary>
+    | COLLAPSE: Why is this not the standard / recommended way to write commands?
     |
-    | > If you're using Bin as a replacement for the one-line tasks typically [defined in package.json](https://docs.npmjs.com/cli/commands/npm-run-script), it might seem perfectly natural to write all tasks this way (and you can do that if you want to).
-    | >
-    | > However, I generally recommend writing slightly longer, more robust scripts. For example, checking that dependencies are installed before you attempt to do something that requires them, or even [installing them automatically](https://github.com/bin-cli/bin-cli/wiki/Automatically-installing-dependencies). It's hard to do that when you're limited to a single line of code.
-    | >
-    | > It also violates this fundamental principle of Bin, listed in the introduction above:
-    | >
-    | > > Collaborators / contributors who choose not to install Bin can run the scripts directly, so you can enjoy the benefits without adding a hard dependency or extra barrier to entry.
-    | >
-    | > That's why I recommend only using inline commands for very simple commands, such as calling a third-party script installed by a package manager (as in the `phpunit` example) or creating a shorthand for a command that could easily be run directly (as in the `watch` example).
+    | If you're using Bin as a replacement for the one-line tasks typically [defined in package.json](https://docs.npmjs.com/cli/commands/npm-run-script), it might seem perfectly natural to write all tasks this way (and you can do that if you want to).
     |
-    | </details>
+    | However, I generally recommend writing slightly longer, more robust scripts. For example, checking that dependencies are installed before you attempt to do something that requires them, or even [installing them automatically](https://github.com/bin-cli/bin-cli/wiki/Automatically-installing-dependencies). It's hard to do that when you're limited to a single line of code.
+    |
+    | It also violates this fundamental principle of Bin, listed in the introduction above:
+    |
+    | > Collaborators / contributors who choose not to install Bin can run the scripts directly, so you can enjoy the benefits without adding a hard dependency or extra barrier to entry.
+    |
+    | That's why I recommend only using inline commands for very simple commands, such as calling a third-party script installed by a package manager (as in the `phpunit` example) or creating a shorthand for a command that could easily be run directly (as in the `watch` example).

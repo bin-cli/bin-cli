@@ -12,14 +12,11 @@ Feature: Merging Directories
     | repo/                  ← parent project
     | ├── bin/
     | │   └── deploy
-    | ├── themes/
-    | │   ├── one/           ← child project
-    | │   │   ├── bin/
-    | │   │   │   └── build
-    | │   │   ├── .binconfig
-    | │   │   └── ...
-    | │   └── ...
-    | └── ...
+    | └── themes/
+    |     └── one/           ← child project
+    |         ├── bin/
+    |         │   └── build
+    |         └── .binconfig
     | ```
     |
     | Normally, if you are in the `themes/one/` directory:
@@ -33,7 +30,7 @@ Feature: Merging Directories
     | merge=true
     | ```
     |
-    | Then:
+    | Then the two `bin/` directories are merged, so:
     |
     | - `bin build` still runs `themes/one/bin/build`
     | - `bin deploy` runs `bin/deploy`
@@ -184,14 +181,11 @@ Feature: Merging Directories
 
   Rule: There can't be any conflicts between directories
 
-    | <details>
-    | <summary><em>Can child project commands override parent project commands?</em></summary>
+    | COLLAPSE: Can child project commands override parent project commands?
     |
-    | > No - any conflicts will be reported as an error, the same as if they were defined at the same level (e.g. by defining a command and an alias with the same name).
-    | >
-    | > This is mostly because it would make the conflict-checking code too complex - but it has the benefit of enforcing simplicity.
+    | No - any conflicts will be reported as an error, the same as if they were defined at the same level (e.g. by defining a command and an alias with the same name).
     |
-    | </details>
+    | This is mostly because it would make the conflict-checking code too complex - but it has the benefit of enforcing simplicity (parent commands work from anywhere, and accidental conflicts are reported).
 
     Scenario: If a child project command conflicts with a parent project command, an error is raised
       Given a file '{ROOT}/project/subdir/.binconfig' with content 'merge=true'
@@ -204,12 +198,9 @@ Feature: Merging Directories
 
   Rule: Merging works with inline commands
 
-    | <details>
-    | <summary><em>Does this work with inline commands and aliases?</em></summary>
+    | COLLAPSE: Does this work with inline commands and aliases?
     |
-    | > Yes - you can use any combination of scripts, inline commands and aliases in both the parent and child projects.
-    |
-    | </details>
+    | Yes - you can use any combination of scripts, inline commands and aliases in both the parent and child projects.
 
     Scenario: Commands can be merged with a higher level .binconfig
       Given a file '{ROOT}/project/subdir/subsubdir/.binconfig' with content 'merge=true'
@@ -254,14 +245,11 @@ Feature: Merging Directories
 
   Rule: The parent directory must exist, unless merge=optional
 
-    | <details>
-    | <summary><em>What if no parent <code>bin/</code> directory exists?</em></summary>
+    | COLLAPSE: What if no parent project is found?
     |
-    | > If you set `merge=true` but no parent `bin/` directory (or `.binconfig` file) is found, Bin will exit with an error.
-    | >
-    | > To avoid that, set `merge=optional` instead. This may be useful in sub-projects that have separate repositories, so you can't guarantee they will be cloned together.
+    | If you set `merge=true` but there is no parent `bin/` directory (or `.binconfig` file), Bin will exit with an error.
     |
-    | </details>
+    | To avoid that, set `merge=optional` instead. This may be useful in sub-projects that have separate repositories, so you can't guarantee they will be cloned together.
 
     Scenario: If the parent directory doesn't exist and 'merge=true', an error is raised
       Given a file '{ROOT}/project/.binconfig' with content 'merge=true'
@@ -281,12 +269,9 @@ Feature: Merging Directories
 
   Rule: More than two levels can be merged
 
-    | <details>
-    | <summary><em>Can three (or more) directories be merged?</em></summary>
+    | COLLAPSE: Can three (or more) directories be merged?
     |
-    | > Yes - just set `merge=true` at each level below the first.
-    |
-    | </details>
+    | Yes - just set `merge=true` at each level below the first.
 
     Scenario: A third level can be merged if enabled
       Given a file '{ROOT}/project/subdir/subsubdir/.binconfig' with content 'merge=true'

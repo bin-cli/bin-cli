@@ -70,11 +70,10 @@ If you have multiple related commands, you may want to group them together and m
 
 ```
 repo/
-├── bin/
-│   └── deploy/
-│       ├── production
-│       └── staging
-└── ...
+└── bin/
+    └── deploy/
+        ├── production
+        └── staging
 ```
 
 Now `bin deploy production` will run `bin/deploy/production`, and `bin deploy` will list the available subcommands:
@@ -108,40 +107,39 @@ bin hello
 bin help
 </pre>
 
-<details>
-<summary><em>How can I disable unique prefix matching?</em></summary>
+<details><summary><em>How can I disable unique prefix matching?</em></summary><blockquote>
 
-> If you prefer to disable unique prefix matching, use `--exact` on the command line:
->
-> ```bash
-> bin --exact hello
-> ```
->
-> You'll probably want to set up a shell alias rather than typing it manually:
->
-> ```bash
-> alias bin='bin --exact'
-> ```
->
-> To disable it for a project, add this at the top of [`.binconfig`](#config-files):
->
-> ```ini
-> exact=true
-> ```
->
-> To enable it again, overriding the config file, use `--prefix`:
->
-> ```bash
-> bin --prefix hel
-> ```
->
-> Again, you'll probably want to set up a shell alias:
->
-> ```bash
-> alias bin='bin --prefix'
-> ```
+If you prefer to disable unique prefix matching, use `--exact` on the command line:
 
-</details>
+```bash
+bin --exact hello
+```
+
+You'll probably want to set up a shell alias rather than typing it manually:
+
+```bash
+alias bin='bin --exact'
+```
+
+To disable it for a project, add this at the top of [`.binconfig`](#config-files):
+
+```ini
+exact=true
+```
+
+To enable it again, overriding the config file, use `--prefix`:
+
+```bash
+bin --prefix hel
+```
+
+Again, you'll probably want to set up a shell alias:
+
+```bash
+alias bin='bin --prefix'
+```
+
+</blockquote></details>
 
 ## Installation
 
@@ -220,42 +218,40 @@ To any of the following files:
 
 _Only Bash is supported at this time. I will add other shells if there is [demand for it](https://github.com/bin-cli/bin-cli/discussions/categories/ideas), or gladly accept [pull requests](https://github.com/bin-cli/bin-cli/pulls)._
 
-<details>
-<summary><em>How to use tab completion with custom aliases?</em></summary>
+<details><summary><em>How to use tab completion with custom aliases?</em></summary><blockquote>
 
-> If you are using a simple [shell alias](#aliasing-the-bin-command), e.g. `alias b=bin`, update the filename to match and add `--exe <name>`:
->
-> ```bash
-> # e.g. in /usr/share/bash-completion/completions/b
-> command -v bin &>/dev/null && eval "$(bin --completion --exe b)"
-> ```
->
-> If you have globally disabled [unique prefix matching](#unique-prefix-matching), e.g. `alias bin='bin --exact'`, add the same parameter here:
->
-> ```bash
-> # e.g. in /usr/share/bash-completion/completions/bin
-> command -v bin &>/dev/null && eval "$(bin --completion --exact)"
-> ```
->
-> Similarly, if you are using an alias with a [custom script directory](#custom-script-directory), e.g. `alias src='bin --dir scripts'`, add the same parameter here:
->
-> ```bash
-> # e.g. in /usr/share/bash-completion/completions/scr
-> command -v bin &>/dev/null && eval "$(bin --completion --exe scr --dir scripts)"
-> ```
->
-> If you have multiple aliases, just create a file for each one (or put them all together in `~/.bash_completion` or `~/.bashrc`).
+If you are using a simple [shell alias](#aliasing-the-bin-command), e.g. `alias b=bin`, update the filename to match and add `--exe <name>`:
 
-</details>
+```bash
+# e.g. in /usr/share/bash-completion/completions/b
+command -v bin &>/dev/null && eval "$(bin --completion --exe b)"
+```
 
-<details>
-<summary><em>Why use <code>eval</code>?</em></summary>
+If you have globally disabled [unique prefix matching](#unique-prefix-matching), e.g. `alias bin='bin --exact'`, add the same parameter here:
 
-> Using `eval` makes it more future-proof - in case I need to change how tab completion works in the future.
->
-> If you prefer, you can manually run `bin --completion` and paste the output into the file instead.
+```bash
+# e.g. in /usr/share/bash-completion/completions/bin
+command -v bin &>/dev/null && eval "$(bin --completion --exact)"
+```
 
-</details>
+Similarly, if you are using an alias with a [custom script directory](#custom-script-directory), e.g. `alias src='bin --dir scripts'`, add the same parameter here:
+
+```bash
+# e.g. in /usr/share/bash-completion/completions/scr
+command -v bin &>/dev/null && eval "$(bin --completion --exe scr --dir scripts)"
+```
+
+If you have multiple aliases, just create a file for each one (or put them all together in `~/.bash_completion` or `~/.bashrc`).
+
+</blockquote></details>
+
+<details><summary><em>Why use <code>eval</code>?</em></summary><blockquote>
+
+Using `eval` makes it more future-proof - in case I need to change how tab completion works in the future.
+
+If you prefer, you can manually run `bin --completion` and paste the output into the file instead.
+
+</blockquote></details>
 
 ## Per-Project Setup
 
@@ -337,42 +333,38 @@ The supported per-command keys are:
 - `help` (string) - [Help text](#help-text)
 - `command` (string) - [Inline commands](#inline-commands)
 
-<details>
-<summary><em>Do I need to create a <code>.binconfig</code> file?</em></summary>
+<details><summary><em>Do I need to create a <code>.binconfig</code> file?</em></summary><blockquote>
 
-> No - `.binconfig` only needs to exist if you want to use the features described below.
+No - `.binconfig` only needs to exist if you want to use the features described below.
 
-</details>
+</blockquote></details>
 
-<details>
-<summary><em>What dialect of INI file is used?</em></summary>
+<details><summary><em>What dialect of INI file is used?</em></summary><blockquote>
 
-> The INI file is parsed according to the following rules:
->
-> - No spaces are allowed before the key names or around the `=` signs. (I may change this in a future release.)
-> - Values should not be quoted - quotes will be treated as part of the value. This avoids the need to escape inner quotes.
-> - Boolean values can be set to `true`/`false` (recommended), `yes`/`no`, `on`/`off` or `1`/`0` (case-insensitive). Anything else triggers an error.
-> - Lines that start with `;` or `#` are comments, which are ignored. No other lines can contain comments.
+The INI file is parsed according to the following rules:
 
-</details>
+- No spaces are allowed before the key names or around the `=` signs. (I may change this in a future release.)
+- Values should not be quoted - quotes will be treated as part of the value. This avoids the need to escape inner quotes.
+- Boolean values can be set to `true`/`false` (recommended), `yes`/`no`, `on`/`off` or `1`/`0` (case-insensitive). Anything else triggers an error.
+- Lines that start with `;` or `#` are comments, which are ignored. No other lines can contain comments.
 
-<details>
-<summary><em>Why isn't <code>.binconfig</code> inside <code>bin/</code>?</em></summary>
+</blockquote></details>
 
-> `.binconfig` can't be inside the `bin/` directory because the [`dir` setting](#custom-script-directory) may change the name of the `bin/` directory, creating a chicken-and-egg problem (how would we find it in the first place?).
->
-> Technically it would be possible to support both locations for every setting _except_ `dir` - and I may if there is demand for it... But then we would have to decide what happens if there are two files - error, or merge them? If merged, how should we handle conflicts? Which one should `bin --edit .binconfig` open? And so on.
+<details><summary><em>Why isn't <code>.binconfig</code> inside <code>bin/</code>?</em></summary><blockquote>
 
-</details>
+`.binconfig` can't be inside the `bin/` directory because the [`dir` setting](#custom-script-directory) may change the name of the `bin/` directory, creating a chicken-and-egg problem (how would we find it in the first place?).
 
-<details>
-<summary><em>What happens if an invalid key name is used?</em></summary>
+Technically it would be possible to support both locations for every setting _except_ `dir` - and I may if there is demand for it... But then we would have to decide what happens if there are two files - error, or merge them? If merged, how should we handle conflicts? Which one should `bin --edit .binconfig` open? And so on.
 
-> Invalid keys are ignored, to allow for forwards-compatibility with future versions of Bin CLI which may support additional settings. (The downside of this is you won't be warned if you make a typo, so I may change this in the future.)
->
-> Invalid command names are displayed as a warning when you run `bin`, after the command listing.
+</blockquote></details>
 
-</details>
+<details><summary><em>What happens if an invalid key name is used?</em></summary><blockquote>
+
+Invalid keys are ignored, to allow for forwards-compatibility with future versions of Bin CLI which may support additional settings. (The downside of this is you won't be warned if you make a typo, so I may change this in the future.)
+
+Invalid command names are displayed as a warning when you run `bin`, after the command listing.
+
+</blockquote></details>
 
 ## Other Features
 
@@ -466,41 +458,38 @@ bin artisan    Run Laravel Artisan command with the appropriate version of PHP <
 bin deploy     Sync the code to the live server <em>(aliases: publish, push)</em>
 </pre>
 
-<details>
-<summary><em>Can I define aliases for commands that have subcommands?</em></summary>
+<details><summary><em>Can I define aliases for commands that have subcommands?</em></summary><blockquote>
 
-> Yes - for example, given a script `bin/deploy/live` and this config file:
->
-> ```ini
-> [deploy]
-> alias=push
-> ```
->
-> `bin push live` would be an alias for `bin deploy live`, and so on.
+Yes - for example, given a script `bin/deploy/live` and this config file:
 
-</details>
+```ini
+[deploy]
+alias=push
+```
 
-<details>
-<summary><em>How do aliases affect unique prefix matching?</em></summary>
+`bin push live` would be an alias for `bin deploy live`, and so on.
 
-> Aliases are checked when looking for unique prefixes. In this example:
->
-> ```ini
-> [deploy]
-> aliases=publish, push
-> ```
->
-> - `bin pub` would match `bin publish`, which is an alias for `bin deploy`, which runs the `bin/deploy` script
-> - `bin pu` would match both `bin publish` and `bin push` - but since both are aliases for `bin deploy`, that would be treated as a unique prefix and would therefore also run `bin/deploy`
+</blockquote></details>
 
-</details>
+<details><summary><em>How do aliases affect unique prefix matching?</em></summary><blockquote>
 
-<details>
-<summary><em>What happens if an alias conflicts with another command?</em></summary>
+Aliases are checked when looking for unique prefixes. In this example:
 
-> Defining an alias that conflicts with a script or another alias will cause Bin to exit with error code 246 and print a message to stderr.
+```ini
+[deploy]
+aliases=publish, push
+```
 
-</details>
+- `bin pub` would match `bin publish`, which is an alias for `bin deploy`, which runs the `bin/deploy` script
+- `bin pu` would match both `bin publish` and `bin push` - but since both are aliases for `bin deploy`, that would be treated as a unique prefix and would therefore also run `bin/deploy`
+
+</blockquote></details>
+
+<details><summary><em>What happens if an alias conflicts with another command?</em></summary><blockquote>
+
+Defining an alias that conflicts with a script or another alias will cause Bin to exit with error code 246 and print a message to stderr.
+
+</blockquote></details>
 
 ### Inline Commands
 
@@ -524,27 +513,25 @@ The following variables are available:
 - `$BIN_DIR` points to the directory containing the scripts (usually `$BIN_ROOT/bin`, unless configured otherwise)
 - The [standard environment variables](#environment-variables-to-use-in-scripts) listed below
 
-<details>
-<summary><em>How complex can the command be?</em></summary>
+<details><summary><em>How complex can the command be?</em></summary><blockquote>
 
-> The command is executed within a Bash shell (`bash -c "$command"`), so it may contain logic operators (`&&`, `||`), multiple commands separated by `;`, and pretty much anything else that you can fit into a single line.
+The command is executed within a Bash shell (`bash -c "$command"`), so it may contain logic operators (`&&`, `||`), multiple commands separated by `;`, and pretty much anything else that you can fit into a single line.
 
-</details>
+</blockquote></details>
 
-<details>
-<summary><em>Why is this not the standard / recommended way to write commands?</em></summary>
+<details><summary><em>Why is this not the standard / recommended way to write commands?</em></summary><blockquote>
 
-> If you're using Bin as a replacement for the one-line tasks typically [defined in package.json](https://docs.npmjs.com/cli/commands/npm-run-script), it might seem perfectly natural to write all tasks this way (and you can do that if you want to).
->
-> However, I generally recommend writing slightly longer, more robust scripts. For example, checking that dependencies are installed before you attempt to do something that requires them, or even [installing them automatically](https://github.com/bin-cli/bin-cli/wiki/Automatically-installing-dependencies). It's hard to do that when you're limited to a single line of code.
->
-> It also violates this fundamental principle of Bin, listed in the introduction above:
->
-> > Collaborators / contributors who choose not to install Bin can run the scripts directly, so you can enjoy the benefits without adding a hard dependency or extra barrier to entry.
->
-> That's why I recommend only using inline commands for very simple commands, such as calling a third-party script installed by a package manager (as in the `phpunit` example) or creating a shorthand for a command that could easily be run directly (as in the `watch` example).
+If you're using Bin as a replacement for the one-line tasks typically [defined in package.json](https://docs.npmjs.com/cli/commands/npm-run-script), it might seem perfectly natural to write all tasks this way (and you can do that if you want to).
 
-</details>
+However, I generally recommend writing slightly longer, more robust scripts. For example, checking that dependencies are installed before you attempt to do something that requires them, or even [installing them automatically](https://github.com/bin-cli/bin-cli/wiki/Automatically-installing-dependencies). It's hard to do that when you're limited to a single line of code.
+
+It also violates this fundamental principle of Bin, listed in the introduction above:
+
+> Collaborators / contributors who choose not to install Bin can run the scripts directly, so you can enjoy the benefits without adding a hard dependency or extra barrier to entry.
+
+That's why I recommend only using inline commands for very simple commands, such as calling a third-party script installed by a package manager (as in the `phpunit` example) or creating a shorthand for a command that could easily be run directly (as in the `watch` example).
+
+</blockquote></details>
 
 ### Script Extensions
 
@@ -587,8 +574,7 @@ The path is relative to the `.binconfig` file - it won't search any parent or ch
 
 This option is provided for use in projects that already have a `scripts` directory or similar. I recommend renaming the directory to `bin` if you can, for consistency with the executable name and [standard UNIX naming conventions](https://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard).
 
-<details>
-<summary><em>Can I put the scripts in the project root directory?</em></summary>
+<details><summary><em>Can I put the scripts in the project root directory?</em></summary><blockquote>
 
 If you have your scripts directly in the project root, you can use this:
 
@@ -598,10 +584,9 @@ dir=.
 
 However, subcommands will **not** be supported, because that would require searching the whole (potentially [very large](https://i.redd.it/tfugj4n3l6ez.png)) directory tree to find all the scripts.
 
-</details>
+</blockquote></details>
 
-<details>
-<summary><em>What if I can't create a config file?</em></summary>
+<details><summary><em>What if I can't create a config file?</em></summary><blockquote>
 
 You can also set the script directory at the command line:
 
@@ -617,10 +602,9 @@ You will probably want to define an alias:
 alias scr='bin --exe scr --dir scripts'
 ```
 
-</details>
+</blockquote></details>
 
-<details>
-<summary><em>Can I use an absolute path?</em></summary>
+<details><summary><em>Can I use an absolute path?</em></summary><blockquote>
 
 Not in a `.binconfig` file, but you can use an absolute path at the command line. For example, you could put your all generic development tools in `~/bin/dev/` and run them as `dev <script>`:
 
@@ -628,7 +612,7 @@ Not in a `.binconfig` file, but you can use an absolute path at the command line
 alias dev="bin --exe dev --dir $HOME/bin/dev"
 ```
 
-</details>
+</blockquote></details>
 
 ### Automatic Shims
 
@@ -696,22 +680,21 @@ b hello
 
 You can skip it (i.e. use `alias b='bin'`) if you prefer it to say `bin`.
 
-<details>
-<summary><em>Alternatively, you can use a symlink</em></summary>
+<details><summary><em>Alternatively, you can use a symlink</em></summary><blockquote>
 
-> System-wide installation:
->
-> ```bash
-> $ sudo ln -s bin /usr/local/bin/b
-> ```
->
-> Per-user installation:
->
-> ```bash
-> $ ln -s bin ~/bin/b
-> ```
+System-wide installation:
 
-</details>
+```bash
+$ sudo ln -s bin /usr/local/bin/b
+```
+
+Per-user installation:
+
+```bash
+$ ln -s bin ~/bin/b
+```
+
+</blockquote></details>
 
 ### Merging Directories
 
@@ -723,14 +706,11 @@ For example, you may have several different themes, each with its own `build` co
 repo/                  ← parent project
 ├── bin/
 │   └── deploy
-├── themes/
-│   ├── one/           ← child project
-│   │   ├── bin/
-│   │   │   └── build
-│   │   ├── .binconfig
-│   │   └── ...
-│   └── ...
-└── ...
+└── themes/
+    └── one/           ← child project
+        ├── bin/
+        │   └── build
+        └── .binconfig
 ```
 
 Normally, if you are in the `themes/one/` directory:
@@ -744,42 +724,38 @@ But if you add this to `.binconfig` (in the child project):
 merge=true
 ```
 
-Then:
+Then the two `bin/` directories are merged, so:
 
 - `bin build` still runs `themes/one/bin/build`
 - `bin deploy` runs `bin/deploy`
 
-<details>
-<summary><em>Can child project commands override parent project commands?</em></summary>
+<details><summary><em>Can child project commands override parent project commands?</em></summary><blockquote>
 
-> No - any conflicts will be reported as an error, the same as if they were defined at the same level (e.g. by defining a command and an alias with the same name).
->
-> This is mostly because it would make the conflict-checking code too complex - but it has the benefit of enforcing simplicity.
+No - any conflicts will be reported as an error, the same as if they were defined at the same level (e.g. by defining a command and an alias with the same name).
 
-</details>
+This is mostly because it would make the conflict-checking code too complex - but it has the benefit of enforcing simplicity (parent commands work from anywhere, and accidental conflicts are reported).
 
-<details>
-<summary><em>Does this work with inline commands and aliases?</em></summary>
+</blockquote></details>
 
-> Yes - you can use any combination of scripts, inline commands and aliases in both the parent and child projects.
+<details><summary><em>Does this work with inline commands and aliases?</em></summary><blockquote>
 
-</details>
+Yes - you can use any combination of scripts, inline commands and aliases in both the parent and child projects.
 
-<details>
-<summary><em>What if no parent <code>bin/</code> directory exists?</em></summary>
+</blockquote></details>
 
-> If you set `merge=true` but no parent `bin/` directory (or `.binconfig` file) is found, Bin will exit with an error.
->
-> To avoid that, set `merge=optional` instead. This may be useful in sub-projects that have separate repositories, so you can't guarantee they will be cloned together.
+<details><summary><em>What if no parent project is found?</em></summary><blockquote>
 
-</details>
+If you set `merge=true` but there is no parent `bin/` directory (or `.binconfig` file), Bin will exit with an error.
 
-<details>
-<summary><em>Can three (or more) directories be merged?</em></summary>
+To avoid that, set `merge=optional` instead. This may be useful in sub-projects that have separate repositories, so you can't guarantee they will be cloned together.
 
-> Yes - just set `merge=true` at each level below the first.
+</blockquote></details>
 
-</details>
+<details><summary><em>Can three (or more) directories be merged?</em></summary><blockquote>
+
+Yes - just set `merge=true` at each level below the first.
+
+</blockquote></details>
 
 ### Automatic Exclusions
 

@@ -225,19 +225,16 @@ Feature: Aliases
 
   Rule: Aliases work for directories
 
-    | <details>
-    | <summary><em>Can I define aliases for commands that have subcommands?</em></summary>
+    | COLLAPSE: Can I define aliases for commands that have subcommands?
     |
-    | > Yes - for example, given a script `bin/deploy/live` and this config file:
-    | >
-    | > ```ini
-    | > [deploy]
-    | > alias=push
-    | > ```
-    | >
-    | > `bin push live` would be an alias for `bin deploy live`, and so on.
+    | Yes - for example, given a script `bin/deploy/live` and this config file:
     |
-    | </details>
+    | ```ini
+    | [deploy]
+    | alias=push
+    | ```
+    |
+    | `bin push live` would be an alias for `bin deploy live`, and so on.
 
     Scenario: Aliases can be defined for directories
       Given a script '{ROOT}/project/bin/deploy/live' that outputs 'Copying to production...'
@@ -272,20 +269,17 @@ Feature: Aliases
 
   Rule: Aliases are considered by unique prefix matching
 
-    | <details>
-    | <summary><em>How do aliases affect unique prefix matching?</em></summary>
+    | COLLAPSE: How do aliases affect unique prefix matching?
     |
-    | > Aliases are checked when looking for unique prefixes. In this example:
-    | >
-    | > ```ini
-    | > [deploy]
-    | > aliases=publish, push
-    | > ```
-    | >
-    | > - `bin pub` would match `bin publish`, which is an alias for `bin deploy`, which runs the `bin/deploy` script
-    | > - `bin pu` would match both `bin publish` and `bin push` - but since both are aliases for `bin deploy`, that would be treated as a unique prefix and would therefore also run `bin/deploy`
+    | Aliases are checked when looking for unique prefixes. In this example:
     |
-    | </details>
+    | ```ini
+    | [deploy]
+    | aliases=publish, push
+    | ```
+    |
+    | - `bin pub` would match `bin publish`, which is an alias for `bin deploy`, which runs the `bin/deploy` script
+    | - `bin pu` would match both `bin publish` and `bin push` - but since both are aliases for `bin deploy`, that would be treated as a unique prefix and would therefore also run `bin/deploy`
 
     Scenario: Aliases are subject to unique prefix matching
       Given a script '{ROOT}/project/bin/deploy' that outputs 'Copying to production...'
@@ -311,12 +305,9 @@ Feature: Aliases
 
   Rule: Alias conflicts cause an error
 
-    | <details>
-    | <summary><em>What happens if an alias conflicts with another command?</em></summary>
+    | COLLAPSE: What happens if an alias conflicts with another command?
     |
-    | > Defining an alias that conflicts with a script or another alias will cause Bin to exit with error code 246 and print a message to stderr.
-    |
-    | </details>
+    | Defining an alias that conflicts with a script or another alias will cause Bin to exit with error code 246 and print a message to stderr.
 
     Scenario: Defining an alias that conflicts with a command causes an error
       Given a script '{ROOT}/project/bin/one'

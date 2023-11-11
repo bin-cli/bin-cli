@@ -58,8 +58,7 @@ Feature: Custom script directory
 
   Rule: Scripts can be in the project root
 
-    | <details>
-    | <summary><em>Can I put the scripts in the project root directory?</em></summary>
+    | COLLAPSE: Can I put the scripts in the project root directory?
     |
     | If you have your scripts directly in the project root, you can use this:
     |
@@ -68,8 +67,6 @@ Feature: Custom script directory
     | ```
     |
     | However, subcommands will **not** be supported, because that would require searching the whole (potentially [very large](https://i.redd.it/tfugj4n3l6ez.png)) directory tree to find all the scripts.
-    |
-    | </details>
 
     Scenario: Scripts can be in the project root
       Given a file '{ROOT}/project/.binconfig' with content 'dir=.'
@@ -87,8 +84,7 @@ Feature: Custom script directory
 
   Rule: The script directory can be set at the command line
 
-    | <details>
-    | <summary><em>What if I can't create a config file?</em></summary>
+    | COLLAPSE: What if I can't create a config file?
     |
     | You can also set the script directory at the command line:
     |
@@ -103,8 +99,6 @@ Feature: Custom script directory
     | ```bash
     | alias scr='bin --exe scr --dir scripts'
     | ```
-    |
-    | </details>
 
     Scenario: The script directory can be configured with --dir
       Given a script '{ROOT}/project/scripts/hello' that outputs 'Hello, World!'
@@ -166,16 +160,13 @@ Feature: Custom script directory
 
   Rule: The script directory can be set to an absolute path at the command line
 
-    | <details>
-    | <summary><em>Can I use an absolute path?</em></summary>
+    | COLLAPSE: Can I use an absolute path?
     |
     | Not in a `.binconfig` file, but you can use an absolute path at the command line. For example, you could put your all generic development tools in `~/bin/dev/` and run them as `dev <script>`:
     |
     | ```bash
     | alias dev="bin --exe dev --dir $HOME/bin/dev"
     | ```
-    |
-    | </details>
 
     Scenario: The 'dir' option cannot be an absolute path when set in .binconfig
       Given a script '{ROOT}/project/scripts/hello' that outputs 'Hello, World!'

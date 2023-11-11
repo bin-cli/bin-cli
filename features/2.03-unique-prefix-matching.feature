@@ -73,40 +73,37 @@ Feature: Unique prefix matching
 
   Rule: Unique prefix matching can be disabled
 
-    | <details>
-    | <summary><em>How can I disable unique prefix matching?</em></summary>
+    | COLLAPSE: How can I disable unique prefix matching?
     |
-    | > If you prefer to disable unique prefix matching, use `--exact` on the command line:
-    | >
-    | > ```bash
-    | > bin --exact hello
-    | > ```
-    | >
-    | > You'll probably want to set up a shell alias rather than typing it manually:
-    | >
-    | > ```bash
-    | > alias bin='bin --exact'
-    | > ```
-    | >
-    | > To disable it for a project, add this at the top of [`.binconfig`](#config-files):
-    | >
-    | > ```ini
-    | > exact=true
-    | > ```
-    | >
-    | > To enable it again, overriding the config file, use `--prefix`:
-    | >
-    | > ```bash
-    | > bin --prefix hel
-    | > ```
-    | >
-    | > Again, you'll probably want to set up a shell alias:
-    | >
-    | > ```bash
-    | > alias bin='bin --prefix'
-    | > ```
+    | If you prefer to disable unique prefix matching, use `--exact` on the command line:
     |
-    | </details>
+    | ```bash
+    | bin --exact hello
+    | ```
+    |
+    | You'll probably want to set up a shell alias rather than typing it manually:
+    |
+    | ```bash
+    | alias bin='bin --exact'
+    | ```
+    |
+    | To disable it for a project, add this at the top of [`.binconfig`](#config-files):
+    |
+    | ```ini
+    | exact=true
+    | ```
+    |
+    | To enable it again, overriding the config file, use `--prefix`:
+    |
+    | ```bash
+    | bin --prefix hel
+    | ```
+    |
+    | Again, you'll probably want to set up a shell alias:
+    |
+    | ```bash
+    | alias bin='bin --prefix'
+    | ```
 
     Scenario Template: Unique prefix matching can be disabled in .binconfig using 'exact=<value>'
       Given a script '{ROOT}/project/bin/hello'

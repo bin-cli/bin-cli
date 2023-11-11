@@ -164,33 +164,30 @@ Feature: Tab completion
 
   Rule: Tab completion works with custom (Bash) aliases
 
-    | <details>
-    | <summary><em>How to use tab completion with custom aliases?</em></summary>
+    | COLLAPSE: How to use tab completion with custom aliases?
     |
-    | > If you are using a simple [shell alias](#aliasing-the-bin-command), e.g. `alias b=bin`, update the filename to match and add `--exe <name>`:
-    | >
-    | > ```bash
-    | > # e.g. in /usr/share/bash-completion/completions/b
-    | > command -v bin &>/dev/null && eval "$(bin --completion --exe b)"
-    | > ```
-    | >
-    | > If you have globally disabled [unique prefix matching](#unique-prefix-matching), e.g. `alias bin='bin --exact'`, add the same parameter here:
-    | >
-    | > ```bash
-    | > # e.g. in /usr/share/bash-completion/completions/bin
-    | > command -v bin &>/dev/null && eval "$(bin --completion --exact)"
-    | > ```
-    | >
-    | > Similarly, if you are using an alias with a [custom script directory](#custom-script-directory), e.g. `alias src='bin --dir scripts'`, add the same parameter here:
-    | >
-    | > ```bash
-    | > # e.g. in /usr/share/bash-completion/completions/scr
-    | > command -v bin &>/dev/null && eval "$(bin --completion --exe scr --dir scripts)"
-    | > ```
-    | >
-    | > If you have multiple aliases, just create a file for each one (or put them all together in `~/.bash_completion` or `~/.bashrc`).
+    | If you are using a simple [shell alias](#aliasing-the-bin-command), e.g. `alias b=bin`, update the filename to match and add `--exe <name>`:
     |
-    | </details>
+    | ```bash
+    | # e.g. in /usr/share/bash-completion/completions/b
+    | command -v bin &>/dev/null && eval "$(bin --completion --exe b)"
+    | ```
+    |
+    | If you have globally disabled [unique prefix matching](#unique-prefix-matching), e.g. `alias bin='bin --exact'`, add the same parameter here:
+    |
+    | ```bash
+    | # e.g. in /usr/share/bash-completion/completions/bin
+    | command -v bin &>/dev/null && eval "$(bin --completion --exact)"
+    | ```
+    |
+    | Similarly, if you are using an alias with a [custom script directory](#custom-script-directory), e.g. `alias src='bin --dir scripts'`, add the same parameter here:
+    |
+    | ```bash
+    | # e.g. in /usr/share/bash-completion/completions/scr
+    | command -v bin &>/dev/null && eval "$(bin --completion --exe scr --dir scripts)"
+    | ```
+    |
+    | If you have multiple aliases, just create a file for each one (or put them all together in `~/.bash_completion` or `~/.bashrc`).
 
     Scenario: The executable name for tab completion can be overridden with --exe
       When I run 'bin --completion --exe b'
@@ -220,14 +217,11 @@ Feature: Tab completion
 
   Rule: The completion script needs to be run through 'eval'
 
-    | <details>
-    | <summary><em>Why use <code>eval</code>?</em></summary>
+    | COLLAPSE: Why use <code>eval</code>?
     |
-    | > Using `eval` makes it more future-proof - in case I need to change how tab completion works in the future.
-    | >
-    | > If you prefer, you can manually run `bin --completion` and paste the output into the file instead.
+    | Using `eval` makes it more future-proof - in case I need to change how tab completion works in the future.
     |
-    | </details>
+    | If you prefer, you can manually run `bin --completion` and paste the output into the file instead.
 
   Rule: Exclusions
 

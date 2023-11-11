@@ -42,22 +42,19 @@ Feature: Aliasing `b` to `bin`
 
   Rule: Symlinks to bin
 
-    | <details>
-    | <summary><em>Alternatively, you can use a symlink</em></summary>
+    | COLLAPSE: Alternatively, you can use a symlink
     |
-    | > System-wide installation:
-    | >
-    | > ```bash
-    | > $ sudo ln -s bin /usr/local/bin/b
-    | > ```
-    | >
-    | > Per-user installation:
-    | >
-    | > ```bash
-    | > $ ln -s bin ~/bin/b
-    | > ```
+    | System-wide installation:
     |
-    | </details>
+    | ```bash
+    | $ sudo ln -s bin /usr/local/bin/b
+    | ```
+    |
+    | Per-user installation:
+    |
+    | ```bash
+    | $ ln -s bin ~/bin/b
+    | ```
 
     # This doesn't work with kcov because $0 is set to 'bin' instead of 'b', though I'm not sure why
     @disable-kcov
