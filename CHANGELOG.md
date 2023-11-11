@@ -1,5 +1,5 @@
 # Changelog
 
-*Bin uses [Semantic Versioning](http://semver.org/).*
+See [GitHub Releases](https://github.com/bin-cli/bin/releases) for the changelog.
 
-See [GitHub Releases](https://github.com/bin-cli/bin/releases).
+Bin uses [Semantic Versioning](http://semver.org/).
