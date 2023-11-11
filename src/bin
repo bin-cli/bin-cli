@@ -359,15 +359,18 @@ map_set() {
 }
 
 map_get() {
-    local default key map
+    local key map
 
     map=$1
     key=$2
-    default=${3-}
 
     key=$(map_key "$map" "$key")
 
-    echo "${!key-$default}"
+    if [[ -v $key ]]; then
+        echo "${!key}"
+    else
+        return 1
+    fi
 }
 
 map_has() {
@@ -841,9 +844,7 @@ prevent_duplicate_alias() {
     name=$1
     source=$2
 
-    existing=$(map_get alias_sources "$name")
-
-    if [[ -n $existing ]]; then
+    if existing=$(map_get alias_sources "$name"); then
         fail "The alias '$name' defined in $source conflicts with the alias defined in $existing"
     fi
 }
@@ -930,13 +931,11 @@ run_command_if_only_one_match() {
     # And this can be used to display other command names
     export BIN_EXE="$exe"
 
-    executable=$(map_get command_to_executable "$command")
-    if [[ -n "$executable" ]]; then
+    if executable=$(map_get command_to_executable "$command"); then
         run_command "$executable" "$@"
     fi
 
-    script=$(map_get command_to_inline_script "$command")
-    if [[ -n "$script" ]]; then
+    if script=$(map_get command_to_inline_script "$command"); then
         # These variables are useful for inline commands, but aren't made available
         # to regular commands because it is better to use "$(dirname "$0")" instead
         export BIN_ROOT="$root"
@@ -1171,8 +1170,7 @@ while $keep_looking; do
     #---------------------------------------
 
     for alias in ${alias_to_executable+"${alias_to_executable[@]}"}; do
-        executable=$(map_get alias_to_executable "$alias")
-        if [[ -n $executable ]]; then
+        if executable=$(map_get alias_to_executable "$alias"); then
             command=$(map_get executable_to_command "$executable")
             map_set original_commands "$alias" "$command"
         fi
@@ -1515,23 +1513,26 @@ get_command_aliases() {
         echo "alias: ${command_aliases:2}"
     elif [[ $command_alias_count -gt 1 ]]; then
         echo "aliases: ${command_aliases:2}"
+    else
+        return 1
     fi
 }
 
 echo "$LWHITE$BOLD$UNDERLINE$list_title$RESET"
 
 for command in ${visible_commands+"${visible_commands[@]}"}; do
-    command_help=$(map_get help "$command")
-    command_aliases=$(get_command_aliases "$command")
-
-    if [[ -n $command_help && -n $command_aliases ]]; then
-        printf "%s %-${maxlength}s    %s\n" "$exe" "$command" "$command_help $GREY($command_aliases)$RESET"
-    elif [[ -n $command_help ]]; then
-        printf "%s %-${maxlength}s    %s\n" "$exe" "$command" "$command_help"
-    elif [[ -n $command_aliases ]]; then
-        printf "%s %-${maxlength}s    %s\n" "$exe" "$command" "$GREY($command_aliases)$RESET"
+    if command_help=$(map_get help "$command"); then
+        if command_aliases=$(get_command_aliases "$command"); then
+            printf "%s %-${maxlength}s    %s\n" "$exe" "$command" "$command_help $GREY($command_aliases)$RESET"
+        else
+            printf "%s %-${maxlength}s    %s\n" "$exe" "$command" "$command_help"
+        fi
     else
-        printf "%s %s\n" "$exe" "$command"
+        if command_aliases=$(get_command_aliases "$command"); then
+            printf "%s %-${maxlength}s    %s\n" "$exe" "$command" "$GREY($command_aliases)$RESET"
+        else
+            printf "%s %s\n" "$exe" "$command"
+        fi
     fi
 done | sort
 
