@@ -1,0 +1,35 @@
+name: Generate README
+
+on:
+  push:
+    branches:
+      - 'main'
+
+permissions:
+  contents: write
+
+jobs:
+  generate-readme:
+    name: Generate README
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 12
+          cache: npm
+
+      - name: Install JavaScript packages
+        run: npm ci
+
+      - name: Generate README
+        run: bin/generate-readme
+
+      - name: Commit & push changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          file_pattern: README.md
+          commit_message: Generate README
