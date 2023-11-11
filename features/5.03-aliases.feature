@@ -223,6 +223,21 @@ Feature: Aliases
         bin deploy     Sync the code to the live server (aliases: publish, push)
         """
 
+    Scenario: Blank aliases are ignored
+      Given a script '{ROOT}/project/bin/hello'
+      And a file '{ROOT}/project/.binconfig' with content:
+        """
+        [hello]
+        alias =
+        """
+      When I run 'bin'
+      Then it is successful
+      And the output is:
+        """
+        Available commands
+        bin hello
+        """
+
   Rule: Aliases work for directories
 
     | COLLAPSE: Can I define aliases for commands that have subcommands?

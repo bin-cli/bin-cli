@@ -1152,7 +1152,9 @@ while $keep_looking; do
             elif [[ $key = 'help' ]]; then
                 # help=Description
                 value=$(trim "$value")
-                map_set help "$command" "$value"
+                if [[ -n "$value" ]]; then
+                    map_set help "$command" "$value"
+                fi
             else
                 # Unknown keys don't trigger an error for forwards compatibility (command)
                 debug "Ignored unknown key '$key' in $binconfig line $line"

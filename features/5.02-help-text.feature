@@ -85,6 +85,21 @@ Feature: Help text
         bin php    Run the appropriate version of PHP for this project
         """
 
+    Scenario: Blank help text is ignored
+      Given a script '{ROOT}/project/bin/hello'
+      And a file '{ROOT}/project/.binconfig' with content:
+        """
+        [hello]
+        help =
+        """
+      When I run 'bin'
+      Then it is successful
+      And the output is:
+        """
+        Available commands
+        bin hello
+        """
+
   Rule: Help text is supported for subcommands
 
     | For subcommands, use the full command name, not the filename:
