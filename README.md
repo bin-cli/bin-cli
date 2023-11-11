@@ -341,6 +341,7 @@ Config files are written in [INI format](https://en.wikipedia.org/wiki/INI_file)
 ; Global settings
 dir=scripts
 exact=true
+merge=true
 
 ; Settings for each command (script)
 [hello]
@@ -355,6 +356,7 @@ The supported global keys are:
 
 - `dir` (string) - Sets a [custom script directory](#custom-script-directory)
 - `exact` (boolean) - Disables [unique prefix matching](#unique-prefix-matching)
+- `merge` (boolean or `optional`) - Enables [directory merging](#merging-directories)
 
 The supported per-command keys are:
 

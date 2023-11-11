@@ -19,6 +19,7 @@ Feature: Config files
     | ; Global settings
     | dir=scripts
     | exact=true
+    | merge=true
     |
     | ; Settings for each command (script)
     | [hello]
@@ -33,6 +34,7 @@ Feature: Config files
     |
     | - `dir` (string) - Sets a [custom script directory](#custom-script-directory)
     | - `exact` (boolean) - Disables [unique prefix matching](#unique-prefix-matching)
+    | - `merge` (boolean or `optional`) - Enables [directory merging](#merging-directories)
     |
     | The supported per-command keys are:
     |
