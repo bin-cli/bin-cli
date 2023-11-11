@@ -3,7 +3,8 @@ process.chdir(`${__dirname}/..`);
 
 const Gherkin = require('@cucumber/gherkin');
 const Messages = require('@cucumber/messages');
-const fs = require('fs');
+const {spawnSync} = require('child_process');
+const {readdirSync, readFileSync, writeFileSync} = require('fs');
 const marked = require('marked');
 
 const uuidFn = Messages.IdGenerator.uuid();
@@ -58,7 +59,7 @@ function addPrefixedBlock(block) {
 function addFeatureFile(filename) {
     markdownBlocks.push(`<!-- ${filename} -->`);
 
-    const fileContent = fs.readFileSync(filename, 'utf8');
+    const fileContent = readFileSync(filename, 'utf8');
     const gherkinDocument = parser.parse(fileContent);
 
     if (gherkinDocument.feature.description) {
@@ -77,12 +78,12 @@ function addFeatureFile(filename) {
 
 function addMarkdownFile(filename) {
     markdownBlocks.push(`<!-- ${filename} -->`);
-    markdownBlocks.push(fs.readFileSync(filename, 'utf8').trim());
+    markdownBlocks.push(readFileSync(filename, 'utf8').trim());
 }
 
 markdownBlocks.push(`<!--\nThis file was automatically generated.\nDo not edit it directly.\n-->`);
 
-for (const filename of fs.readdirSync('features')) {
+for (const filename of readdirSync('features')) {
     if (filename.match(/\.feature$/)) {
         addFeatureFile(`features/${filename}`);
     } else if (filename.match(/\.md$/)) {
@@ -90,6 +91,48 @@ for (const filename of fs.readdirSync('features')) {
     }
 }
 
-fs.writeFile('README.md', markdownBlocks.join('\n\n') + '\n', (err) => {
-    if (err) throw err;
-});
+let markdown = markdownBlocks.join('\n\n') + '\n';
+
+function getOutput(command) {
+    const result = spawnSync(command, {
+        cwd: this.workingDir,
+        env: {},
+        shell: true,
+    });
+
+    if (result.error) {
+        throw result.error;
+    }
+
+    return result.stdout.toString();
+}
+
+function replaceBlock(content, tag, output) {
+    const startTag = `<!-- START ${tag} -->`;
+    const endTag = `<!-- END ${tag} -->`;
+
+    const startPos = content.indexOf(startTag);
+    const endPos = content.indexOf(endTag);
+
+    if (startPos < 0) {
+        throw new Error(`Start tag ${startTag} not found`);
+    }
+
+    if (endPos < 0) {
+        throw new Error(`End tag ${endTag} not found`);
+    }
+
+    if (startPos > endPos) {
+        throw new Error(`Start tag ${startTag} appears after end tag ${endTag}`);
+    }
+
+    return content.slice(0, startPos + startTag.length) + output + content.slice(endPos);
+}
+
+markdown = replaceBlock(
+    markdown,
+    'auto-update-cli-reference',
+    '\n\n```\n' + getOutput('src/bin --help') + '```\n\n'
+);
+
+writeFileSync('README.md', markdown);

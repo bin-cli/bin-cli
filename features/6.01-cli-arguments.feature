@@ -45,7 +45,6 @@ Feature: CLI arguments
 
   Rule: Help
 
-    @auto-update-cli-reference
     Scenario: The help message is displayed when using --help
       When I run 'bin --help'
       Then it is successful
