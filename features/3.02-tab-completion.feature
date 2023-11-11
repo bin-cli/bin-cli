@@ -17,8 +17,6 @@ Feature: Tab completion
     | - `~/.local/share/bash-completion/completions/bin` (recommended for per-user installs)
     | - `~/.bash_completion`
     | - `~/.bashrc`
-    |
-    | _Only Bash is supported at this time. I will add other shells if there is [demand for it](https://github.com/bin-cli/bin-cli/discussions/categories/ideas), or gladly accept [pull requests](https://github.com/bin-cli/bin-cli/pulls)._
 
     Scenario: A tab completion script is available for Bash
       When I run 'bin --completion'
@@ -380,3 +378,9 @@ Feature: Tab completion
         | /snap/bin      | /snap/.binconfig      | /snap/example          |
         | /usr/local/bin | /usr/local/.binconfig | /usr/local/bin/example |
         | /home/user/bin | /home/user/.binconfig | /home/user/example     |
+
+  Rule: Other shells are not currently supported
+
+    | COLLAPSE: What about other shells (Zsh, Fish, etc)?
+    |
+    | Only Bash is supported at this time. I will add other shells if there is [demand for it](https://github.com/bin-cli/bin-cli/discussions/categories/ideas), or gladly accept [pull requests](https://github.com/bin-cli/bin-cli/pulls).

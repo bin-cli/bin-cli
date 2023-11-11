@@ -237,8 +237,6 @@ To any of the following files:
 - `~/.bash_completion`
 - `~/.bashrc`
 
-_Only Bash is supported at this time. I will add other shells if there is [demand for it](https://github.com/bin-cli/bin-cli/discussions/categories/ideas), or gladly accept [pull requests](https://github.com/bin-cli/bin-cli/pulls)._
-
 <details><summary><em>How to use tab completion with custom aliases?</em></summary><blockquote>
 
 If you are using a simple [shell alias](#aliasing-the-bin-command), e.g. `alias b=bin`, update the filename to match and add `--exe <name>`:
@@ -271,6 +269,12 @@ If you have multiple aliases, just create a file for each one (or put them all t
 Using `eval` makes it more future-proof - in case I need to change how tab completion works in the future.
 
 If you prefer, you can manually run `bin --completion` and paste the output into the file instead.
+
+</blockquote></details>
+
+<details><summary><em>What about other shells (Zsh, Fish, etc)?</em></summary><blockquote>
+
+Only Bash is supported at this time. I will add other shells if there is [demand for it](https://github.com/bin-cli/bin-cli/discussions/categories/ideas), or gladly accept [pull requests](https://github.com/bin-cli/bin-cli/pulls).
 
 </blockquote></details>
 
