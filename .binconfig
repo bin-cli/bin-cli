@@ -1,3 +1,7 @@
+[bin]
+alias = b
+help = Run the latest development/release version of Bin (temp/dist/bin)
+
 [build]
 help = Generate a build of Bin into temp/dist/ (not normally called directly)
 

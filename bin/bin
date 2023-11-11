@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -o errexit -o nounset -o pipefail
+
+root="$(dirname "$(dirname "$0")")"
+
+if [[ ! -f "$root/temp/dist/bin" ]]; then
+    "$root/bin/build" >/dev/null
+fi
+
+exec "$root/temp/dist/bin" "$@"
