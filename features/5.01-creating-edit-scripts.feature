@@ -234,27 +234,28 @@ Feature: Creating/editing scripts
         """
         """
 
-    # TODO
-    #Scenario: .binconfig is pre-filled with the command names
-    #  Given a script '{ROOT}/project/bin/hello'
-    #  And a script '{ROOT}/project/bin/world'
-    #  And a script '{ROOT}/usr/bin/myeditor' that outputs 'EXECUTED: myeditor "$@"'
-    #  And an environment variable 'VISUAL' set to 'myeditor'
-    #  When I run 'bin --create .binconfig'
-    #  Then it is successful
-    #  And the output is:
-    #    """
-    #    Created file {ROOT}/project/.binconfig
-    #    EXECUTED: myeditor {ROOT}/project/.binconfig
-    #    """
-    #  And there is a file '{ROOT}/project/.binconfig' with content:
-    #    """
-    #    [hello]
-    #    help =
-    #
-    #    [world]
-    #    help =
-    #    """
+    Scenario: .binconfig is pre-filled with the command names
+      Given a script '{ROOT}/project/bin/hello'
+      And a script '{ROOT}/project/bin/world'
+      And a script '{ROOT}/usr/bin/myeditor' that outputs 'EXECUTED: myeditor "$@"'
+      And an environment variable 'VISUAL' set to 'myeditor'
+      When I run 'bin --create .binconfig'
+      Then it is successful
+      And the output is:
+        """
+        Created file {ROOT}/project/.binconfig
+        EXECUTED: myeditor {ROOT}/project/.binconfig
+        """
+      And there is a file '{ROOT}/project/.binconfig' with content:
+        """
+        [hello]
+        alias =
+        help =
+
+        [world]
+        alias =
+        help =
+        """
 
     Scenario: Running '--create .binconfig' gives an error if .binconfig already exists
       Given an empty directory '{ROOT}/project/bin'
@@ -277,6 +278,31 @@ Feature: Creating/editing scripts
       And there is a file '{ROOT}/project/.binconfig' with content:
         """
         dir = scripts
+        """
+
+    Scenario: Directory and pre-filled commands can be combined
+      Given a script '{ROOT}/project/scripts/hello'
+      And a script '{ROOT}/project/scripts/world'
+      And a script '{ROOT}/usr/bin/myeditor' that outputs 'EXECUTED: myeditor "$@"'
+      And an environment variable 'VISUAL' set to 'myeditor'
+      When I run 'bin --dir scripts --create .binconfig'
+      Then it is successful
+      And the output is:
+        """
+        Created file {ROOT}/project/.binconfig
+        EXECUTED: myeditor {ROOT}/project/.binconfig
+        """
+      And there is a file '{ROOT}/project/.binconfig' with content:
+        """
+        dir = scripts
+
+        [hello]
+        alias =
+        help =
+
+        [world]
+        alias =
+        help =
         """
 
     Scenario: If an absolute directory is specified when creating a config file, a relative path is written to the file

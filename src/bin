@@ -1261,9 +1261,24 @@ while [[ $# -gt $last_parameter ]]; do
             fi
 
             ( # kcov-ignore-line: Usage not detected
+                output_started=false
+
                 if [[ $main_bin_dir_from_root != 'bin' ]]; then
                     echo "dir = $main_bin_dir_from_root"
-                else
+                    output_started=true
+                fi
+
+                for command in ${registered_commands+"${registered_commands[@]}"}; do
+                    if $output_started; then
+                        echo
+                    fi
+                    echo "[$command]"
+                    echo 'alias ='
+                    echo 'help ='
+                    output_started=true
+                done
+
+                if ! $output_started; then
                     echo
                 fi
             ) > "$main_root/.binconfig" # kcov-ignore-line: Usage not detected
