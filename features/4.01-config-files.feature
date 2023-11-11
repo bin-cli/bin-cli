@@ -59,7 +59,7 @@ Feature: Config files
 
   Rule: .binconfig files are optional
 
-    | COLLAPSE: Do I need to create a <code>.binconfig</code> file?
+    | COLLAPSE: Do I need to create a `.binconfig` file?
     |
     | No - `.binconfig` only needs to exist if you want to use the features described below.
 
@@ -89,7 +89,7 @@ Feature: Config files
 
   Rule: .binconfig can't be inside the bin/ folder
 
-    | COLLAPSE: Why isn't <code>.binconfig</code> inside <code>bin/</code>?
+    | COLLAPSE: Why isn't `.binconfig` inside `bin/`?
     |
     | `.binconfig` can't be inside the `bin/` directory because the [`dir` setting](#custom-script-directory) may change the name of the `bin/` directory, creating a chicken-and-egg problem (how would we find it in the first place?).
     |

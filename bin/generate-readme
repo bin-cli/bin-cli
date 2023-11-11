@@ -4,6 +4,7 @@ process.chdir(`${__dirname}/..`);
 const Gherkin = require('@cucumber/gherkin');
 const Messages = require('@cucumber/messages');
 const fs = require('fs');
+const marked = require('marked');
 
 const uuidFn = Messages.IdGenerator.uuid();
 const builder = new Gherkin.AstBuilder(uuidFn);
@@ -33,7 +34,8 @@ function extractPrefixedMarkdown(content) {
 
     let detailsTitle = null;
     if (lines[0].startsWith('COLLAPSE:')) {
-        detailsTitle = lines.shift().slice(9).trim();
+        // GFM doesn't support Markdown inside HTML blocks, so transform the title now
+        detailsTitle = marked.parseInline(lines.shift().slice(9).trim());
     }
 
     let markdown = lines.join('\n').trim();

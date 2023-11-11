@@ -350,7 +350,7 @@ The INI file is parsed according to the following rules:
 
 </blockquote></details>
 
-<details><summary><em>Why isn't <code>.binconfig</code> inside <code>bin/</code>?</em></summary><blockquote>
+<details><summary><em>Why isn&#39;t <code>.binconfig</code> inside <code>bin/</code>?</em></summary><blockquote>
 
 `.binconfig` can't be inside the `bin/` directory because the [`dir` setting](#custom-script-directory) may change the name of the `bin/` directory, creating a chicken-and-egg problem (how would we find it in the first place?).
 
@@ -586,7 +586,7 @@ However, subcommands will **not** be supported, because that would require searc
 
 </blockquote></details>
 
-<details><summary><em>What if I can't create a config file?</em></summary><blockquote>
+<details><summary><em>What if I can&#39;t create a config file?</em></summary><blockquote>
 
 You can also set the script directory at the command line:
 

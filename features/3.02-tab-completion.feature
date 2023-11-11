@@ -217,7 +217,7 @@ Feature: Tab completion
 
   Rule: The completion script needs to be run through 'eval'
 
-    | COLLAPSE: Why use <code>eval</code>?
+    | COLLAPSE: Why use `eval`?
     |
     | Using `eval` makes it more future-proof - in case I need to change how tab completion works in the future.
     |
