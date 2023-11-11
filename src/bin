@@ -366,11 +366,11 @@ map_get() {
 
     key=$(map_key "$map" "$key")
 
-    if [[ -v $key ]]; then
-        echo "${!key}"
-    else
+    if [[ -z ${!key+isset} ]]; then
         return 1
     fi
+
+    echo "${!key}"
 }
 
 map_has() {
@@ -381,7 +381,7 @@ map_has() {
 
     key=$(map_key "$map" "$key")
 
-    [[ -v $key ]]
+    [[ -n ${!key+isset} ]]
 }
 
 #---------------------------------------
