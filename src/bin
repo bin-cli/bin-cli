@@ -501,9 +501,7 @@ bin_dir_for() {
     while IFS='=' read -r key value; do
         ((line += 1))
 
-        # Trim leading/trailing white space
         key=$(trim "$key")
-        value=$(trim "$value")
 
         if [[ $key = '' || $key = '#'* || $key = ';'* ]]; then
             # Skip blank lines & comments
@@ -513,6 +511,7 @@ bin_dir_for() {
             break
         elif [[ $key = 'dir' ]]; then
             # dir=scripts
+            value=$(trim "$value")
             result="${value%%/}"
             break
         fi
@@ -1064,9 +1063,7 @@ while $keep_looking; do
         while IFS='=' read -r key value; do
             ((line += 1))
 
-            # Trim leading/trailing white space
             key=$(trim "$key")
-            value=$(trim "$value")
 
             if [[ $key = '' || $key = '#'* || $key = ';'* ]]; then
                 # Skip blank lines & comments
@@ -1079,10 +1076,11 @@ while $keep_looking; do
                 # Already handled (above)
                 :
             elif [[ -z $command && $key = 'exact' ]]; then
-                # exact=true
-                # exact=false (default)
+                # exact = true
+                # exact = false (default)
                 if [[ -z $exact ]]; then
                     # Can't use ${value,,} because it doesn't work in Bash 3 (macOS)
+                    value=$(trim "$value")
                     lc_value=$(echo "$value" | tr '[:upper:]' '[:lower:]')
                     if in_array "$lc_value" 'false' 'no' 'off' '0'; then
                         exact=false
@@ -1093,9 +1091,10 @@ while $keep_looking; do
                     fi
                 fi
             elif [[ -z $command && $key = 'merge' ]]; then
-                # merge=true
-                # merge=optional
-                # merge=false (default)
+                # merge = true
+                # merge = optional
+                # merge = false (default)
+                value=$(trim "$value")
                 lc_value=$(echo "$value" | tr '[:upper:]' '[:lower:]')
                 if in_array "$lc_value" 'false' 'no' 'off' '0'; then
                     keep_looking=false
@@ -1112,18 +1111,20 @@ while $keep_looking; do
                 # Unknown keys don't trigger an error for forwards compatibility (global)
                 debug "Ignored unknown key '$key' in $binconfig line $line"
             elif [[ ($key = 'alias' || $key = 'aliases') ]]; then
-                # alias=blah
-                # aliases=blah1, blah2
+                # alias = blah
+                # aliases = blah1, blah2
                 IFS=',' read -ra line_aliases <<<"$value"
                 for alias in ${line_aliases+"${line_aliases[@]}"}; do
                     alias=$(trim "$alias")
                     register_command_alias "$alias" "$command" "$binconfig line $line"
                 done
             elif [[ $key = 'command' ]]; then
-                # command=echo 'Hello, World!'
+                # command = echo 'Hello, World!'
+                value=$(trim "$value")
                 register_inline_command "$command" "$value" "$binconfig line $line"
             elif [[ $key = 'help' ]]; then
                 # help=Description
+                value=$(trim "$value")
                 map_set help "$command" "$value"
             else
                 # Unknown keys don't trigger an error for forwards compatibility (command)
