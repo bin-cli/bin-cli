@@ -1,5 +1,4 @@
 <!--
-TEST - THIS LINE WILL BE REMOVED BY GITHUB ACTIONS.
 This file was automatically generated.
 Do not edit it directly.
 -->
