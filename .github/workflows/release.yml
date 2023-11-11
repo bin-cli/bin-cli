@@ -25,8 +25,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
       - name: Build
         run: bin/build "$GITHUB_REF_NAME"
+
       - name: Prerelease
         if: "contains(github.ref_name, '-')"
         uses: marvinpinto/action-automatic-releases@v1.2.1
@@ -36,6 +38,7 @@ jobs:
           prerelease: true
           files: |
             temp/dist/bin
+
       - name: Release
         if: "!contains(github.ref_name, '-')"
         uses: marvinpinto/action-automatic-releases@v1.2.1

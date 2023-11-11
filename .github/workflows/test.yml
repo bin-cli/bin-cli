@@ -26,23 +26,29 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 12
           cache: npm
+
       - name: Install Kcov
         run: sudo apt-get update && sudo apt-get install -y kcov
+
       - name: Install JavaScript packages
         run: npm ci
+
       - name: Run all tests
         run: bin/test
+
       - name: Upload 'bin' artifact
         if: always()
         uses: actions/upload-artifact@v3
         with:
           name: bin
           path: temp/dist/bin
+
       - name: Upload 'coverage/' artifact
         if: always()
         uses: actions/upload-artifact@v3
@@ -58,15 +64,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 12
           cache: npm
+
       - name: Install other dependencies
         run: brew update && brew install gawk shellcheck
+
       - name: Install JavaScript packages
         run: npm ci
+
       - name: Run all tests (except coverage)
         run: bin/test
         env:
@@ -80,6 +90,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
       - name: Run simple tests
         shell: bash
         run: bin/simple-test
@@ -90,8 +101,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
       - name: Install Cygwin
         uses: egor-tensin/setup-cygwin@v4
+
       - name: Run simple tests
         shell: C:\tools\cygwin\bin\bash.exe -e {0}
         run: bin/simple-test
@@ -102,8 +115,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
       - name: Install MSYS2
         uses: msys2/setup-msys2@v2
+
       - name: Run simple tests
         shell: msys2 {0}
         run: bin/simple-test
