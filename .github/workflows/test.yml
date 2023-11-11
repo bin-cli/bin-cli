@@ -71,8 +71,8 @@ jobs:
           node-version: 12
           cache: npm
 
-      - name: Install other dependencies
-        run: brew update && brew install gawk shellcheck
+      - name: Install ShellCheck
+        run: brew update && brew install shellcheck
 
       - name: Install JavaScript packages
         run: npm ci
