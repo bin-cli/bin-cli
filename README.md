@@ -1,3 +1,10 @@
+<!--
+This file was automatically generated.
+Do not edit it directly.
+-->
+
+<!-- features/1.00-introduction.md -->
+
 # Bin CLI – A simple task/script runner
 
 Bin is a simple task runner, designed to be used in code repositories, with scripts written in any programming language.
@@ -9,6 +16,8 @@ It is implemented as a self-contained Bash script, small enough to bundle with y
 Collaborators / contributors who choose not to install Bin can run the scripts directly, so you can enjoy the benefits without adding a hard dependency or extra barrier to entry.
 
 _To see how Bin compares to some of the alternatives (Just, Task, Make, etc.), see [the wiki](https://github.com/bin-cli/bin-cli/wiki/Alternatives-to-Bin-CLI)._
+
+<!-- features/2.00-how-it-works.feature -->
 
 ## How It Works
 
@@ -52,6 +61,8 @@ $ ../../../bin/hello       # Works, but is rather tedious to type :-/
 $ bin hello                # Still works :-)
 ```
 
+<!-- features/2.01-listing-commands.feature -->
+
 ### Listing Commands
 
 If you run `bin` on its own, it will list all available commands:
@@ -63,6 +74,8 @@ bin build
 bin deploy
 bin hello
 </pre>
+
+<!-- features/2.02-subcommands.feature -->
 
 ### Subcommands
 
@@ -84,6 +97,8 @@ $ bin deploy
 bin deploy production
 bin deploy staging
 </pre>
+
+<!-- features/2.03-unique-prefix-matching.feature -->
 
 ### Unique Prefix Matching
 
@@ -141,6 +156,8 @@ alias bin='bin --prefix'
 
 </blockquote></details>
 
+<!-- features/3.00-installation.md -->
+
 ## Installation
 
 Bin CLI is a [single script](https://github.com/bin-cli/bin-cli/releases/latest/download/bin) that you can download to anywhere in your `$PATH`.
@@ -194,11 +211,15 @@ PATH="$HOME/bin:$PATH"
 
 </details>
 
+<!-- features/3.01-upgrading.md -->
+
 ### Upgrading
 
 To upgrade to the latest version at any time, just repeat the same `wget` command as above.
 
 You may want to watch [this repo](https://github.com/bin-cli/bin-cli) to be notified when a new version is released - select either Watch > Custom > Releases, or Watch > All Activity.
+
+<!-- features/3.02-tab-completion.feature -->
 
 ### Tab Completion
 
@@ -253,6 +274,8 @@ If you prefer, you can manually run `bin --completion` and paste the output into
 
 </blockquote></details>
 
+<!-- features/4.00-per-project-setup.md -->
+
 ## Per-Project Setup
 
 In the root of the repository, create a `bin/` directory. For example:
@@ -294,6 +317,8 @@ bin sample
 > You can also put the scripts [in the root directory](#custom-script-directory) - but then [subcommands](#subcommands) won't be supported.
 
 </details>
+
+<!-- features/4.01-config-files.feature -->
 
 ### Config Files
 
@@ -366,7 +391,11 @@ Invalid command names are displayed as a warning when you run `bin`, after the c
 
 </blockquote></details>
 
+<!-- features/5.00-other-features.md -->
+
 ## Other Features
+
+<!-- features/5.01-creating-edit-scripts.feature -->
 
 ### Creating / Editing Scripts
 
@@ -382,6 +411,8 @@ The `--create` (`-c`) command will pre-fill the script with a typical Bash scrip
 The `--edit` (`-e`) command supports [unique prefix matching](#unique-prefix-matching) (e.g. `bin -e sam`).
 
 You can also use `bin --create .binconfig` to create a [config file](#config-files), and `bin --edit .binconfig` to edit it.
+
+<!-- features/5.02-help-text.feature -->
 
 ### Help Text
 
@@ -413,6 +444,8 @@ help=Deploy to the production site
 [deploy staging]
 help=Deploy to the staging site
 ```
+
+<!-- features/5.03-aliases.feature -->
 
 ### Aliases
 
@@ -491,6 +524,8 @@ Defining an alias that conflicts with a script or another alias will cause Bin t
 
 </blockquote></details>
 
+<!-- features/5.04-inline-commands.feature -->
+
 ### Inline Commands
 
 If you have a really short script, you can instead write it as an inline command in `.binconfig`:
@@ -533,6 +568,8 @@ That's why I recommend only using inline commands for very simple commands, such
 
 </blockquote></details>
 
+<!-- features/5.05-script-extensions.feature -->
+
 ### Script Extensions
 
 You can create scripts with an extension to represent the language, if you prefer that:
@@ -561,6 +598,8 @@ You can run them with or without the extension:
 $ bin sample1
 $ bin sample1.sh
 ```
+
+<!-- features/5.06-custom-script-directory.feature -->
 
 ### Custom Script Directory
 
@@ -614,6 +653,8 @@ alias dev="bin --exe dev --dir $HOME/bin/dev"
 
 </blockquote></details>
 
+<!-- features/5.07-automatic-shims.feature -->
+
 ### Automatic Shims
 
 I often use Bin to create shims for other executables - for example, [different PHP versions](https://github.com/bin-cli/bin-cli/wiki/PHP-version-shim) or [running scripts inside Docker](https://github.com/bin-cli/bin-cli/wiki/Docker-shim).
@@ -640,6 +681,8 @@ alias php='bin --fallback php8.1 php'
 
 Both of these options imply `--exact` - i.e. [unique prefix matching](#unique-prefix-matching) is disabled (otherwise it might call `bin/phpunit`, for example).
 
+<!-- features/5.08-environment-variables.feature -->
+
 ### Environment Variables To Use in Scripts
 
 Bin will set the environment variable `$BIN_COMMAND` to the command that was executed, for use in help messages:
@@ -661,6 +704,8 @@ Usage: bin/sample [...]
 ```
 
 There is also `$BIN_EXE`, which is set to the name of the executable (typically just `bin`, but that [may be overridden](#aliasing-the-bin-command)).
+
+<!-- features/5.09-aliasing-the-bin-command.feature -->
 
 ### Aliasing the `bin` Command
 
@@ -695,6 +740,8 @@ $ ln -s bin ~/bin/b
 ```
 
 </blockquote></details>
+
+<!-- features/5.10-merging-directories.feature -->
 
 ### Merging Directories
 
@@ -757,6 +804,8 @@ Yes - just set `merge=true` at each level below the first.
 
 </blockquote></details>
 
+<!-- features/5.11-automatic-exclusions.feature -->
+
 ### Automatic Exclusions
 
 Scripts starting with `_` (underscore) are excluded from listings, but can still be executed. This can be used for hidden tools and helper scripts that are not intended to be executed directly. (Or you could use a separate [`libexec` directory](https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch04s07.html) in the project root if you prefer.)
@@ -768,6 +817,8 @@ Files that are not executable (not `chmod +x`) are listed as warnings in the com
 A number of common non-executable file types (`*.json`, `*.md`, `*.txt`, `*.yaml`, `*.yml`) are also excluded when using `dir=.`, even if they are executable, to reduce the noise when all files are executable (e.g. on FAT32 filesystems).
 
 The directories `/bin`, `/snap/bin`, `/usr/bin`, `/usr/local/bin` and `~/bin` are ignored when searching parent directories, unless there is a corresponding `.binconfig` file, because they are common locations for global executables (typically in `$PATH`).
+
+<!-- features/6.00-cli-reference.md -->
 
 ## CLI Reference
 
@@ -800,6 +851,14 @@ For more details see https://github.com/bin-cli/bin-cli#readme
 
 <!-- END auto-update-cli-reference -->
 
+<!-- features/6.01-cli-arguments.feature -->
+
+<!-- features/7.00-license.md -->
+
 ## License
 
 [MIT License](LICENSE.md)
+
+<!-- features/9.98-edge-cases.feature -->
+
+<!-- features/9.99-code-quality.feature -->

@@ -56,6 +56,8 @@ function addPrefixedBlock(block) {
 }
 
 function addFeatureFile(filename) {
+    markdownBlocks.push(`<!-- ${filename} -->`);
+
     const fileContent = fs.readFileSync(filename, 'utf8');
     const gherkinDocument = parser.parse(fileContent);
 
@@ -74,8 +76,11 @@ function addFeatureFile(filename) {
 }
 
 function addMarkdownFile(filename) {
+    markdownBlocks.push(`<!-- ${filename} -->`);
     markdownBlocks.push(fs.readFileSync(filename, 'utf8').trim());
 }
+
+markdownBlocks.push(`<!--\nThis file was automatically generated.\nDo not edit it directly.\n-->`);
 
 for (const filename of fs.readdirSync('features')) {
     if (filename.match(/\.feature$/)) {
