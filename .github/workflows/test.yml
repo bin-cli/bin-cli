@@ -56,6 +56,30 @@ jobs:
           name: coverage
           path: temp/coverage/merged/
 
+  test-on-alpine:
+    name: Test on Alpine
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Alpine Linux in chroot
+        uses: jirutka/setup-alpine@v1
+
+      - name: Install Bash and Node.js
+        shell: alpine.sh --root {0}
+        run: apk update && apk add bash nodejs npm
+
+      - name: Install JavaScript packages
+        shell: alpine.sh {0}
+        run: npm ci
+
+      - name: Run all tests
+        shell: alpine.sh {0}
+        run: bin/test
+        env:
+          DISABLE_KCOV: true
+
   # On macOS, we run almost all tests, except those that require kcov
   # While kcov can run on macOS, it's *really* slow (even with --include-path)
   test-on-macos:
