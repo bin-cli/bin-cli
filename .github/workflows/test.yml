@@ -95,6 +95,17 @@ jobs:
         shell: bash
         run: bin/simple-test
 
+  test-on-msys2:
+    name: Test on Windows (MSYS2)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Run simple tests
+        shell: C:\msys64\usr\bin\bash.exe {0}
+        run: bin/simple-test
+
   test-on-cygwin:
     name: Test on Windows (Cygwin)
     runs-on: windows-latest
@@ -109,17 +120,6 @@ jobs:
         shell: C:\tools\cygwin\bin\bash.exe -e {0}
         run: bin/simple-test
 
-  test-on-msys2:
-    name: Test on Windows (MSYS2)
-    runs-on: windows-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Run simple tests
-        shell: C:\msys64\usr\bin\bash.exe {0}
-        run: bin/simple-test
-
   test-on-wsl:
     name: Test on Windows (WSL)
     runs-on: windows-latest
@@ -127,6 +127,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Install WSL distribution
+        uses: Vampire/setup-wsl@v2
+
       - name: Run simple tests
-        shell: C:\Windows\System32\bash.exe {0}
+        shell: wsl-bash {0}
         run: bin/simple-test
