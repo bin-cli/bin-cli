@@ -103,7 +103,7 @@ Feature: Creating/editing scripts
 
   Rule: There is a command to create a script
 
-    | The `--create` (`-c`) command will pre-fill the script with a typical Bash script template and make it executable.
+    | The `--create` (`-c`) command will pre-fill the file with a typical Bash script template and make it executable.
 
     Scenario: A new script can be created and opened in the editor set in $VISUAL with '--create'
       Given an empty directory '{ROOT}/project/bin'
@@ -319,4 +319,54 @@ Feature: Creating/editing scripts
       And there is a file '{ROOT}/project/.binconfig' with content:
         """
         dir = scripts
+        """
+
+  Rule: The template for a new script can be configured
+
+    | COLLAPSE: How can I customise the template for new scripts?
+    |
+    | Add this to the top of [`.binconfig`](#config-files):
+    |
+    | ```ini
+    | template = #!/usr/bin/env bash\nset -euo pipefail\n\n
+    | ```
+    |
+    | It is passed to `echo -e`, so you can use escape sequences such as `\n` for new lines.
+
+    Scenario: The template for a new script can be configured in .binconfig
+      Given a file '{ROOT}/project/.binconfig' with content:
+        """
+        template = #!/bin/sh\n
+        """
+      And an environment variable 'VISUAL' set to 'myeditor'
+      And a script '{ROOT}/usr/bin/myeditor' that outputs 'EXECUTED: myeditor "$@"'
+      When I run 'bin --create hello world'
+      Then it is successful
+      And the output is:
+        """
+        Created script {ROOT}/project/bin/hello/world
+        EXECUTED: myeditor {ROOT}/project/bin/hello/world
+        """
+      And there is a script '{ROOT}/project/bin/hello/world' with content:
+        """
+        #!/bin/sh
+
+        """
+
+    Scenario: The template for a new script can be set to an empty string
+      Given a file '{ROOT}/project/.binconfig' with content:
+        """
+        template =
+        """
+      And an environment variable 'VISUAL' set to 'myeditor'
+      And a script '{ROOT}/usr/bin/myeditor' that outputs 'EXECUTED: myeditor "$@"'
+      When I run 'bin --create hello world'
+      Then it is successful
+      And the output is:
+        """
+        Created script {ROOT}/project/bin/hello/world
+        EXECUTED: myeditor {ROOT}/project/bin/hello/world
+        """
+      And there is a script '{ROOT}/project/bin/hello/world' with content:
+        """
         """

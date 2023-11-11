@@ -24,7 +24,7 @@ Feature: Merging Directories
     | - `bin build` runs `themes/one/bin/build`
     | - `bin deploy` gives an error, because the parent directory is ignored
     |
-    | But if you add this to `.binconfig` (in the child project):
+    | But if you add this to [`.binconfig`](#config-files) (in the child project):
     |
     | ```ini
     | merge = true

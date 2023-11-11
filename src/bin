@@ -956,10 +956,6 @@ non_executable_files=()
 commands_listed_in_config=()
 
 #---------------------------------------
-# Determine the start directory
-#---------------------------------------
-
-#---------------------------------------
 # Repeat while 'merge=true' is set
 #---------------------------------------
 
@@ -972,6 +968,7 @@ main_is_root_dir=false
 main_root=''
 merging=false
 start_directory=$PWD
+template='_TBC'
 
 map_init help
 
@@ -1133,6 +1130,10 @@ while $keep_looking; do
                     error_if_not_found=false
                 else
                     fail "Invalid value for 'merge' in $binconfig line $line: $value"
+                fi
+            elif [[ -z $command && $key = 'template' ]]; then
+                if [[ $template = '_TBC' ]]; then
+                    template=$(trim "$value")
                 fi
             elif [[ -z $command ]]; then
                 # Unknown keys don't trigger an error for forwards compatibility (global)
@@ -1335,7 +1336,13 @@ while [[ $# -gt $last_parameter ]]; do
 
         mkdir -p "$current_directory"
         script="$current_directory/$subcommand"
-        echo -e "#!/usr/bin/env bash\nset -euo pipefail\n\n" >"$script"
+        if [[ $template = '_TBC' ]]; then
+            # Using '_TBC' as the placeholder allows the user to set it to a blank string
+            # in the config file. We can't just initialise it to the following value
+            # because we want the first (lowest) .binconfig file to take precedence.
+            template='#!/usr/bin/env bash\nset -euo pipefail\n\n'
+        fi
+        echo -e "$template" > "$script"
         chmod +x "$script"
         echo "Created script $script"
         open_in_editor "$script"

@@ -20,6 +20,7 @@ Feature: Config files
     | dir = scripts
     | exact = true
     | merge = true
+    | template = #!/bin/sh\n\n
     |
     | ; Settings for each command (script)
     | [hello]
@@ -35,6 +36,7 @@ Feature: Config files
     | - `dir` (string) - Sets a [custom script directory](#custom-script-directory)
     | - `exact` (boolean) - Disables [unique prefix matching](#unique-prefix-matching)
     | - `merge` (boolean or `optional`) - Enables [directory merging](#merging-directories)
+      - `template` (string) - Sets the template for [scripts created with `--create`](#creating--editing-scripts)
     |
     | The supported per-command keys are:
     |

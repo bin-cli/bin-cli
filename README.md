@@ -342,6 +342,7 @@ Config files are written in [INI format](https://en.wikipedia.org/wiki/INI_file)
 dir = scripts
 exact = true
 merge = true
+template = #!/bin/sh\n\n
 
 ; Settings for each command (script)
 [hello]
@@ -412,11 +413,23 @@ bin --create sample
 bin --edit sample
 ```
 
-The `--create` (`-c`) command will pre-fill the script with a typical Bash script template and make it executable.
+The `--create` (`-c`) command will pre-fill the file with a typical Bash script template and make it executable.
 
 The `--edit` (`-e`) command supports [unique prefix matching](#unique-prefix-matching) (e.g. `bin -e sam`).
 
 You can also use `bin --create .binconfig` to create a [config file](#config-files), and `bin --edit .binconfig` to edit it.
+
+<details><summary><em>How can I customise the template for new scripts?</em></summary><blockquote>
+
+Add this to the top of [`.binconfig`](#config-files):
+
+```ini
+template = #!/usr/bin/env bash\nset -euo pipefail\n\n
+```
+
+It is passed to `echo -e`, so you can use escape sequences such as `\n` for new lines.
+
+</blockquote></details>
 
 <!-- features/5.02-help-text.feature -->
 
@@ -771,7 +784,7 @@ Normally, if you are in the `themes/one/` directory:
 - `bin build` runs `themes/one/bin/build`
 - `bin deploy` gives an error, because the parent directory is ignored
 
-But if you add this to `.binconfig` (in the child project):
+But if you add this to [`.binconfig`](#config-files) (in the child project):
 
 ```ini
 merge = true
