@@ -15,7 +15,7 @@ Then('ShellCheck must report no errors', async function () {
         // '--enable=check-set-e-suppressed', // Can't see any good ways to solve these!
         '--enable=check-unassigned-uppercase',
         '--enable=deprecate-which',
-        // '--enable=quote-safe-variables', // Too verbose
+        '--enable=quote-safe-variables',
         '--enable=require-double-brackets',
         // '--enable=require-variable-braces', // Too verbose
         `${paths.dist}/bin`,
