@@ -1,7 +1,7 @@
-import {Given, Then, When} from '@cucumber/cucumber';
+import {After, Given, Then, When} from '@cucumber/cucumber';
 import {strict as assert} from 'assert';
 import {spawnSync} from 'child_process';
-import {ensureDir, exists, outputFile} from 'fs-extra';
+import {ensureDir, exists, outputFile, remove} from 'fs-extra';
 import {move} from 'fs-extra/lib/move/index.js';
 import * as paths from '../support/paths.mjs';
 import * as coverage from '../support/coverage.mjs';
@@ -59,7 +59,7 @@ async function run(command, env = {}) {
         env_string += `${key}='${value}' \\\n`;
     }
 
-    await outputFile(`${paths.root}/command.txt`, `cd ${this.workingDir}\n${env_string}${command}\n`);
+    await outputFile(`${paths.temp}/command.txt`, `cd ${this.workingDir}\n${env_string}${command}\n`);
 
     const result = spawnSync(command, {
         cwd: this.workingDir,
@@ -76,21 +76,28 @@ async function run(command, env = {}) {
 
     // Write the output to files to be displayed by the 'bin/tdd' script if the test fails
     const stdout = result.stdout.toString();
-    await outputFile(`${paths.root}/stdout.txt`, stdout);
+    await outputFile(`${paths.temp}/stdout.txt`, stdout);
 
     const stderr = result.stderr.toString();
-    await outputFile(`${paths.root}/stderr.txt`, stderr);
+    await outputFile(`${paths.temp}/stderr.txt`, stderr);
 
     const debugLog = result.output[3].toString();
-    await outputFile(`${paths.root}/debug.txt`, debugLog);
+    await outputFile(`${paths.temp}/debug.txt`, debugLog);
 
     this.runResult = {status, stdout, stderr};
-
-    // Stash the code coverage results for merging later
-    if (!this.disableKcov && await exists(`${paths.root}/coverage/result-${kcovId}`)) {
-        await move(`${paths.coverage}/result-${kcovId}`, `${paths.coverage}/result-${kcovId}`);
-    }
 }
+
+After({name: 'Remove temp files', tags: 'not @exit'}, async function (hook) {
+    // If the test failed, keep the temp files for inspection
+    if (hook.result.status === 'FAILED') {
+        return 'skipped';
+    }
+
+    await remove(`${paths.temp}/command.txt`);
+    await remove(`${paths.temp}/stdout.txt`);
+    await remove(`${paths.temp}/stderr.txt`);
+    await remove(`${paths.temp}/debug.txt`);
+});
 
 When('I run {string}', run);
 

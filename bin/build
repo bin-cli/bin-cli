@@ -10,44 +10,12 @@ if [[ $version = '--help' || $version = '-h' ]]; then
     exit
 fi
 
+# Create the directory
 mkdir -p temp/dist
 
-awk \
-    '
-    BEGIN {
-        header_output = 0
-    }
-
-    {
-        if ($0 ~ / VERSION=.*/) {
-            # Replace the version number
-            print "    VERSION='"'$version'"'"
-        } else if ($0 ~ /^#!/) {
-            # Keep the shebang
-            print
-        } else if ($0 ~ /^#.*#$/) {
-            # Keep the copyright notice
-            print
-        } else if ($0 ~ /# (kcov-|shellcheck )/) {
-            # Keep Kcov and ShellCheck markers for testing
-            print
-        } else if ($0 ~ /^\s*#/) {
-            # Remove all other comments to keep the script size down, but
-            # keep the number of lines the same for easier debugging
-            if (header_output) {
-                print ""
-            } else {
-                print "# This is the minified version with comments removed, but the same line numbers to help with debugging."
-                header_output = 1
-            }
-        } else {
-            # Keep everything else
-            print
-        }
-    }' \
-    src/bin \
-    > temp/dist/bin
-
+# Compile with mdsh
+export VERSION=$version
+libexec/mdsh --compile bin.md > temp/dist/bin
 chmod +x temp/dist/bin
 
 # Smoke test

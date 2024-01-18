@@ -7,15 +7,19 @@ while true; do
     # Clear the screen
     clear
 
-    # Update the README first, if possible, so I don't have to wait to view the changes
     (
+        # Update the README first, if possible, so I don't have to wait to view the changes
         bin/generate-readme
+
+        # Then run the tests
         bin/test "$@"
+
+        # Don't quit if there are errors in this part of the script
     ) || true
 
-    # Wait until something changes
+    # Wait until something changes and do it all over again
     inotifywait -qqr \
         -e create -e modify -e move -e attrib -e delete \
-        bin/build features src
+        bin/build bin/generate-readme bin/test features bin.md
 
 done

@@ -10,40 +10,35 @@ LGREEN=$'\e[92m'
 LMAGENTA=$'\e[95m'
 LCYAN=$'\e[96m'
 
-result=0
+bin/build
 
-# Build
-bin/build || result=$?
+if ! bin/cucumber --fail-fast "$@"; then
+    result=$?
 
-# Run tests
-if [[ $result -eq 0 ]]; then
-    bin/cucumber --fail-fast "$@" || result=$?
+    # If it failed, output debugging information
+    if [[ -f temp/command.txt ]]; then
+        echo
+        echo "${LMAGENTA}${BOLD}${UNDERLINE}Command${RESET}"
+        cat temp/command.txt
+    fi
+
+    if [[ -f temp/stdout.txt ]]; then
+        echo
+        echo "${LGREEN}${BOLD}${UNDERLINE}Output${RESET}"
+        cat temp/stdout.txt
+    fi
+
+    if [[ -f temp/stderr.txt ]]; then
+        echo
+        echo "${LRED}${BOLD}${UNDERLINE}Errors${RESET}"
+        cat temp/stderr.txt
+    fi
+
+    if [[ -f temp/debug.txt ]]; then
+        echo
+        echo "${LCYAN}${BOLD}${UNDERLINE}Debug log${RESET}"
+        cat temp/debug.txt
+    fi
+
+    exit $result
 fi
-
-# If it failed, output debugging information
-if [[ -f temp/root/command.txt ]]; then
-    echo
-    echo "${LMAGENTA}${BOLD}${UNDERLINE}Command${RESET}"
-    cat temp/root/command.txt
-fi
-
-if [[ -f temp/root/stdout.txt ]]; then
-    echo
-    echo "${LGREEN}${BOLD}${UNDERLINE}Output${RESET}"
-    cat temp/root/stdout.txt
-fi
-
-if [[ -f temp/root/stderr.txt ]]; then
-    echo
-    echo "${LRED}${BOLD}${UNDERLINE}Errors${RESET}"
-    cat temp/root/stderr.txt
-fi
-
-if [[ -f temp/root/debug.txt ]]; then
-    echo
-    echo "${LCYAN}${BOLD}${UNDERLINE}Debug log${RESET}"
-    cat temp/root/debug.txt
-fi
-
-# Return the result code
-exit $result
