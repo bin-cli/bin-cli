@@ -169,3 +169,33 @@ Feature: Script extensions
         Available commands
         bin sample1
         """
+
+  Rule: Extensions must be used in .binconfig
+
+    | You must include the extension in `.binconfig`:
+    |
+    | ```ini
+    | [sample1.sh]
+    | help = The extension is required here
+    | ```
+
+    Scenario: The extension should be used when looking for help text
+      Given a script '{ROOT}/project/bin/sample1.sh'
+      And a file '{ROOT}/project/.binconfig' with content:
+        """
+        [sample1]
+        help = Incorrect
+
+        [sample1.sh]
+        help = Correct
+        """
+      When I run 'bin'
+      Then it is successful
+      And the output is:
+        """
+        Available commands
+        bin sample1    Correct
+
+        Warning: The following commands listed in .binconfig do not exist:
+        [sample1]
+        """

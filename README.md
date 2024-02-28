@@ -618,6 +618,13 @@ $ bin sample1
 $ bin sample1.sh
 ```
 
+You must include the extension in `.binconfig`:
+
+```ini
+[sample1.sh]
+help = The extension is required here
+```
+
 <!-- features/5.06-custom-script-directory.feature -->
 
 ### Custom Script Directory

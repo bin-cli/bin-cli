@@ -947,6 +947,30 @@ run_command_if_only_one_match() {
     bug 'Reached the end of run_command_if_only_one_match() without running a command' # kcov-ignore-line: This should never be happen
 }
 
+#---------------------------------------
+# Command help text
+#---------------------------------------
+
+map_init command_help
+
+set_command_help() {
+    local command help
+
+    command=$1
+    help=$2
+
+    map_set command_help "$command" "$help"
+}
+
+get_command_help() {
+    local command original_command
+
+    command=$1
+
+    original_command=$(map_get original_commands "$command")
+    map_get command_help "$original_command"
+}
+
 #===============================================================================
 # Find the available commands, aliases, etc.
 #===============================================================================
@@ -969,8 +993,6 @@ main_root=''
 merging=false
 start_directory=$PWD
 template='_TBC'
-
-map_init help
 
 while $keep_looking; do
 
@@ -1154,7 +1176,7 @@ while $keep_looking; do
                 # help=Description
                 value=$(trim "$value")
                 if [[ -n "$value" ]]; then
-                    map_set help "$command" "$value"
+                    set_command_help "$command" "$value"
                 fi
             else
                 # Unknown keys don't trigger an error for forwards compatibility (command)
@@ -1545,7 +1567,7 @@ get_command_aliases() {
 echo "$LWHITE$BOLD$UNDERLINE$list_title$RESET"
 
 for command in ${visible_commands+"${visible_commands[@]}"}; do
-    if command_help=$(map_get help "$command"); then
+    if command_help=$(get_command_help "$command"); then
         if command_aliases=$(get_command_aliases "$command"); then
             printf "%s %-${maxlength}s    %s\n" "$exe" "$command" "$command_help $GREY($command_aliases)$RESET"
         else
