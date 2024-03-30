@@ -4,87 +4,118 @@
 # https://github.com/bin-cli/bin-cli   MIT License                             #
 ################################################################################
 
-#region ==== SHELL OPTIONS =====================================================
+#region ======= GENERAL NOTES ==================================================
+
+# We use '/usr/bin/env bash' rather than '/bin/bash' in the shebang so
+# it works with Bash installed in a non-standard location, e.g. with Homebrew.
+#
+# We require Bash, not just a standard POSIX shell like Dash[1], because we use:
+# - Arrays
+# - Regular expression matching
+# - '[[' for saner 'if' conditions[2]
+# - Function-local variables (especially in recursive functions)
+#
+# While I would prefer to support all POSIX-compatible[3] shells, it's probably
+# not worth the extra effort. Supporting Bash v3 (for macOS) is already complex
+# enough (there are no associative arrays, and we have to use
+# '${array+"${array[@]}"}' everywhere instead of '${array[@]}' [4])!
+#
+# There are a number of global variables. Unfortunately there's little we can do
+# to avoid that, since we can't pass arrays/maps around by reference like in
+# other languages, and Bash doesn't have anything equivalent to classes/objects.
+# I have marked each assignment to a global variable (inside a function) with
+# the comment '# global'. Every other variable set in a function should be
+# marked 'local'.
+#
+# Since Bash doesn't support booleans, they are actually set to the strings
+# 'true' or 'false', which can be evaluated directly using 'if $var; then ...'.
+# (Some people argue against this style[5], but I haven't seen any convincing
+# arguments why to change it...)
+#
+# [1]: https://wiki.archlinux.org/title/Dash
+# [2]: https://stackoverflow.com/a/31366734
+# [3]: https://en.wikipedia.org/wiki/POSIX
+# [4]: https://stackoverflow.com/a/61551944
+# [5]: https://stackoverflow.com/a/21210966
+
+#endregion =====================================================================
+#region ======= SHELL OPTIONS ==================================================
+
+# This has been called[1] the "unofficial bash strict mode". There are some
+# downsides and edge cases[2][3], but I generally find it helpful. I may look at
+# some of the expanded versions[4][5] at some point.
+#
+# Specifically:
+# - 'errexit', causes the script to exit if a subcommand fails (with some
+#   unfortunate exceptions[2])
+# - 'nounset', triggers an error when reading an unset variable (good for
+#   catching typos and logic errors)
+# - 'pipefail' triggers an error if any command in a pipeline fails, rather
+#   than just the last command in the pipeline
+#
+# [1]: http://redsymbol.net/articles/unofficial-bash-strict-mode/
+# [2]: https://mywiki.wooledge.org/BashFAQ/105
+# [3]: https://news.ycombinator.com/item?id=11313928
+# [4]: https://github.com/olivergondza/bash-strict-mode/blob/master/strict-mode.sh
+# [5]: https://github.com/sellout/bash-strict-mode/blob/main/bin/strict-mode.bash
 
 set -euo pipefail
+
+# 'nullglob' causes wildcard patterns that don't match any files to return no
+# results, rather than returning the input string and requiring an extra manual
+# check to see if if matched anything or not.
+
 shopt -s nullglob
 
 #endregion =====================================================================
-#region ==== CONSTANTS =========================================================
+#region ======= VERSION ========================================================
 
-# Version (set by build script - don't change in source file)
-VERSION='v1.2.3-source'
+# The version number is set by 'bin/build', which is called by 'bin/release'. If
+# no version number is provided - including when running the tests - it defaults
+# to 'v1.2.3-dev'. We'll use a slightly different version here so we can tell if
+# something goes wrong with the build script.
 
-# Executable
-BIN_EXECUTABLE="$0"
-
-# The BIN_TEST_ROOT env var is ignored in production builds, but is used to emulate global directories in the tests
-if [[ $VERSION = 'v1.2.3-dev' ]]; then
-    BIN_TEST_ROOT=${BIN_TEST_ROOT-}
-else
-    BIN_TEST_ROOT='' # kcov-ignore-line: Not tested
-fi
-
-# ANSI codes
-if [[ -t 1 ]]; then
-    # kcov-ignore-start: There is never a terminal connected during unit tests
-    RESET=$'\e[0m'
-    BOLD=$'\e[1m'
-    UNDERLINE=$'\e[4m'
-    YELLOW=$'\e[33m'
-    GREY=$'\e[90m'
-    LWHITE=$'\e[97m'
-    # kcov-ignore-end
-else
-    RESET=''
-    BOLD=''
-    UNDERLINE=''
-    YELLOW=''
-    GREY=''
-    LWHITE=''
-fi
-
-# The debug output always goes to a terminal, but indirectly
-DEBUG_GREY=$'\e[90m'
-DEBUG_RESET=$'\e[0m'
-
-# Exit codes
-ERR_NOT_EXECUTABLE=126
-ERR_NOT_FOUND=127
-ERR_GENERIC=246
-
-# Other constants
-NEW_LINE=$'\n'
+readonly VERSION='v1.2.3-source' # DO NOT CHANGE
 
 #endregion =====================================================================
-#region ==== OUTPUT / DEBUGGING ================================================
+#region ======= HELPERS: OUTPUT & ERROR HANDLING  ==============================
 
-write_debug_to_fd3=false
-
-# If FD3 is open, write debug data to it (used in the test script)
-if { true >&3; } 2>/dev/null; then # kcov-ignore-line: Usage not detected
-    write_debug_to_fd3=true
+if [[ -t 1 ]]; then
+    # Terminal connected - use ANSI codes
+    # kcov-ignore-start: There is never a terminal connected during unit tests
+    readonly RESET=$'\e[0m'
+    readonly BOLD=$'\e[1m'
+    readonly UNDERLINE=$'\e[4m'
+    readonly YELLOW=$'\e[33m'
+    readonly GREY=$'\e[90m'
+    readonly LWHITE=$'\e[97m'
+    # kcov-ignore-end
+else
+    # No terminal connected - use plain output
+    readonly RESET=''
+    readonly BOLD=''
+    readonly UNDERLINE=''
+    readonly YELLOW=''
+    readonly GREY=''
+    readonly LWHITE=''
 fi
 
-# So we can use 'debug' inside functions where stdout is redirected,
-# redirect FD4 to stdout globally, then write debug data to FD4 locally
-exec 4>&1
+readonly NEW_LINE=$'\n'
 
-debug() {
-    # kcov-ignore-start: Debug statements are only added when needed
-    # (Originally I had it output debug logs all the time, but as the script
-    # grew they got harder to maintain and harder to read)
+# We use standard Linux (Unix? POSIX?) exit codes when scripts can't be executed
+# (permission denied) or can't be found. For everything else, we use a code that
+# is unlikely to be returned by the scripts themselves. I chose 246 because it's
+# "bin" written on a telephone keypad, as well as being sufficiently high enough
+# to be unusual. (Codes above 127 typically represent "killed by signal N+127",
+# but there are only 64 signals, and code 246 would represent signal 119.)
 
-    if ! $write_debug_to_fd3; then
-        return
-    fi
+readonly ERR_NOT_EXECUTABLE=126
+readonly ERR_NOT_FOUND=127
+readonly ERR_GENERIC=246
 
-    local lines
-    lines="${BASH_LINENO[*]}"
-    lines=${lines% 0}
-    echo "$@" "${DEBUG_GREY}[line ${lines// /, }]${DEBUG_RESET}" >&3
-    # kcov-ignore-end
-}
+# Define a function to be called when the script needs to exit with an error
+# message & code, so we can do so consistently.
+exe=${0##*/}
 
 fail() {
     local code message
@@ -92,38 +123,162 @@ fail() {
     message=$1
     code=${2-$ERR_GENERIC}
 
-    if [[ $action = 'complete-bash' ]]; then
+    # If we are performing tab completion, we don't want to output anything as
+    # it would clobber the prompt. We'll also return a success code, since the
+    # tab completion successfully returned nothing (although I don't know if
+    # that makes any practical difference)
+    if [[ ${action-} = 'complete-bash' ]]; then
         exit
     fi
 
+    # Otherwise, we will prefix the error message with the executable name -
+    # usually 'bin' (but it may be overridden with '--exe', or by just renaming
+    # / symlinking the script)
     echo "$exe: $message" >&2
     exit "$code"
 }
 
+# When debugging, it is useful to be able to log things and dump variables to
+# display on screen.
+#
+# Originally I had "debug" statements throughout the code and a "--debug" option
+# to display the log to users, but as the script grew, that got harder to
+# maintain and much harder to read - so now I just add debug statements
+# temporarily when debugging.
+#
+# We can't output debug data to either stdout (&1) or stderr (&2), because that
+# would cause earlier tests to fail, so we write it to debug.txt instead. That
+# is displayed on screen by the 'bin/test' script, so we include ANSI codes to
+# make it a little easier to read.
+
+readonly DEBUG_GREY=$'\e[90m'
+readonly DEBUG_RESET=$'\e[0m'
+
+debug() {
+    # kcov-ignore-start: Debug statements are only added when needed
+    if [[ -n ${BIN_DEBUG_LOG-} ]]; then
+        local line
+        line=$(debug_line)
+        echo "$@" "${DEBUG_GREY}[line $line]${DEBUG_RESET}" >> "$BIN_DEBUG_LOG"
+    fi
+    # kcov-ignore-end
+}
+
+# We'll also output the line number, since that can be helpful when there is
+# more than one debug statement, and the line numbers of the call stack,
+# because why not! But we don't want them to get in the way, so we'll display
+# them in a light grey colour.
+#
+# $BASH_LINENO is an array containing the line numbers from the stack trace.
+# We remove the first (call to this function) and last (always line 0),
+# convert it to a space-separated string, then replace the spaces by commas
+# to get a string like 'line 132, 41, 1722'.
+
+debug_line() {
+    local lines
+    lines=${BASH_LINENO[*]:1:${#BASH_LINENO[@]}-2}
+    echo "${lines// /, }"
+}
+
+# If we somehow reach a place in the code that shouldn't be possible, abort and
+# display the line number to help with debugging.
+
 bug() {
     # kcov-ignore-start: This should never be needed!
-    local lines
-
-    lines="${BASH_LINENO[*]}"
-    lines=${lines% 0}
-
-    fail "BUG: $1 on line ${lines// /, }"
+    local line
+    line=$(debug_line)
+    fail "BUG: $1 on line $line"
     # kcov-ignore-end
 }
 
 #endregion =====================================================================
-#region ==== PARSE PARAMETERS ==================================================
+#region ======= PARSE ARGUMENTS ================================================
 
-action='' # complete-bash, completion, create, edit, help, version
-dir=''
-exact=''
-exe=${0##*/}
-error=''
+# We need to parse the arguments given on the command line to determine the
+# action we should take, as well as various settings.
+#
+# Actions are mutually independent, so we'll return an error if the user
+# specifies more than one. (The alternative would be silently using the last
+# option given - but I think that is more confusing.)
+
+action=''
+argument_error=''
+
+set_action() {
+    if [[ -n $action ]]; then
+        set_argument_error "The '--$action' and '--$1' arguments are incompatible"
+    fi
+
+    action=$1 # global
+}
+
+set_argument_error() {
+    # Don't exit immediately because '--exe' may come after the parameter with the error
+    # But only display the first error encountered, as if we had exited immediately
+    if [[ -z $argument_error ]]; then
+        argument_error=$1 # global
+    fi
+}
+
+# Now we can loop through the arguments and parse them. We stop once we reach
+# one that doesn't start with a '-' - i.e. the command name. We'll also allow
+# '--' to explicitly stop parsing, just for consistency with other programs -
+# though I don't recommend making a command whose name starts with '-'.
+#
+# We allow both '--param value' and '--param=value' formats for long options.
+# We don't allow combining short options - it's more complex to implement, and
+# not worth it because all the short options are mutually exclusive.
+#
+# We can't use 'getopt', 'getopts', etc. to help with this because we don't want
+# to clobber anything after the command name - we need to keep them intact to
+# pass to the command.
+
 fallback=''
+fixed_bin_dir=''
+is_custom_exe=false
 shim=false
+unique_prefix_matching='' # may be boolean or empty
 
-help() {
-    echo "Usage: bin [OPTIONS] [--] [COMMAND] [ARGUMENTS...]"
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --complete-bash)    set_action complete-bash ;;
+        --completion)       set_action completion ;;
+        --create | -c)      set_action create ;;
+        --dir)              fixed_bin_dir=$2; shift ;;
+        --dir=*)            fixed_bin_dir=${1#*=} ;;
+        --edit | -e)        set_action edit ;;
+        --exact)            unique_prefix_matching=false ;;
+        --exe)              is_custom_exe=true; exe=$2; shift ;;
+        --exe=*)            is_custom_exe=true; exe=${1#*=} ;;
+        --fallback)         fallback=$2; shift ;;
+        --fallback=*)       fallback=${1#*=} ;;
+        --help | -h)        set_action help ;;
+        --prefix)           unique_prefix_matching=true ;;
+        --shim)             shim=true ;;
+        --version | -v)     set_action version ;;
+        --)                 shift; break ;;
+        -*)                 fail "Invalid option '$1'" ;;
+        *)                  break ;;
+    esac
+
+    shift
+done
+
+if [[ -n $argument_error ]]; then
+    fail "$argument_error"
+fi
+
+if [[ -z $action ]]; then
+    action='run'
+fi
+
+#endregion =====================================================================
+#region ======= SIMPLE ACTIONS: HELP / VERSION / COMPLETION SCRIPT =============
+
+# These actions don't require us to parse any config files or register commands.
+
+if [[ $action = 'help' ]]; then
+    echo "Usage: $exe [OPTIONS] [--] [COMMAND] [ARGUMENTS...]"
     echo
     echo "Options that can be used with a command:"
     echo "  --dir DIR             Specify the directory name to search for (overrides .binconfig)"
@@ -145,112 +300,6 @@ help() {
     echo "Any options must be given before the command, because everything after the command will be passed as parameters to the script."
     echo
     echo "For more details see https://github.com/bin-cli/bin-cli#readme"
-}
-
-set_action() {
-    if [[ -n $action ]]; then
-        set_error "The '--$action' and '--$1' arguments are incompatible"
-    fi
-
-    action=$1
-}
-
-set_error() {
-    # Don't exit immediately because '--exe' may come after the parameter with the error
-    # But only display the first error encountered, as if we had exited immediately
-    if [[ -z $error ]]; then
-        error=$1
-    fi
-}
-
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        --complete-bash)
-            set_action complete-bash
-            shift
-            ;;
-        --completion)
-            set_action completion
-            shift
-            ;;
-        --create | -c)
-            set_action create
-            shift
-            ;;
-        --dir)
-            dir=$2
-            shift 2
-            ;;
-        --dir=*)
-            dir=${1#*=}
-            shift
-            ;;
-        --edit | -e)
-            set_action edit
-            shift
-            ;;
-        --exact)
-            exact=true
-            shift
-            ;;
-        --exe)
-            exe=$2
-            shift 2
-            ;;
-        --exe=*)
-            exe=${1#*=}
-            shift
-            ;;
-        --fallback)
-            fallback=$2
-            shift 2
-            ;;
-        --fallback=*)
-            fallback=${1#*=}
-            shift
-            ;;
-        --help | -h)
-            set_action help
-            shift
-            ;;
-        --prefix)
-            exact=false
-            shift
-            ;;
-        --shim)
-            shim=true
-            shift
-            ;;
-        --version | -v)
-            set_action version
-            shift
-            ;;
-        --)
-            shift
-            break
-            ;;
-        -*)
-            fail "Invalid option '$1'"
-            ;;
-        *)
-            break
-            ;;
-    esac
-done
-
-if [[ -n $error ]]; then
-    fail "$error"
-fi
-
-if [[ -z $action ]]; then
-    action='run'
-fi
-
-#endregion =====================================================================
-#region ==== DISPLAY HELP / VERSION INFORMATION ================================
-
-if [[ $action = 'help' ]]; then
-    help
     exit
 fi
 
@@ -259,17 +308,14 @@ if [[ $action = 'version' ]]; then
     exit
 fi
 
-#endregion =====================================================================
-#region ==== TAB COMPLETION SCRIPT GENERATOR ===================================
-
 # This doesn't do the tab completion - it just outputs the script to be 'eval'ed
-
+# in the shell to enable tab completion.
 if [[ $action = 'completion' ]]; then
-    complete_command=("$BIN_EXECUTABLE" --complete-bash)
-    if [[ -n $dir ]]; then
-        complete_command+=("--dir" "'$dir'")
+    complete_command=("$0" --complete-bash)
+    if [[ -n $fixed_bin_dir ]]; then
+        complete_command+=("--dir" "'$fixed_bin_dir'")
     fi
-    if [[ $exe != 'bin' ]]; then
+    if $is_custom_exe; then
         complete_command+=("--exe" "'$exe'")
     fi
     echo "complete -C \"${complete_command[*]}\" -o default $exe"
@@ -277,7 +323,27 @@ if [[ $action = 'completion' ]]; then
 fi
 
 #endregion =====================================================================
-#region ==== GENERIC HELPER FUNCTIONS ==========================================
+#region ======= HELPERS: STRINGS ===============================================
+
+lowercase() {
+    # Can't use ${value,,} because it doesn't work in Bash 3 (macOS)
+    echo "$1" | tr '[:upper:]' '[:lower:]'
+}
+
+trim() {
+    local string
+
+    string=$1
+
+    # https://stackoverflow.com/a/3352015
+    string="${string#"${string%%[![:space:]]*}"}"
+    string="${string%"${string##*[![:space:]]}"}"
+
+    echo "$string"
+}
+
+#endregion =====================================================================
+#region ======= HELPERS: ARRAYS ================================================
 
 in_array() {
     local needle value
@@ -294,30 +360,24 @@ in_array() {
     return 1
 }
 
-trim() {
-    local string
+#endregion =====================================================================
+#region ======= HELPERS: MAPS (ASSOCIATIVE ARRAYS) =============================
 
-    string=$1
-
-    # https://stackoverflow.com/a/3352015/167815
-    string="${string#"${string%%[![:space:]]*}"}"
-    string="${string%"${string##*[![:space:]]}"}"
-
-    echo "$string"
-}
-
-#---------------------------------------
-# Maps (associative arrays)
-#---------------------------------------
-# This is to support Bash 3 (macOS - *sigh*!), which doesn't have associative arrays
+# Bash 3 (still the default on macOS - *sigh*!) doesn't have associative arrays,
+# so we emulate them by creating variables in the format 'map__<map>__<key>',
+# with the key being hex-encoded if necessary. This does mean all maps are
+# global - they can't be local to a function.
 
 map_init() {
     local map
 
     map=$1
 
-    eval "$map=()"
-    eval "unset \"\${!map__${map}__@}\""
+    # Clear any existing values so maps can be reset/reused
+    eval "unset \"\${!map__${map}__@}\"" # global
+
+    # Also create an array of raw keys so we can loop through them
+    eval "$map=()" # global
 }
 
 map_key() {
@@ -340,58 +400,69 @@ map_key() {
 }
 
 map_set() {
-    local key map value
+    local key map map_key value
 
     map=$1
     key=$2
     value=$3
 
-    # Make an array containing the raw keys so we can loop through them
-    eval "$map+=(\"\$key\")"
-
     # Store the values in separate variables
-    key=$(map_key "$map" "$key")
-    printf -v "$key" %s "$value"
+    map_key=$(map_key "$map" "$key")
+    printf -v "$map_key" %s "$value" # global
+
+    # Also add it to an array of raw keys so we can loop through them
+    eval "$map+=(\"\$key\")" # global
 }
 
 map_get() {
-    local key map
+    local key map map_key
 
     map=$1
     key=$2
 
-    key=$(map_key "$map" "$key")
+    map_key=$(map_key "$map" "$key")
 
-    if [[ -z ${!key+isset} ]]; then
+    if [[ -z ${!map_key+isset} ]]; then
         return 1
     fi
 
-    echo "${!key}"
+    echo "${!map_key}"
 }
 
 map_has() {
-    local key map
+    local key map map_key
 
     map=$1
     key=$2
 
-    key=$(map_key "$map" "$key")
+    map_key=$(map_key "$map" "$key")
 
-    [[ -n ${!key+isset} ]]
+    [[ -n ${!map_key+isset} ]]
 }
 
-#---------------------------------------
-# Filesystem
-#---------------------------------------
+#endregion =====================================================================
+#region ======= HELPERS: FILESYSTEM ============================================
+
+# The BIN_TEST_ROOT env var is ignored in production builds, but is used as
+# an alternative to 'chroot' (which doesn't work on macOS) in the tests
+if [[ $VERSION = 'v1.2.3-dev' ]]; then
+    readonly ROOT_DIR=${BIN_TEST_ROOT-}
+else
+    readonly ROOT_DIR='' # kcov-ignore-line: Not tested
+fi
 
 findup() (
+    cd "$1"
+    shift
+
     while true; do
+
         if test "$@"; then
             echo "$PWD"
             return 0
         fi
 
-        if [[ $PWD = '/' || $PWD = "$BIN_TEST_ROOT" ]]; then
+        if [[ ${PWD%/} = "$ROOT_DIR" ]]; then
             return 1
         fi
 
@@ -399,6 +470,15 @@ findup() (
 
     done
 )
+
+is_common_bin_dir() {
+    in_array "$1" \
+        "$ROOT_DIR/bin" \
+        "$ROOT_DIR/usr/bin" \
+        "$ROOT_DIR/usr/local/bin" \
+        "$ROOT_DIR/snap/bin" \
+        "$HOME/bin"
+}
 
 relative_path() {
     local child parent
@@ -409,16 +489,14 @@ relative_path() {
     echo "${child#"${parent}/"}"
 }
 
-#---------------------------------------
-# Cross-platform `realpath`
-#---------------------------------------
+#endregion =====================================================================
+#region ======= HELPERS: CROSS-PLATFORM 'realpath' =============================
 
 # Based on: https://github.com/mkropat/sh-realpath/blob/65512368b8155b176b67122aa395ac580d9acc5b/realpath.sh
 # Copyright (c) 2014 Michael Kropat - MIT License
 # Modified to work with 'set -e', and to follow our code conventions
 
-# Not every code path is covered by our tests
-# kcov-ignore-start
+# kcov-ignore-start: Not every code path is covered by our tests
 realpath() {
     local resolved
     resolved=$(resolve_symlinks "$1")
@@ -454,7 +532,7 @@ _prepend_dir_context_if_necessary() {
 _prepend_path_if_relative() {
     case "$2" in
         /*) echo "$2" ;;
-        *)  echo "$1/$2" ;;
+        *) echo "$1/$2" ;;
     esac
 }
 
@@ -493,17 +571,19 @@ _canonicalize_file_path() {
 # kcov-ignore-end
 
 #endregion =====================================================================
-#region ==== BIN FUNCTIONS =====================================================
+#region ======= HELPERS: CONFIG FILES ==========================================
 
-#---------------------------------------
-# Config files
-#---------------------------------------
+# '.binconfig' files are INI files, so we need some functions to parse them. We
+# do that in two separate phases.
+#
+# First, when we are searching for the 'bin/' directory or checking for a
+# matching '.binconfig' file, we only need to extract the global 'dir' option
+# and can ignore the rest of the file.
 
 bin_dir_for() {
-    local bin_dir_real file key line result root_real sanity_checks value
+    local bin_dir_real file key line result root_real value
 
     file=$1
-    sanity_checks=${2-false}
 
     line=0
     result=''
@@ -512,7 +592,7 @@ bin_dir_for() {
 
         key=$(trim "$key")
 
-        if [[ $key = '' || $key = '#'* || $key = ';'* ]]; then
+        if binconfig_line_is_ignored "$key"; then
             # Skip blank lines & comments
             :
         elif [[ $key =~ ^\[(.+)]$ ]]; then
@@ -526,40 +606,189 @@ bin_dir_for() {
         fi
     done <"$file" # kcov-ignore-line: Usage not detected
 
+    # If 'dir' is not set, default to 'bin' and skip the sanity checks
     if [[ -z $result ]]; then
-        result='bin'
-        line=0
+        echo 'bin'
+        return
     fi
 
-    if $sanity_checks; then
-        if [[ $result = /* ]]; then
-            fail "The option 'dir' cannot be an absolute path in $file line $line"
-        fi
+    # Sanity checks to ensure it will work even if the project is moved elsewhere
+    if [[ $result = /* ]]; then
+        fail "The option 'dir' cannot be an absolute path in $file line $line"
+    fi
 
-        if [[ -d "$root/$result" ]]; then
-            bin_dir_real=$(realpath "$root/$result")
-            root_real=$(realpath "$root")
+    if [[ ! -d "$root/$result" ]]; then
+        fail "The directory specified in $file line $line does not exist: $root/$result/"
+    fi
 
-            if [[ "$bin_dir_real/" != "$root_real/"* ]]; then
-                fail "The option 'dir' cannot point to a directory outside $root in $file line $line"
-            fi
-        elif [[ $line -gt 0 ]]; then
-            fail "The directory specified in $file line $line does not exist: $root/$result/"
-        fi
-
-        # It is not an error if (1) .binconfig exists, (2) 'dir' is not set and
-        # (3) bin/ doesn't exist, because .binconfig may contain inline commands
+    bin_dir_real=$(realpath "$root/$result")
+    root_real=$(realpath "$root")
+    if [[ "$bin_dir_real/" != "$root_real/"* ]]; then
+        fail "The option 'dir' cannot point to a directory outside $root in $file line $line"
     fi
 
     echo "$result"
 }
 
-#---------------------------------------
-# Commands
-#---------------------------------------
+# Once we have determined the correct '.binconfig' file to use, we can parse it
+# and register both the global and per-command settings. This may be called more
+# than once if we are using 'merge = true'.
 
+commands_listed_in_binconfig=()
+merge_is_optional=false
+merge_with_parent=true
+template='_TBC'
+
+map_init command_help
+
+parse_binconfig() {
+    local binconfig bin_dir command key line root value
+
+    binconfig=$1
+    root=$2
+    bin_dir=$3
+
+    command=''
+    line=0
+
+    # shellcheck disable=SC2094 # We aren't writing to $binconfig but it thinks we might be
+    while IFS='=' read -r key value; do
+        ((line += 1))
+
+        key=$(trim "$key")
+        value=$(trim "$value")
+
+        if binconfig_line_is_ignored "$key"; then
+            : # Skip blank lines & comments
+        elif [[ $key =~ ^\[(.+)]$ ]]; then
+            command=${BASH_REMATCH[1]}
+            commands_listed_in_binconfig+=("$command") # global
+        elif [[ -n $command ]]; then
+            set_command_option "$command" "$key" "$value" "$binconfig" "$line" "$root" "$bin_dir"
+        else
+            set_global_option "$key" "$value" "$binconfig" "$line"
+        fi
+    done <"$binconfig" # kcov-ignore-line: Usage not detected
+}
+
+set_global_option() {
+    local binconfig key line value value_lowercase
+
+    key=$1
+    value=$2
+    binconfig=$3
+    line=$4
+
+    if [[ $key = 'dir' ]]; then
+
+        : # Already handled in 'get_dir_from_binconfig'
+
+    elif [[ $key = 'exact' ]]; then
+
+        # exact = true
+        # exact = false (default)
+        value_lowercase=$(lowercase "$value")
+
+        if in_array "$value_lowercase" 'false' 'no' 'off' '0'; then
+            # The first processed (i.e. deepest) .binconfig file takes precedence here
+            if [[ -z $unique_prefix_matching ]]; then
+                unique_prefix_matching=true
+            fi
+        elif in_array "$value_lowercase" 'true' 'yes' 'on' '1'; then
+            if [[ -z $unique_prefix_matching ]]; then
+                unique_prefix_matching=false
+            fi
+        else
+            fail "Invalid value for 'exact' in $binconfig line $line: $value"
+        fi
+
+    elif [[ $key = 'merge' ]]; then
+
+        value_lowercase=$(lowercase "$value")
+
+        if in_array "$value_lowercase" 'false' 'no' 'off' '0'; then
+            merge_with_parent=false # global
+        elif in_array "$value_lowercase" 'true' 'yes' 'on' '1'; then
+            merge_with_parent=true # global
+            merge_is_optional=false # global
+        elif [[ $value_lowercase = 'optional' ]]; then
+            merge_with_parent=true # global
+            merge_is_optional=true # global
+        else
+            fail "Invalid value for 'merge' in $binconfig line $line: $value"
+        fi
+
+    elif [[ $key = 'template' ]]; then
+
+        if [[ $template = '_TBC' ]]; then
+            template=$value
+        fi
+
+    else
+
+        # Unknown keys don't trigger an error for forwards compatibility
+        debug "Ignored unknown key '$key' in $binconfig line $line"
+
+    fi
+}
+
+set_command_option() {
+    local binconfig bin_dir command key line root value value_lowercase
+
+    command=$1
+    key=$2
+    value=$3
+    binconfig=$4
+    line=$5
+    root=$6
+    bin_dir=$7
+
+    if [[ $key = 'alias' || $key = 'aliases' ]]; then
+
+        IFS=',' read -ra line_aliases <<<"$value"
+        for alias in ${line_aliases+"${line_aliases[@]}"}; do
+            alias=$(trim "$alias")
+            register_command_alias "$alias" "$command" "$binconfig line $line"
+        done
+
+    elif [[ $key = 'command' ]]; then
+
+        register_inline_command "$command" "$value" "$binconfig line $line" "$root" "$bin_dir"
+
+    elif [[ $key = 'help' ]]; then
+
+        if [[ -n "$value" ]]; then
+            register_command_help "$command" "$value"
+        fi
+
+    else
+
+        # Unknown keys don't trigger an error for forwards compatibility
+        debug "Ignored unknown key '$key' in $binconfig line $line"
+
+    fi
+}
+
+# Like many INI parsers, we allow both '#' and ';' to denote comments - but only
+# at the start of a line. (There may also be whitespace before it - that is
+# removed by 'trim' before this function is called.) We'll also use this
+# function to skip blank lines.
+
+binconfig_line_is_ignored() {
+    [[ $1 = '' || $1 = '#'* || $1 = ';'* ]]
+}
+
+#endregion =====================================================================
+#region ======= HELPERS: REGISTER COMMANDS =====================================
+
+# Before we can run any commands, we need to make a list of them all. This
+# allows us to support unique prefix matching, detect conflicts, and so on.
+# Regular commands are implemented as executables / shell scripts. Inline
+# commands are defined in '.binconfig'.
+
+broken_symlinks=()
+non_executable_files=()
 registered_commands=()
-matching_commands=()
 
 map_init command_to_executable
 map_init command_to_inline_script
@@ -573,8 +802,6 @@ prevent_duplicate_command() {
     name=$2
     source=$3
 
-    # This long-winded syntax (used here and in various other places) is to make
-    # it work in Bash 3 (macOS) - https://stackoverflow.com/a/61551944/167815
     if in_array "$name" ${registered_commands+"${registered_commands[@]}"}; then
         fail "The $type '$name' defined in $source conflicts with an existing command"
     fi
@@ -588,10 +815,10 @@ register_executable_command() {
 
     prevent_duplicate_command command "$name" "$executable"
 
-    registered_commands+=("$name")
-    map_set command_to_executable "$name" "$executable"
-    map_set executable_to_command "$executable" "$name"
-    map_set original_commands "$name" "$name"
+    registered_commands+=("$name")                      # global
+    map_set command_to_executable "$name" "$executable" # global
+    map_set executable_to_command "$executable" "$name" # global
+    map_set original_commands "$name" "$name"           # global
 }
 
 register_inline_command() {
@@ -603,9 +830,9 @@ register_inline_command() {
 
     prevent_duplicate_command command "$name" "$source"
 
-    registered_commands+=("$name")
-    map_set command_to_inline_script "$name" "$script"
-    map_set original_commands "$name" "$name"
+    registered_commands+=("$name")                     # global
+    map_set command_to_inline_script "$name" "$script" # global
+    map_set original_commands "$name" "$name"          # global
 }
 
 register_commands_in_directory() {
@@ -627,7 +854,7 @@ register_commands_in_directory() {
                 fail "The symlink '$file' must use a relative path, not absolute ('$target')"
             fi
             if [[ -e $file ]]; then
-                register_executable_alias "$prefix$name" "$realfile" "$file"
+                register_symlink_alias "$prefix$name" "$realfile" "$file"
             else
                 broken_symlinks+=("$file => $target")
             fi
@@ -637,12 +864,12 @@ register_commands_in_directory() {
             # unlikely someone who keeps scripts in the root would also have
             # some in subdirectories
             if ! $is_root_dir; then
-                map_set executable_to_command "$realfile" "$prefix$name"
+                map_set executable_to_command "$realfile" "$prefix$name" # global
                 register_commands_in_directory "$file" "$prefix$name "
             fi
         elif [[ ! -x $file ]]; then
             if ! $is_root_dir; then
-                non_executable_files+=("$file")
+                non_executable_files+=("$file") # global
             fi
         else
             # Ignore known plain text files if scripts are in the root directory,
@@ -653,6 +880,58 @@ register_commands_in_directory() {
         fi
     done
 }
+
+#endregion =====================================================================
+#region ======= HELPERS: ALIASES ===============================================
+
+aliases=()
+
+map_init alias_sources
+map_init alias_to_executable
+
+prevent_duplicate_alias() {
+    local existing name source
+
+    name=$1
+    source=$2
+
+    if existing=$(map_get alias_sources "$name"); then
+        fail "The alias '$name' defined in $source conflicts with the alias defined in $existing"
+    fi
+}
+
+register_command_alias() {
+    local alias command source
+
+    alias=$1
+    command=$2
+    source=$3
+
+    prevent_duplicate_alias "$alias" "$source"
+
+    aliases+=("$alias")                           # global
+    map_set original_commands "$alias" "$command" # global
+    map_set alias_sources "$alias" "$source"      # global
+}
+
+register_symlink_alias() {
+    local alias executable source
+
+    alias=$1
+    executable=$2
+    source=$3
+
+    prevent_duplicate_alias "$alias" "$source"
+
+    aliases+=("$alias")                                # global
+    map_set alias_to_executable "$alias" "$executable" # global
+    map_set alias_sources "$alias" "$source"           # global
+}
+
+#endregion =====================================================================
+#region ======= HELPERS: SEARCH FOR COMMANDS ===================================
+
+matching_commands=()
 
 command_matches() {
     local command found target type
@@ -710,21 +989,21 @@ find_matching_commands() {
     target=$2
     stop_after_first=${3-false}
 
-    map_init commands_matching_aliases
+    map_init commands_matching_aliases # global
 
     for alias in ${aliases+"${aliases[@]}"}; do
         if command_matches "$type" "$target" "$alias"; then
             command=$(map_get original_commands "$alias")
-            map_set commands_matching_aliases "$command" true
+            map_set commands_matching_aliases "$command" true # global
         fi
     done
 
-    matching_commands=()
+    matching_commands=() # global
     for command in ${registered_commands+"${registered_commands[@]}"}; do
         if map_has commands_matching_aliases "$command"; then
-            matching_commands+=("$command")
+            matching_commands+=("$command") # global
         elif command_matches "$type" "$target" "$command"; then
-            matching_commands+=("$command")
+            matching_commands+=("$command") # global
         else
             continue
         fi
@@ -780,101 +1059,8 @@ matching_commands_shared_prefix() {
     fi
 }
 
-remove_extension() {
-    local command
-
-    # Can't use ${command%%.*} because it could remove too much ("a.b c" => "a" instead of "a.b")
-    # Can't use ${command%.*} because it could remove too little ("a.b.c" => "a.b" instead of "a")
-    command="$1"
-
-    while [[ "$command" =~ (.*)(\.[a-zA-Z0-9]+)+ ]]; do
-        command=${BASH_REMATCH[1]}
-    done
-
-    echo "$command"
-}
-
-has_duplicate() {
-    local alias command long short
-
-    short=$1
-    long=$2
-
-    for command in ${registered_commands+"${registered_commands[@]}"}; do
-        case "$command" in
-            # Ignore a match to itself
-            "$long") continue ;;
-            # Matched to the short command, but not the long one
-            "$short") return 0 ;;
-            "$short."*) return 0 ;;
-            "$short "*) return 0 ;;
-            *) continue ;;
-        esac
-    done
-
-    for alias in ${aliases+"${aliases[@]}"}; do
-        case "$alias" in
-            "$short") return 0 ;;
-            "$short "*) return 0 ;;
-            *) continue ;;
-        esac
-    done
-
-    # No matches found
-    return 1
-}
-
-#---------------------------------------
-# Aliases
-#---------------------------------------
-
-aliases=()
-
-map_init alias_sources
-map_init alias_to_executable
-
-prevent_duplicate_alias() {
-    local existing name source
-
-    name=$1
-    source=$2
-
-    if existing=$(map_get alias_sources "$name"); then
-        fail "The alias '$name' defined in $source conflicts with the alias defined in $existing"
-    fi
-}
-
-register_command_alias() {
-    local alias command source
-
-    alias=$1
-    command=$2
-    source=$3
-
-    prevent_duplicate_alias "$alias" "$source"
-
-    aliases+=("$alias")
-    map_set original_commands "$alias" "$command"
-    map_set alias_sources "$alias" "$source"
-}
-
-register_executable_alias() {
-    local alias executable source
-
-    alias=$1
-    executable=$2
-    source=$3
-
-    prevent_duplicate_alias "$alias" "$source"
-
-    aliases+=("$alias")
-    map_set alias_to_executable "$alias" "$executable"
-    map_set alias_sources "$alias" "$source"
-}
-
-#---------------------------------------
-# Run commands
-#---------------------------------------
+#endregion =====================================================================
+#region ======= HELPERS: RUN COMMANDS ==========================================
 
 open_in_editor() {
     local editor file
@@ -921,10 +1107,10 @@ run_command_if_only_one_match() {
 
     # Export the command name so it can be displayed in help messages
     # Typically with a fallback to $0 if it is unset: ${BIN_COMMAND-$0}
-    export BIN_COMMAND="$exe $command"
+    export BIN_COMMAND="$exe $command" # global
 
     # And this can be used to display other command names
-    export BIN_EXE="$exe"
+    export BIN_EXE="$exe" # global
 
     if executable=$(map_get command_to_executable "$command"); then
         run_command "$executable" "$@"
@@ -933,8 +1119,8 @@ run_command_if_only_one_match() {
     if script=$(map_get command_to_inline_script "$command"); then
         # These variables are useful for inline commands, but aren't made available
         # to regular commands because it is better to use "$(dirname "$0")" instead
-        export BIN_ROOT="$root"
-        export BIN_DIR="$bin_dir"
+        export BIN_ROOT="$root"   # global
+        export BIN_DIR="$bin_dir" # global
 
         run_command bash -c "$script" -- "$@"
     fi
@@ -942,19 +1128,16 @@ run_command_if_only_one_match() {
     bug 'Reached the end of run_command_if_only_one_match() without running a command' # kcov-ignore-line: This should never be happen
 }
 
-#---------------------------------------
-# Command help text
-#---------------------------------------
+#endregion =====================================================================
+#region ======= HELPERS: COMMAND HELP TEXT =====================================
 
-map_init command_help
-
-set_command_help() {
+register_command_help() {
     local command help
 
     command=$1
     help=$2
 
-    map_set command_help "$command" "$help"
+    map_set command_help "$command" "$help" # global
 }
 
 get_command_help() {
@@ -967,65 +1150,57 @@ get_command_help() {
 }
 
 #endregion =====================================================================
-#region ==== FIND THE AVAILABLE COMMANDS, ALIASES, ETC. ========================
+#region ======= REGISTER COMMANDS & CONFIG FILES ===============================
 
-broken_symlinks=()
-non_executable_files=()
-commands_listed_in_config=()
-
-#---------------------------------------
-# Repeat while 'merge=true' is set
-#---------------------------------------
-
-error_if_not_found=true
-keep_looking=true
-main_binconfig=''
 main_bin_dir=''
 main_bin_dir_from_root=''
+main_binconfig=''
 main_is_root_dir=false
 main_root=''
 merging=false
 start_directory=$PWD
-template='_TBC'
 
-while $keep_looking; do
+while true; do
 
-    keep_looking=false
+    merge_with_parent=false
 
-    #---------------------------------------
     # Determine paths
-    #---------------------------------------
-
     root=''
     binconfig=''
     bin_dir=''
     bin_dir_from_root=''
     is_root_dir=false
 
-    if [[ -n $dir ]]; then
+    if [[ -n $fixed_bin_dir ]]; then
 
-        # Look for the given directory
-        if [[ $dir = /* ]]; then
-            bin_dir=$dir
+        # Look for given directory given by '--dir', which can either be an absolute
+        # path, which is searched directly, or a directory name, which is found
+        # by searching upwards from the current working directory as normal.
 
-            if [[ ! -d $bin_dir ]]; then
-                fail "Specified directory '$bin_dir/' is missing"
+        if [[ $fixed_bin_dir = /* ]]; then
+            # Absolute path
+            if [[ ! -d $fixed_bin_dir ]]; then
+                fail "Specified directory '$fixed_bin_dir/' is missing"
             fi
+
+            bin_dir=$fixed_bin_dir
         else
-            if ! dir_parent=$(cd "$start_directory" && findup -d "$dir"); then
-                fail "Could not find '$dir/' directory starting from '$start_directory'" $ERR_NOT_FOUND
+            # Directory name
+            if ! dir_parent=$(findup "$start_directory" -d "$fixed_bin_dir"); then
+                fail "Could not find '$fixed_bin_dir/' directory starting from '$start_directory'" $ERR_NOT_FOUND
             fi
 
-            bin_dir="$dir_parent/$dir"
+            bin_dir="$dir_parent/$fixed_bin_dir"
+            fixed_bin_dir=''
         fi
 
-        # If there is no .binconfig file, assume the parent directory is the root
+        # Look for a matching .binconfig file
+        # If there isn't one, assume the parent directory is the project root
         binconfig=''
         root=$(dirname "$bin_dir")
         bin_dir_from_root=$(basename "$bin_dir")
 
-        # Look for a matching .binconfig file
-        if binconfig_dir=$(cd "$bin_dir" && findup -f .binconfig); then
+        if binconfig_dir=$(findup "$bin_dir" -f .binconfig); then
             binconfig_file="$binconfig_dir/.binconfig"
             dir_in_binconfig=$(bin_dir_for "$binconfig_file")
             required_dir=$(relative_path "$binconfig_dir" "$bin_dir")
@@ -1037,46 +1212,49 @@ while $keep_looking; do
             fi
         fi
 
+    elif root=$(findup "$start_directory" -f .binconfig); then
+
+        # If there is a .binconfig file in any ancestor directory, that takes precedence
+        binconfig="${root%/}/.binconfig"
+        bin_dir_from_root=$(bin_dir_for "$binconfig")
+
+        if [[ $bin_dir_from_root = '.' ]]; then
+            bin_dir=${root%/}
+        else
+            bin_dir="${root%/}/$bin_dir_from_root"
+        fi
+
     else
 
-        if root=$(cd "$start_directory" && findup -f .binconfig); then
-            binconfig="${root%/}/.binconfig"
-            bin_dir_from_root=$(bin_dir_for "$binconfig" true)
-            if [[ $bin_dir_from_root = '.' ]]; then
-                bin_dir=${root%/}
+        # Otherwise search for a bin/ directory
+        if ! root=$(findup "$start_directory" -d bin); then
+            if $merge_is_optional; then
+                break
+            elif $merging; then
+                # This returns a generic (i.e. configuration) error because merge=true should only be used if the parent exists
+                fail "Could not find 'bin/' directory or '.binconfig' file starting from '$start_directory' (merge=true)" $ERR_GENERIC
             else
-                bin_dir="${root%/}/$bin_dir_from_root"
-            fi
-        else
-            if ! root=$(cd "$start_directory" && findup -d bin); then
-                if ! $error_if_not_found; then
-                    break
-                elif $merging; then
-                    # This returns a generic (i.e. configuration) error because merge=true should only be used if the parent exists
-                    fail "Could not find 'bin/' directory or '.binconfig' file starting from '$start_directory' (merge=true)" $ERR_GENERIC
-                else
-                    # Whereas this returns a 'not found' error because it has probably just been run from a directory with no scripts
-                    fail "Could not find 'bin/' directory or '.binconfig' file starting from '$start_directory'" $ERR_NOT_FOUND
-                fi
-            fi
-
-            binconfig="${root%/}/.binconfig"
-            bin_dir_from_root='bin'
-            bin_dir="${root%/}/$bin_dir_from_root"
-
-            if in_array "$bin_dir" "$BIN_TEST_ROOT/bin" "$BIN_TEST_ROOT/usr/bin" "$BIN_TEST_ROOT/usr/local/bin" "$BIN_TEST_ROOT/snap/bin" "$HOME/bin"; then
-                if ! $error_if_not_found; then
-                    break
-                elif $merging; then
-                    # This returns a generic (i.e. configuration) error because merge=true should only be used if the parent exists
-                    fail "Could not find 'bin/' directory or '.binconfig' file starting from '$start_directory' (merge=true) (ignored '$bin_dir')" $ERR_GENERIC
-                else
-                    # Whereas this returns a 'not found' error because it has probably just been run from a directory with no scripts
-                    fail "Could not find 'bin/' directory or '.binconfig' file starting from '$start_directory' (ignored '$bin_dir')" $ERR_NOT_FOUND
-                fi
+                # Whereas this returns a 'not found' error because it has probably just been run from a directory with no scripts
+                fail "Could not find 'bin/' directory or '.binconfig' file starting from '$start_directory'" $ERR_NOT_FOUND
             fi
         fi
 
+        binconfig="${root%/}/.binconfig"
+        bin_dir_from_root='bin'
+        bin_dir="${root%/}/bin"
+
+        # Ignore common global bin/ directories (/bin, /usr/bin, etc.)
+        if is_common_bin_dir "$bin_dir"; then
+            if $merge_is_optional; then
+                break
+            elif $merging; then
+                # This returns a generic (i.e. configuration) error because merge=true should only be used if the parent exists
+                fail "Could not find 'bin/' directory or '.binconfig' file starting from '$start_directory' (merge=true) (ignored '$bin_dir')" $ERR_GENERIC
+            else
+                # Whereas this returns a 'not found' error because it has probably just been run from a directory with no scripts
+                fail "Could not find 'bin/' directory or '.binconfig' file starting from '$start_directory' (ignored '$bin_dir')" $ERR_NOT_FOUND
+            fi
+        fi
     fi
 
     # Special case for dir=.
@@ -1084,110 +1262,18 @@ while $keep_looking; do
         is_root_dir=true
     fi
 
-    #---------------------------------------
     # Find and register available commands
-    #---------------------------------------
-
     if [[ -d $bin_dir ]]; then
         register_commands_in_directory "$bin_dir"
     fi
 
-    #---------------------------------------
-    # Parse config file
-    #---------------------------------------
-
+    # Parse config file (including registering aliases)
     if [[ -f $binconfig ]]; then
-        command=''
-
-        line=0
-        while IFS='=' read -r key value; do
-            ((line += 1))
-
-            key=$(trim "$key")
-
-            if [[ $key = '' || $key = '#'* || $key = ';'* ]]; then
-                # Skip blank lines & comments
-                :
-            elif [[ $key =~ ^\[(.+)]$ ]]; then
-                # [command]
-                command=${BASH_REMATCH[1]}
-                commands_listed_in_config+=("$command")
-            elif [[ -z $command && $key = 'dir' ]]; then
-                # Already handled (above)
-                :
-            elif [[ -z $command && $key = 'exact' ]]; then
-                # exact = true
-                # exact = false (default)
-                if [[ -z $exact ]]; then
-                    # Can't use ${value,,} because it doesn't work in Bash 3 (macOS)
-                    value=$(trim "$value")
-                    lc_value=$(echo "$value" | tr '[:upper:]' '[:lower:]')
-                    if in_array "$lc_value" 'false' 'no' 'off' '0'; then
-                        exact=false
-                    elif in_array "$lc_value" 'true' 'yes' 'on' '1'; then
-                        exact=true
-                    else
-                        fail "Invalid value for 'exact' in $binconfig line $line: $value"
-                    fi
-                fi
-            elif [[ -z $command && $key = 'merge' ]]; then
-                # merge = true
-                # merge = optional
-                # merge = false (default)
-                value=$(trim "$value")
-                lc_value=$(echo "$value" | tr '[:upper:]' '[:lower:]')
-                if in_array "$lc_value" 'false' 'no' 'off' '0'; then
-                    keep_looking=false
-                elif in_array "$lc_value" 'true' 'yes' 'on' '1'; then
-                    keep_looking=true
-                    error_if_not_found=true
-                elif [[ $lc_value = 'optional' ]]; then
-                    keep_looking=true
-                    error_if_not_found=false
-                else
-                    fail "Invalid value for 'merge' in $binconfig line $line: $value"
-                fi
-            elif [[ -z $command && $key = 'template' ]]; then
-                if [[ $template = '_TBC' ]]; then
-                    template=$(trim "$value")
-                fi
-            elif [[ -z $command ]]; then
-                # Unknown keys don't trigger an error for forwards compatibility (global)
-                debug "Ignored unknown key '$key' in $binconfig line $line"
-            elif [[ ($key = 'alias' || $key = 'aliases') ]]; then
-                # alias = blah
-                # aliases = blah1, blah2
-                IFS=',' read -ra line_aliases <<<"$value"
-                for alias in ${line_aliases+"${line_aliases[@]}"}; do
-                    alias=$(trim "$alias")
-                    register_command_alias "$alias" "$command" "$binconfig line $line"
-                done
-            elif [[ $key = 'command' ]]; then
-                # command = echo 'Hello, World!'
-                value=$(trim "$value")
-                register_inline_command "$command" "$value" "$binconfig line $line"
-            elif [[ $key = 'help' ]]; then
-                # help=Description
-                value=$(trim "$value")
-                if [[ -n "$value" ]]; then
-                    set_command_help "$command" "$value"
-                fi
-            else
-                # Unknown keys don't trigger an error for forwards compatibility (command)
-                debug "Ignored unknown key '$key' in $binconfig line $line"
-            fi
-        done <"$binconfig" # kcov-ignore-line: Usage not detected
+        parse_binconfig "$binconfig" "$root" "$bin_dir"
     fi
 
-    # Default values, if not given at the command line or in the config file
-    if [[ -z $exact ]]; then
-        exact=false
-    fi
-
-    #---------------------------------------
-    # Process aliases
-    #---------------------------------------
-
+    # Map symlink aliases to their underlying commands, now we know all the commands
+    # shellcheck disable=SC2154 # It doesn't recognise 'map_init' and 'map_set' as setting this variable
     for alias in ${alias_to_executable+"${alias_to_executable[@]}"}; do
         if executable=$(map_get alias_to_executable "$alias"); then
             command=$(map_get executable_to_command "$executable")
@@ -1200,7 +1286,7 @@ while $keep_looking; do
         source=$(map_get alias_sources "$alias")
         prevent_duplicate_command alias "$alias" "$source"
 
-        # Expand aliases to cover subcommands (e.g. if 'deploy'='push' then 'deploy live'='push live')
+        # Expand aliases to cover subcommands (e.g. if 'deploy' => 'push' then 'deploy live' => 'push live')
         target=$(map_get original_commands "$alias")
         for command in ${registered_commands+"${registered_commands[@]}"}; do
             if [[ "$command" = "$target "* ]]; then
@@ -1211,10 +1297,12 @@ while $keep_looking; do
         done
     done
 
-    #---------------------------------------
-    # Remember the lowest level for --create
-    #---------------------------------------
+    # Set default values, if not given at the command line or in the config file
+    if [[ -z $unique_prefix_matching ]]; then
+        unique_prefix_matching=true
+    fi
 
+    # Remember the lowest level for --create
     if [[ -z $main_root ]]; then
         main_binconfig=$binconfig
         main_bin_dir=$bin_dir
@@ -1223,50 +1311,54 @@ while $keep_looking; do
         main_root=$root
     fi
 
-    #---------------------------------------
     # Merge with parent?
-    #---------------------------------------
-
-    if $keep_looking; then
-        merging=true
-        start_directory=$(dirname "$root")
-        dir=''
+    if ! $merge_with_parent; then
+        break
     fi
+
+    merging=true
+    start_directory=$(dirname "$root")
 
 done
 
 #endregion =====================================================================
-#region ==== TAB COMPLETION SETUP ==============================================
+#region ======= PREPARE FOR TAB COMPLETION (IF NEEDED) =========================
 
-last_parameter=0
+num_parameters_to_ignore=0
 
 if [[ $action = 'complete-bash' ]]; then
-    # Remove everything after the cursor, and assign everything before it to $1, $2, etc.
+
+    # The command being completed is available in $COMP_LINE.
+    # The current cursor position is available in $COMP_POINT.
+    # Ignore everything after the cursor, and assign everything before it to $1,
+    # $2, etc. as if it had been executed already.
     args=${COMP_LINE:0:$COMP_POINT}
-    # shellcheck disable=SC2086
+
+    # shellcheck disable=SC2086 # We want this to be split into separate arguments
     set -- $args
 
-    # Remove the command name
+    # Remove the command name (since that would be in $0 not $1)
     shift
 
     # If there is a space at the end, we want to complete the next parameter; otherwise the last one given
     if [[ $args != *' ' ]]; then
-        last_parameter=1
+        num_parameters_to_ignore=1
     fi
+
 fi
 
 #endregion =====================================================================
-#region ==== PARSE PARAMETERS AND RUN THE COMMAND ==============================
+#region ======= PARSE PARAMETERS AND FIND/RUN THE COMMAND ======================
 
 # If no command is given, we will list all available commands
-list_title='Available commands'
-list_commands=(${registered_commands+"${registered_commands[@]}"})
+command_list_title='Available commands'
+command_list=(${registered_commands+"${registered_commands[@]}"})
 
 # Loop through each argument until we find a matching command
 current_directory=$main_bin_dir
 full_command=''
 
-while [[ $# -gt $last_parameter ]]; do
+while [[ $# -gt $num_parameters_to_ignore ]]; do
     subcommand=$1
     shift
 
@@ -1277,7 +1369,7 @@ while [[ $# -gt $last_parameter ]]; do
                 fail "$main_root/.binconfig already exists (use --edit to edit it)"
             fi
 
-            ( # kcov-ignore-line: Usage not detected
+            (# kcov-ignore-line: Usage not detected
                 output_started=false
 
                 if [[ $main_bin_dir_from_root != 'bin' ]]; then
@@ -1298,7 +1390,7 @@ while [[ $# -gt $last_parameter ]]; do
                 if ! $output_started; then
                     echo
                 fi
-            ) > "$main_root/.binconfig" # kcov-ignore-line: Usage not detected
+            ) >"$main_root/.binconfig" # kcov-ignore-line: Usage not detected
 
             echo "Created file $main_root/.binconfig"
             open_in_editor "$main_root/.binconfig"
@@ -1332,8 +1424,8 @@ while [[ $# -gt $last_parameter ]]; do
 
     if [[ ${#matching_commands[@]} -gt 0 ]]; then
         current_directory="$current_directory/$subcommand"
-        list_title='Available subcommands'
-        list_commands=(${matching_commands+"${matching_commands[@]}"})
+        command_list_title='Available subcommands'
+        command_list=(${matching_commands+"${matching_commands[@]}"})
         continue
     fi
 
@@ -1351,22 +1443,21 @@ while [[ $# -gt $last_parameter ]]; do
         mkdir -p "$current_directory"
         script="$current_directory/$subcommand"
         if [[ $template = '_TBC' ]]; then
-            # Using '_TBC' as the placeholder allows the user to set it to a blank string
-            # in the config file. We can't just initialise it to the following value
-            # because we want the first (lowest) .binconfig file to take precedence.
+            # Using '_TBC' as the placeholder allows the user to set it to a
+            # blank string in the config file. We can't just initialise it to
+            # the following value because we want the first (deepest) .binconfig
+            # file to take precedence, not the last.
             template='#!/usr/bin/env bash\nset -euo pipefail\n\n'
         fi
-        echo -e "$template" > "$script"
+        echo -e "$template" >"$script"
         chmod +x "$script"
         echo "Created script $script"
         open_in_editor "$script"
     elif $shim; then
-        # We want word splitting here
-        # shellcheck disable=SC2086
+        # shellcheck disable=SC2086 # We want word splitting here
         run_command ${full_command:1} "$@"
     elif [[ -n $fallback ]]; then
-        # We want word splitting here - the fallback command may contain spaces to separate arguments
-        # shellcheck disable=SC2086
+        # shellcheck disable=SC2086 # We want word splitting here (the fallback command may contain arguments)
         run_command $fallback "$@"
     fi
 
@@ -1374,17 +1465,17 @@ while [[ $# -gt $last_parameter ]]; do
     # We need to check even with --exact so we can list them
     find_matching_commands prefix "${full_command:1}"
 
-    if ! $exact && parent=$(matching_commands_shared_prefix "${full_command:1}"); then
+    if $unique_prefix_matching && parent=$(matching_commands_shared_prefix "${full_command:1}"); then
         # If all matching commands have the same parent command, pretend
         # the user typed the full parent command, then continue parsing
         current_directory="$current_directory/$parent"
         full_command=" $parent"
-        list_title='Matching commands'
-        list_commands=(${matching_commands+"${matching_commands[@]}"})
+        command_list_title='Matching commands'
+        command_list=(${matching_commands+"${matching_commands[@]}"})
         continue
     fi
 
-    if ! $exact; then
+    if $unique_prefix_matching; then
         run_command_if_only_one_match "$@"
     fi
 
@@ -1408,18 +1499,62 @@ while [[ $# -gt $last_parameter ]]; do
     fi
 
     # Otherwise display the list of matches
-    list_title='Matching commands'
-    list_commands=(${matching_commands+"${matching_commands[@]}"})
+    command_list_title='Matching commands'
+    command_list=(${matching_commands+"${matching_commands[@]}"})
     break
 done
 
 #endregion =====================================================================
-#region ==== DETERMINE SHORTENED COMMAND NAMES & ALIASES =======================
+#region ======= DETERMINE SHORTENED COMMAND NAMES & ALIASES ====================
+
+remove_extension() {
+    local command
+
+    # Can't use ${command%%.*} because it could remove too much ("a.b c" => "a" instead of "a.b")
+    # Can't use ${command%.*} because it could remove too little ("a.b.c" => "a.b" instead of "a")
+    command="$1"
+
+    while [[ "$command" =~ (.*)(\.[a-zA-Z0-9]+)+ ]]; do
+        command=${BASH_REMATCH[1]}
+    done
+
+    echo "$command"
+}
+
+has_duplicate() {
+    local alias command long short
+
+    short=$1
+    long=$2
+
+    for command in ${registered_commands+"${registered_commands[@]}"}; do
+        case "$command" in
+            # Ignore a match to itself
+            "$long") continue ;;
+                # Matched to the short command, but not the long one
+            "$short") return 0 ;;
+            "$short."*) return 0 ;;
+            "$short "*) return 0 ;;
+            *) continue ;;
+        esac
+    done
+
+    for alias in ${aliases+"${aliases[@]}"}; do
+        case "$alias" in
+            "$short") return 0 ;;
+            "$short "*) return 0 ;;
+            *) continue ;;
+        esac
+    done
+
+    # No matches found
+    return 1
+}
 
 # Commands
 shortened_commands=()
 
-for command in ${list_commands+"${list_commands[@]}"}; do
+for command in ${command_list+"${command_list[@]}"}; do
     short=$(remove_extension "$command")
 
     if [[ "$short" = "$command" ]]; then
@@ -1451,7 +1586,7 @@ for alias in ${aliases+"${aliases[@]}"}; do
 done
 
 #endregion =====================================================================
-#region ==== TAB COMPLETION OUTPUT =============================================
+#region ======= TAB COMPLETION OUTPUT ==========================================
 
 if [[ $action = 'complete-bash' ]]; then
 
@@ -1506,26 +1641,9 @@ if [[ $action = 'complete-bash' ]]; then
 fi
 
 #endregion =====================================================================
-#region ==== LIST AVAILABLE/MATCHING COMMANDS ==================================
+#region ======= LIST COMMANDS ==================================================
 
-# Remove hidden commands
-visible_commands=()
-
-for command in ${shortened_commands+"${shortened_commands[@]}"}; do
-    if ! is_hidden_command "$command" "${full_command:1}"; then
-        visible_commands+=("$command")
-    fi
-done
-
-# Calculate the maximum length of a command in the list so we can align the help text
-maxlength=0
-for command in ${visible_commands+"${visible_commands[@]}"}; do
-    if [[ ${#command} -gt $maxlength ]]; then
-        maxlength=${#command}
-    fi
-done
-
-# Output the list
+# Helper to get the aliases for a command
 get_command_aliases() {
     local alias command command_alias_count command_aliases original_command target
 
@@ -1553,8 +1671,28 @@ get_command_aliases() {
     fi
 }
 
-echo "$LWHITE$BOLD$UNDERLINE$list_title$RESET"
+# Remove hidden commands
+visible_commands=()
 
+for command in ${shortened_commands+"${shortened_commands[@]}"}; do
+    if ! is_hidden_command "$command" "${full_command:1}"; then
+        visible_commands+=("$command")
+    fi
+done
+
+# Calculate the maximum length of a command in the list so we can align the help text
+maxlength=0
+
+for command in ${visible_commands+"${visible_commands[@]}"}; do
+    if [[ ${#command} -gt $maxlength ]]; then
+        maxlength=${#command}
+    fi
+done
+
+# Output the title
+echo "$LWHITE$BOLD$UNDERLINE$command_list_title$RESET"
+
+# Output the list of commands
 for command in ${visible_commands+"${visible_commands[@]}"}; do
     if command_help=$(get_command_help "$command"); then
         if command_aliases=$(get_command_aliases "$command"); then
@@ -1575,10 +1713,7 @@ if [[ ${#visible_commands[@]} -eq 0 ]]; then
     echo "${GREY}None found${RESET}"
 fi
 
-#endregion =====================================================================
-#region ==== DISPLAY WARNINGS ==================================================
-
-# Broken symlinks
+# Warnings: Broken symlinks
 if [[ ${#broken_symlinks[@]} -gt 0 ]]; then
     echo
     echo "${YELLOW}Warning: The following symlinks point to targets that don't exist:${RESET}"
@@ -1587,7 +1722,7 @@ if [[ ${#broken_symlinks[@]} -gt 0 ]]; then
     done
 fi
 
-# Non-executable files
+# Warnings: Non-executable files
 if [[ ${#non_executable_files[@]} -gt 0 ]]; then
     echo
     echo "${YELLOW}Warning: The following files are not executable (chmod +x):${RESET}"
@@ -1596,9 +1731,10 @@ if [[ ${#non_executable_files[@]} -gt 0 ]]; then
     done
 fi
 
-# Missing commands in .binconfig
+# Warnings: Commands listed in .binconfig that do not exist
 missing_commands=()
-for command in ${commands_listed_in_config+"${commands_listed_in_config[@]}"}; do
+
+for command in ${commands_listed_in_binconfig+"${commands_listed_in_binconfig[@]}"}; do
 
     # Regular script
     if map_has command_to_executable "$command"; then

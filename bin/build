@@ -11,17 +11,7 @@ if [[ $version = '--help' || $version = '-h' ]]; then
 fi
 
 mkdir -p temp/dist
-
-awk \
-    "{
-        if (\$0 ~ /VERSION=.*/)
-            print \"VERSION='$version'\"
-        else
-            print
-    }" \
-    src/bin \
-    > temp/dist/bin
-
+awk -f lib/build.awk -v "version=$version" src/bin > temp/dist/bin
 chmod +x temp/dist/bin
 
 # Smoke test

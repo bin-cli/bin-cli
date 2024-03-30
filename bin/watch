@@ -16,6 +16,6 @@ while true; do
     # Wait until something changes
     inotifywait -qqr \
         -e create -e modify -e move -e attrib -e delete \
-        bin/build features src
+        bin/build features lib/build.awk src
 
 done

@@ -25,6 +25,7 @@ async function run(command, env = {}) {
     env = {
         HOME: `${paths.root}/home/user`,
         PATH: `${paths.root}/usr/bin:${paths.root}/global/bin`,
+        BIN_DEBUG_LOG: `${paths.root}/debug.txt`,
         BIN_TEST_ROOT: paths.root,
         ...env,
         ...(this.env || {}),
@@ -65,7 +66,7 @@ async function run(command, env = {}) {
         cwd: this.workingDir,
         env,
         shell: true,
-        stdio: ['pipe', 'pipe', 'pipe', 'pipe'],
+        stdio: ['pipe', 'pipe', 'pipe'],
     });
 
     if (result.error) {
@@ -80,9 +81,6 @@ async function run(command, env = {}) {
 
     const stderr = result.stderr.toString();
     await outputFile(`${paths.root}/stderr.txt`, stderr);
-
-    const debugLog = result.output[3].toString();
-    await outputFile(`${paths.root}/debug.txt`, debugLog);
 
     this.runResult = {status, stdout, stderr};
 
