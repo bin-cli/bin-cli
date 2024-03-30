@@ -129,10 +129,12 @@ function replaceBlock(content, tag, output) {
     return content.slice(0, startPos + startTag.length) + output + content.slice(endPos);
 }
 
+const help = getOutput('src/bin --help').replace('v1.2.3-source', 'main');
+
 markdown = replaceBlock(
     markdown,
     'auto-update-cli-reference',
-    '\n\n```\n' + getOutput('src/bin --help') + '```\n\n'
+    '\n\n```\n' + help + '```\n\n'
 );
 
 writeFileSync('README.md', markdown);

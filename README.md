@@ -872,7 +872,7 @@ Options that do something special and don't accept a COMMAND:
 
 Any options must be given before the command, because everything after the command will be passed as parameters to the script.
 
-For more details see https://github.com/bin-cli/bin-cli#readme
+For more details see https://github.com/bin-cli/bin-cli/tree/main#readme
 ```
 
 <!-- END auto-update-cli-reference -->

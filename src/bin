@@ -299,7 +299,7 @@ if [[ $action = 'help' ]]; then
     echo
     echo "Any options must be given before the command, because everything after the command will be passed as parameters to the script."
     echo
-    echo "For more details see https://github.com/bin-cli/bin-cli#readme"
+    echo "For more details see https://github.com/bin-cli/bin-cli/tree/$VERSION#readme"
     exit
 fi
 
