@@ -194,7 +194,7 @@ Feature: Automatic exclusions
 
     | The directories `/bin`, `/snap/bin`, `/usr/bin`, `/usr/local/bin` and `~/bin` are ignored when searching parent directories, unless there is a corresponding `.binconfig` file, because they are common locations for global executables (typically in `$PATH`).
 
-    Scenario Template: Common bin directories are ignored when searching parent directories
+    Scenario Outline: Common bin directories are ignored when searching parent directories
       Given a script '{ROOT}<bin>/hello'
       And the working directory is '{ROOT}<workdir>'
       When I run 'bin hello'
@@ -209,7 +209,7 @@ Feature: Automatic exclusions
         | /usr/local/bin | /usr/local/bin/example |
         | /home/user/bin | /home/user/example     |
 
-    Scenario Template: Common bin directories are not ignored if there is a .binconfig directory in the parent directory
+    Scenario Outline: Common bin directories are not ignored if there is a .binconfig directory in the parent directory
       Given a script '{ROOT}<bin>/hello' that outputs 'Hello, World!'
       And an empty file '{ROOT}<config>'
       And the working directory is '{ROOT}<workdir>'

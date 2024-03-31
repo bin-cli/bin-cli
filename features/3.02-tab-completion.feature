@@ -345,7 +345,7 @@ Feature: Tab completion
         executable1
         """
 
-    Scenario Template: Common bin directories are ignored when tab completing
+    Scenario Outline: Common bin directories are ignored when tab completing
       Given a script '{ROOT}<bin>/hello'
       And the working directory is '{ROOT}<workdir>'
       When I tab complete 'bin h'
@@ -360,7 +360,7 @@ Feature: Tab completion
         | /usr/local/bin | /usr/local/bin/example |
         | /home/user/bin | /home/user/example     |
 
-    Scenario Template: Common bin directories are not ignored when tab completing if there is a .binconfig directory in the parent directory
+    Scenario Outline: Common bin directories are not ignored when tab completing if there is a .binconfig directory in the parent directory
       Given a script '{ROOT}<bin>/hello'
       And an empty file '{ROOT}<config>'
       And the working directory is '{ROOT}<workdir>'

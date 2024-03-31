@@ -105,7 +105,7 @@ Feature: Unique prefix matching
     | alias bin='bin --prefix'
     | ```
 
-    Scenario Template: Unique prefix matching can be disabled in .binconfig using 'exact = <value>'
+    Scenario Outline: Unique prefix matching can be disabled in .binconfig using 'exact = <value>'
       Given a script '{ROOT}/project/bin/hello'
       And a file '{ROOT}/project/.binconfig' with content 'exact = <value>'
       When I run 'bin hel'
@@ -124,7 +124,7 @@ Feature: Unique prefix matching
         | yes   |
         | 1     |
 
-    Scenario Template: Unique prefix matching can be explicitly enabled in .binconfig using 'exact = <value>'
+    Scenario Outline: Unique prefix matching can be explicitly enabled in .binconfig using 'exact = <value>'
       Given a script '{ROOT}/project/bin/hello' that outputs 'Hello, World!'
       And a file '{ROOT}/project/.binconfig' with content 'exact = <value>'
       When I run 'bin hel'

@@ -35,7 +35,7 @@ Feature: Merging Directories
     | - `bin build` still runs `themes/one/bin/build`
     | - `bin deploy` runs `bin/deploy`
 
-    Scenario Template: Commands can be merged with the immediate parent bin/ directory with 'merge = <value>
+    Scenario Outline: Commands can be merged with the immediate parent bin/ directory with 'merge = <value>
       Given a file '{ROOT}/project/subdir/.binconfig' with content 'merge = <value>'
       And a script '{ROOT}/project/subdir/bin/child'
       And a script '{ROOT}/project/bin/parent'
@@ -111,7 +111,7 @@ Feature: Merging Directories
       Then it fails with exit code 246
       And the error is "bin: Invalid value for 'merge' in {ROOT}/project/.binconfig line 1: blah"
 
-    Scenario Template: Common bin directories are ignored when searching parent directories to merge with 'merge = true'
+    Scenario Outline: Common bin directories are ignored when searching parent directories to merge with 'merge = true'
       Given a file '{ROOT}<workdir>/.binconfig' with content 'merge = true'
       And a script '{ROOT}<workdir>/bin/child'
       And a script '{ROOT}<bin>/parent'
@@ -128,7 +128,7 @@ Feature: Merging Directories
         | /usr/local | /usr/local/bin | /usr/local/example |
         | /home/user | /home/user/bin | /home/user/example |
 
-    Scenario Template: Common bin directories are ignored when searching parent directories to merge with 'merge = optional'
+    Scenario Outline: Common bin directories are ignored when searching parent directories to merge with 'merge = optional'
       Given a file '{ROOT}<workdir>/.binconfig' with content 'merge = optional'
       And a script '{ROOT}<workdir>/bin/child'
       And a script '{ROOT}<bin>/parent'
@@ -379,7 +379,7 @@ Feature: Merging Directories
         bin grandchild
         """
 
-    Scenario Template: The third level is not merged if 'merge = <value>
+    Scenario Outline: The third level is not merged if 'merge = <value>
       Given a file '{ROOT}/project/subdir/subsubdir/.binconfig' with content 'merge = true'
       And a script '{ROOT}/project/subdir/subsubdir/bin/grandchild'
       And a file '{ROOT}/project/subdir/.binconfig' with content 'merge = <value>'
