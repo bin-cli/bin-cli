@@ -44,7 +44,7 @@ Feature: Merging Directories
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin child
         bin parent
         """
@@ -75,7 +75,7 @@ Feature: Merging Directories
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin grandchild
         bin parent
         """
@@ -100,7 +100,7 @@ Feature: Merging Directories
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin child     Child help
         bin parent    Parent help
         """
@@ -137,7 +137,7 @@ Feature: Merging Directories
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin child
         """
 
@@ -215,7 +215,7 @@ Feature: Merging Directories
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin grandchild
         bin parent
         """
@@ -238,7 +238,7 @@ Feature: Merging Directories
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin child
         bin parent
         """
@@ -318,7 +318,7 @@ Feature: Merging Directories
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         None found
         """
 
@@ -339,7 +339,7 @@ Feature: Merging Directories
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin child
         bin grandchild
         bin parent
@@ -356,7 +356,7 @@ Feature: Merging Directories
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin child
         bin grandchild
         """
@@ -372,7 +372,7 @@ Feature: Merging Directories
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin child
         bin grandchild
         """

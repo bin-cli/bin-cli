@@ -73,7 +73,7 @@ Feature: Inline commands
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin another
         bin hello      (alias: hi)
         bin zebra

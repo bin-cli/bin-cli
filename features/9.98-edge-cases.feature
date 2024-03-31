@@ -12,7 +12,7 @@ Feature: Edge cases
     Then it is successful
     And the output is:
       """
-      Available commands
+      Available Commands
       bin hello-world-script
       """
 
@@ -28,7 +28,7 @@ Feature: Edge cases
     Then it is successful
     And the output is:
       """
-      Available subcommands
+      Available Subcommands
       bin hello-world script
       """
 
@@ -42,7 +42,7 @@ Feature: Edge cases
     Then it is successful
     And the output is:
       """
-      Available commands
+      Available Commands
       bin deploy    (alias: publish)
       """
 
@@ -57,7 +57,7 @@ Feature: Edge cases
     Then it is successful
     And the output is:
       """
-      Available commands
+      Available Commands
       bin deploy live       (alias: publish live)
       bin deploy staging    (alias: publish staging)
       """

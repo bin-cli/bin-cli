@@ -8,7 +8,7 @@ Feature: Listing commands
     |
     | <pre>
     | $ bin hel
-    | <strong>Available commands</strong>
+    | <strong>Available Commands</strong>
     | bin build
     | bin deploy
     | bin hello
@@ -21,7 +21,7 @@ Feature: Listing commands
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin another
         bin hello
         """
@@ -32,6 +32,6 @@ Feature: Listing commands
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         None found
         """

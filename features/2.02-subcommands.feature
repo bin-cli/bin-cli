@@ -18,7 +18,7 @@ Feature: Subcommands
     |
     | <pre>
     | $ bin deploy
-    | <strong>Available subcommands</strong>
+    | <strong>Available Subcommands</strong>
     | bin deploy production
     | bin deploy staging
     | </pre>
@@ -37,7 +37,7 @@ Feature: Subcommands
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin another
         bin deploy live
         bin deploy staging
@@ -51,7 +51,7 @@ Feature: Subcommands
       Then it is successful
       And the output is:
         """
-        Available subcommands
+        Available Subcommands
         bin deploy live
         bin deploy staging
         """
@@ -72,7 +72,7 @@ Feature: Subcommands
       Then it is successful
       And the output is:
         """
-        Available subcommands
+        Available Subcommands
         bin deploy live       Deploy to the production site
         bin deploy staging    Deploy to the staging site
         """

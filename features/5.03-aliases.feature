@@ -115,7 +115,7 @@ Feature: Aliases
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin deploy    (alias: publish)
         """
 
@@ -127,7 +127,7 @@ Feature: Aliases
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin deploy live       (alias: publish live)
         bin deploy staging    (alias: publish staging)
         """
@@ -146,7 +146,7 @@ Feature: Aliases
       # two methods, and keeping the order set in .binconfig gives the user more control
       And the output is:
         """
-        Available commands
+        Available Commands
         bin deploy    (aliases: publish, alpha, zappa)
         """
 
@@ -163,7 +163,7 @@ Feature: Aliases
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         None found
 
         Warning: The following symlinks point to targets that don't exist:
@@ -176,7 +176,7 @@ Feature: Aliases
     |
     | <pre>
     | $ bin
-    | <strong>Available commands</strong>
+    | <strong>Available Commands</strong>
     | bin artisan    Run Laravel Artisan with the appropriate version of PHP <em>(alias: art)</em>
     | bin deploy     Sync the code to the live server <em>(aliases: publish, push)</em>
     | </pre>
@@ -196,7 +196,7 @@ Feature: Aliases
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin artisan    (alias: art)
         bin deploy     (aliases: publish, push)
         """
@@ -218,7 +218,7 @@ Feature: Aliases
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin artisan    Run Laravel Artisan with the appropriate version of PHP (alias: art)
         bin deploy     Sync the code to the live server (aliases: publish, push)
         """
@@ -234,7 +234,7 @@ Feature: Aliases
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin hello
         """
 
@@ -274,7 +274,7 @@ Feature: Aliases
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin deploy live       (alias: push live)
         bin deploy staging    (alias: push staging)
         """

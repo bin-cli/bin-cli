@@ -15,7 +15,7 @@ Feature: Help text
     |
     | <pre>
     | $ bin
-    | <strong>Available commands</strong>
+    | <strong>Available Commands</strong>
     | bin artisan    Run Laravel Artisan with the appropriate version of PHP
     | bin deploy     Sync the code to the live server
     | bin php        Run the appropriate version of PHP for this project
@@ -42,7 +42,7 @@ Feature: Help text
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin artisan    Run Laravel Artisan with the appropriate version of PHP
         bin deploy     Sync the code to the live server
         bin php        Run the appropriate version of PHP for this project
@@ -64,7 +64,7 @@ Feature: Help text
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin artisan    Run Laravel Artisan with the appropriate version of PHP
         bin deploy
         bin php        Run the appropriate version of PHP for this project
@@ -81,7 +81,7 @@ Feature: Help text
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin php    Run the appropriate version of PHP for this project
         """
 
@@ -96,7 +96,7 @@ Feature: Help text
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin hello
         """
 
@@ -131,7 +131,7 @@ Feature: Help text
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin another           Another command
         bin deploy live       Deploy to the production site
         bin deploy staging    Deploy to the staging site

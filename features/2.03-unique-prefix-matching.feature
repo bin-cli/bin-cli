@@ -19,7 +19,7 @@ Feature: Unique prefix matching
     |
     | <pre>
     | $ bin hel
-    | <strong>Matching commands</strong>
+    | <strong>Matching Commands</strong>
     | bin hello
     | bin help
     | </pre>
@@ -38,7 +38,7 @@ Feature: Unique prefix matching
       Then it is successful
       And the output is:
         """
-        Matching commands
+        Matching Commands
         bin hello
         bin hi
         """
@@ -65,7 +65,7 @@ Feature: Unique prefix matching
       Then it is successful
       And the output is:
         """
-        Matching commands
+        Matching Commands
         bin deploy live
         bin deploy staging
         bin dump config
@@ -112,7 +112,7 @@ Feature: Unique prefix matching
       Then it is successful
       And the output is:
         """
-        Matching commands
+        Matching Commands
         bin hello
         """
 
@@ -152,7 +152,7 @@ Feature: Unique prefix matching
       Then it is successful
       And the output is:
         """
-        Matching commands
+        Matching Commands
         bin hello
         """
 

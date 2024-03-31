@@ -69,7 +69,7 @@ If you run `bin` on its own, it will list all available commands:
 
 <pre>
 $ bin hel
-<strong>Available commands</strong>
+<strong>Available Commands</strong>
 bin build
 bin deploy
 bin hello
@@ -93,7 +93,7 @@ Now `bin deploy production` will run `bin/deploy/production`, and `bin deploy` w
 
 <pre>
 $ bin deploy
-<strong>Available subcommands</strong>
+<strong>Available Subcommands</strong>
 bin deploy production
 bin deploy staging
 </pre>
@@ -117,7 +117,7 @@ If you type a prefix that isn't unique, Bin will display a list of matches inste
 
 <pre>
 $ bin hel
-<strong>Matching commands</strong>
+<strong>Matching Commands</strong>
 bin hello
 bin help
 </pre>
@@ -447,7 +447,7 @@ This will be displayed when you run `bin` with no parameters (or with an ambiguo
 
 <pre>
 $ bin
-<strong>Available commands</strong>
+<strong>Available Commands</strong>
 bin artisan    Run Laravel Artisan with the appropriate version of PHP
 bin deploy     Sync the code to the live server
 bin php        Run the appropriate version of PHP for this project
@@ -506,7 +506,7 @@ In any case, aliases are listed alongside the help text when you run `bin` with 
 
 <pre>
 $ bin
-<strong>Available commands</strong>
+<strong>Available Commands</strong>
 bin artisan    Run Laravel Artisan with the appropriate version of PHP <em>(alias: art)</em>
 bin deploy     Sync the code to the live server <em>(aliases: publish, push)</em>
 </pre>
@@ -606,7 +606,7 @@ The extensions will be removed when [listing commands](#listing-commands) and in
 
 <pre>
 $ bin
-<strong>Available commands</strong>
+<strong>Available Commands</strong>
 bin sample1
 bin sample2
 bin sample3
@@ -746,7 +746,7 @@ The `--exe` parameter is used to override the executable name used in the [envir
 
 <pre>
 $ b
-<strong>Available commands</strong>
+<strong>Available Commands</strong>
 b hello
 </pre>
 

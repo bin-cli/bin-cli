@@ -18,7 +18,7 @@ Feature: Script extensions
     |
     | <pre>
     | $ bin
-    | <strong>Available commands</strong>
+    | <strong>Available Commands</strong>
     | bin sample1
     | bin sample2
     | bin sample3
@@ -39,7 +39,7 @@ Feature: Script extensions
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin sample1
         bin sample2
         bin sample3
@@ -57,7 +57,7 @@ Feature: Script extensions
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin sample1.py
         bin sample1.sh
         bin sample2
@@ -88,7 +88,7 @@ Feature: Script extensions
       Then it is successful
       And the output is:
         """
-        Matching commands
+        Matching Commands
         bin sample1.py
         bin sample1.sh
         """
@@ -100,7 +100,7 @@ Feature: Script extensions
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin sample1    (alias: sample2)
         """
 
@@ -116,7 +116,7 @@ Feature: Script extensions
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin sample1.sh
         bin sample2       (alias: sample1)
         """
@@ -129,7 +129,7 @@ Feature: Script extensions
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin sample1    (aliases: sample2, sample2.sh)
         """
 
@@ -140,7 +140,7 @@ Feature: Script extensions
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin sample two
         bin sample.sh
         """
@@ -156,7 +156,7 @@ Feature: Script extensions
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin sample.sh    (alias: sample two)
         """
 
@@ -166,7 +166,7 @@ Feature: Script extensions
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin sample1
         """
 
@@ -193,7 +193,7 @@ Feature: Script extensions
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin sample1    Correct
 
         Warning: The following commands listed in .binconfig do not exist:

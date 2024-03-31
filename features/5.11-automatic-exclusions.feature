@@ -13,7 +13,7 @@ Feature: Automatic exclusions
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin visible
         """
 
@@ -30,7 +30,7 @@ Feature: Automatic exclusions
       Then it is successful
       And the output is:
         """
-        Available subcommands
+        Available Subcommands
         bin sub visible
         """
 
@@ -40,7 +40,7 @@ Feature: Automatic exclusions
       Then it is successful
       And the output is:
         """
-        Matching commands
+        Matching Commands
         None found
         """
 
@@ -51,7 +51,7 @@ Feature: Automatic exclusions
       Then it is successful
       And the output is:
         """
-        Matching commands
+        Matching Commands
         bin sub visible
         """
 
@@ -68,7 +68,7 @@ Feature: Automatic exclusions
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin visible
         """
 
@@ -85,7 +85,7 @@ Feature: Automatic exclusions
       Then it is successful
       And the output is:
         """
-        Available subcommands
+        Available Subcommands
         bin _sub child
         """
 
@@ -96,7 +96,7 @@ Feature: Automatic exclusions
       Then it is successful
       And the output is:
         """
-        Matching commands
+        Matching Commands
         bin _sub child
         """
 
@@ -111,7 +111,7 @@ Feature: Automatic exclusions
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin visible
         """
 
@@ -138,7 +138,7 @@ Feature: Automatic exclusions
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin executable
 
         Warning: The following files are not executable (chmod +x):
@@ -164,7 +164,7 @@ Feature: Automatic exclusions
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin executable
         """
 
@@ -180,7 +180,7 @@ Feature: Automatic exclusions
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin executable1
         """
 

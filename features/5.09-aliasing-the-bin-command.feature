@@ -14,7 +14,7 @@ Feature: Aliasing `b` to `bin`
     |
     | <pre>
     | $ b
-    | <strong>Available commands</strong>
+    | <strong>Available Commands</strong>
     | b hello
     | </pre>
     |
@@ -26,7 +26,7 @@ Feature: Aliasing `b` to `bin`
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         b hello
         """
 
@@ -36,7 +36,7 @@ Feature: Aliasing `b` to `bin`
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         b hello
         """
 
@@ -65,6 +65,6 @@ Feature: Aliasing `b` to `bin`
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         b hello
         """

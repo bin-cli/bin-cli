@@ -88,6 +88,7 @@ if [[ -t 1 ]]; then
     readonly UNDERLINE=$'\e[4m'
     readonly YELLOW=$'\e[33m'
     readonly GREY=$'\e[90m'
+    readonly LCYAN=$'\e[96m'
     readonly LWHITE=$'\e[97m'
     # kcov-ignore-end
 else
@@ -97,6 +98,7 @@ else
     readonly UNDERLINE=''
     readonly YELLOW=''
     readonly GREY=''
+    readonly LCYAN=''
     readonly LWHITE=''
 fi
 
@@ -1361,7 +1363,7 @@ fi
 #region ======= PARSE PARAMETERS AND FIND/RUN THE COMMAND ======================
 
 # If no command is given, we will list all available commands
-declare command_list_title='Available commands'
+declare command_list_title='Available Commands'
 declare -a command_list=(${registered_commands+"${registered_commands[@]}"})
 
 # Loop through each argument until we find a matching command
@@ -1434,7 +1436,7 @@ while [[ $# -gt $num_parameters_to_ignore ]]; do
 
     if [[ ${#matching_commands[@]} -gt 0 ]]; then
         current_directory="$current_directory/$subcommand"
-        command_list_title='Available subcommands'
+        command_list_title='Available Subcommands'
         command_list=(${matching_commands+"${matching_commands[@]}"})
         continue
     fi
@@ -1482,7 +1484,7 @@ while [[ $# -gt $num_parameters_to_ignore ]]; do
         # the user typed the full parent command, then continue parsing
         current_directory="$current_directory/$parent"
         full_command=" $parent"
-        command_list_title='Matching commands'
+        command_list_title='Matching Commands'
         command_list=(${matching_commands+"${matching_commands[@]}"})
         continue
     fi
@@ -1511,7 +1513,7 @@ while [[ $# -gt $num_parameters_to_ignore ]]; do
     fi
 
     # Otherwise display the list of matches
-    command_list_title='Matching commands'
+    command_list_title='Matching Commands'
     command_list=(${matching_commands+"${matching_commands[@]}"})
     break
 done
@@ -1710,7 +1712,7 @@ for command in ${visible_commands+"${visible_commands[@]}"}; do
 done
 
 # Output the title
-echo "$LWHITE$BOLD$UNDERLINE$command_list_title$RESET"
+echo "$LCYAN$BOLD$UNDERLINE$command_list_title$RESET"
 
 # Output the list of commands
 declare command command_aliases help
@@ -1718,15 +1720,15 @@ declare command command_aliases help
 for command in ${visible_commands+"${visible_commands[@]}"}; do
     if help=$(get_command_help "$command"); then
         if command_aliases=$(get_command_aliases "$command"); then
-            printf "%s %-${maxlength}s    %s\n" "$exe" "$command" "$help $GREY($command_aliases)$RESET"
+            printf "$LWHITE%s %-${maxlength}s$RESET    %s $GREY(%s)$RESET\n" "$exe" "$command" "$help" "$command_aliases"
         else
-            printf "%s %-${maxlength}s    %s\n" "$exe" "$command" "$help"
+            printf "$LWHITE%s %-${maxlength}s$RESET    %s\n" "$exe" "$command" "$help"
         fi
     else
         if command_aliases=$(get_command_aliases "$command"); then
-            printf "%s %-${maxlength}s    %s\n" "$exe" "$command" "$GREY($command_aliases)$RESET"
+            printf "$LWHITE%s %-${maxlength}s$RESET    $GREY(%s)$RESET\n" "$exe" "$command" "$command_aliases"
         else
-            printf "%s %s\n" "$exe" "$command"
+            printf "$LWHITE%s %s$RESET\n" "$exe" "$command"
         fi
     fi
 done | sort

@@ -139,7 +139,7 @@ Feature: Custom script directory
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin hello    Hello, World!
         """
 
@@ -154,7 +154,7 @@ Feature: Custom script directory
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin hello
         """
 

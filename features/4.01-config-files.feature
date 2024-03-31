@@ -139,7 +139,7 @@ Feature: Config files
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin sample1    Description ; Not a comment
         bin sample2    Description # Not a comment
         """
@@ -185,7 +185,7 @@ Feature: Config files
       Then it is successful
       And the output is:
         """
-        Available commands
+        Available Commands
         bin sample
 
         Warning: The following commands listed in .binconfig do not exist:
