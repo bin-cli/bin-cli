@@ -182,6 +182,17 @@ PATH="$HOME/bin:$PATH"
 ```
 
 <details>
+<summary><em>What are the system requirements?</em></summary>
+
+> The requirements are minimal:
+>
+> - Bash 3.x or above
+> - [Core utilities](https://www.gnu.org/software/coreutils/coreutils.html)
+>   (specifically `basename`, `chmod`, `dirname`, `mkdir`, `readlink`, `sort`, `tr`, `uniq`)
+
+</details>
+
+<details>
 <summary><em>What if <code>wget</code> is not available?</em></summary>
 
 > You can use `curl` instead:
@@ -191,9 +202,9 @@ PATH="$HOME/bin:$PATH"
 > curl https://github.com/bin-cli/bin-cli/releases/latest/download/bin -Lo ~/bin/bin
 > ```
 >
-> At least one of `curl` or `wget` are usually installed, or can easily be installed, so that covers 99.99% of cases.
->
-> But just for completeness - you can also use [HTTPie](https://httpie.io/docs/cli):
+> At least one of `curl` or `wget` are usually installed, or can easily be
+> installed, so that covers 99.99% of cases... But just for completeness - you
+> can also use [HTTPie](https://httpie.io/docs/cli):
 >
 > ```bash
 > sudo http get https://github.com/bin-cli/bin-cli/releases/latest/download/bin -do /usr/local/bin/bin
@@ -207,7 +218,8 @@ PATH="$HOME/bin:$PATH"
 > npx download-cli https://github.com/bin-cli/bin-cli/releases/latest/download/bin -o ~/bin/
 > ```
 >
-> Or just click [this link](https://github.com/bin-cli/bin-cli/releases/latest/download/bin) to download it.
+> Or just click [this link](https://github.com/bin-cli/bin-cli/releases/latest/download/bin)
+> to download it using your browser.
 
 </details>
 
