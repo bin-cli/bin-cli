@@ -3,8 +3,6 @@ set -euo pipefail
 
 root="$(dirname "$(dirname "$0")")"
 
-if [[ ! -f "$root/temp/dist/bin" ]]; then
-    "$root/bin/build" >/dev/null
-fi
+"$root/bin/build" >/dev/null
 
 exec "$root/temp/dist/bin" "$@"

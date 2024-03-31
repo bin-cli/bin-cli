@@ -1,12 +1,12 @@
-[bin]
-alias = b
-help = Run the latest development/release version of Bin (temp/dist/bin)
-
 [build]
-help = Generate a build of Bin into temp/dist/ (not normally called directly)
+help = Generate a build of Bin into temp/dist/
 
 [cucumber]
 help = Run Cucumber.js directly
+
+[dev]
+alias = d
+help = Build and run the latest development version of Bin
 
 [generate-readme]
 alias = docs, readme
