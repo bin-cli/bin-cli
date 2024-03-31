@@ -33,3 +33,8 @@ jobs:
         with:
           file_pattern: README.md
           commit_message: Generate README
+
+      # This is *after* the commit/push because it's not critical if there
+      # are broken links - it's better to have the correct information
+      - name: Check links
+        run: bin/check-readme-links

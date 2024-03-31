@@ -1,6 +1,9 @@
 [build]
 help = Generate a build of Bin into temp/dist/
 
+[check-readme-links]
+help = Check for broken links in the README
+
 [cucumber]
 help = Run Cucumber.js directly
 
