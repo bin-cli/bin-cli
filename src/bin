@@ -115,7 +115,7 @@ readonly ERR_GENERIC=246
 
 # Define a function to be called when the script needs to exit with an error
 # message & code, so we can do so consistently.
-exe=${0##*/}
+declare exe=${0##*/}
 
 fail() {
     local code message
@@ -201,8 +201,8 @@ bug() {
 # specifies more than one. (The alternative would be silently using the last
 # option given - but I think that is more confusing.)
 
-action=''
-argument_error=''
+declare action=''
+declare argument_error=''
 
 set_action() {
     if [[ -n $action ]]; then
@@ -233,11 +233,11 @@ set_argument_error() {
 # to clobber anything after the command name - we need to keep them intact to
 # pass to the command.
 
-fallback=''
-fixed_bin_dir=''
-is_custom_exe=false
-shim=false
-unique_prefix_matching='' # may be boolean or empty
+declare fallback=''
+declare fixed_bin_dir=''
+declare is_custom_exe=false
+declare shim=false
+declare unique_prefix_matching='' # may be boolean or empty
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -311,7 +311,7 @@ fi
 # This doesn't do the tab completion - it just outputs the script to be 'eval'ed
 # in the shell to enable tab completion.
 if [[ $action = 'completion' ]]; then
-    complete_command=("$0" --complete-bash)
+    declare complete_command=("$0" --complete-bash)
     if [[ -n $fixed_bin_dir ]]; then
         complete_command+=("--dir" "'$fixed_bin_dir'")
     fi
@@ -634,11 +634,10 @@ bin_dir_for() {
 # and register both the global and per-command settings. This may be called more
 # than once if we are using 'merge = true'.
 
-commands_listed_in_binconfig=()
-merge_is_optional=false
-merge_with_parent=true
-template='_TBC'
-
+declare -a commands_listed_in_binconfig=()
+declare merge_is_optional=false
+declare merge_with_parent=false
+declare template='_TBC'
 map_init command_help
 
 parse_binconfig() {
@@ -786,10 +785,9 @@ binconfig_line_is_ignored() {
 # Regular commands are implemented as executables / shell scripts. Inline
 # commands are defined in '.binconfig'.
 
-broken_symlinks=()
-non_executable_files=()
-registered_commands=()
-
+declare -a broken_symlinks=()
+declare -a non_executable_files=()
+declare -a registered_commands=()
 map_init command_to_bin_dir
 map_init command_to_executable
 map_init command_to_inline_script
@@ -824,7 +822,7 @@ register_executable_command() {
 }
 
 register_inline_command() {
-    local name script source
+    local bin_dir name root script source
 
     name=$1
     script=$2
@@ -842,10 +840,11 @@ register_inline_command() {
 }
 
 register_commands_in_directory() {
-    local directory file name prefix realfile target
+    local directory file is_root_dir name prefix realfile target
 
     directory=$1
-    prefix=${2-}
+    is_root_dir=$2
+    prefix=${3-}
 
     # Loop through the directory to find commands
     for file in "$directory/"*; do
@@ -871,7 +870,7 @@ register_commands_in_directory() {
             # some in subdirectories
             if ! $is_root_dir; then
                 map_set executable_to_command "$realfile" "$prefix$name" # global
-                register_commands_in_directory "$file" "$prefix$name "
+                register_commands_in_directory "$file" "$is_root_dir" "$prefix$name "
             fi
         elif [[ ! -x $file ]]; then
             if ! $is_root_dir; then
@@ -890,8 +889,7 @@ register_commands_in_directory() {
 #endregion =====================================================================
 #region ======= HELPERS: ALIASES ===============================================
 
-aliases=()
-
+declare -a aliases=()
 map_init alias_sources
 map_init alias_to_executable
 
@@ -937,7 +935,7 @@ register_symlink_alias() {
 #endregion =====================================================================
 #region ======= HELPERS: SEARCH FOR COMMANDS ===================================
 
-matching_commands=()
+declare -a matching_commands=()
 
 command_matches() {
     local command found target type
@@ -1103,7 +1101,7 @@ run_command() {
 }
 
 run_command_if_only_one_match() {
-    local command executable script
+    local command executable root script
 
     if [[ ${#matching_commands[@]} -ne 1 ]]; then
         return
@@ -1165,25 +1163,23 @@ get_command_help() {
 #endregion =====================================================================
 #region ======= REGISTER COMMANDS & CONFIG FILES ===============================
 
-main_bin_dir=''
-main_bin_dir_from_root=''
-main_binconfig=''
-main_is_root_dir=false
-main_root=''
-merging=false
-start_directory=$PWD
+declare main_bin_dir=''
+declare main_bin_dir_from_root=''
+declare main_binconfig=''
+declare main_is_root_dir=false
+declare main_root=''
+declare merging=false
+declare start_directory=$PWD
 
 while true; do
 
-    merge_with_parent=false
+    declare root=''
+    declare binconfig=''
+    declare bin_dir=''
+    declare bin_dir_from_root=''
+    declare is_root_dir=false
 
     # Determine paths
-    root=''
-    binconfig=''
-    bin_dir=''
-    bin_dir_from_root=''
-    is_root_dir=false
-
     if [[ -n $fixed_bin_dir ]]; then
 
         # Look for given directory given by '--dir', which can either be an absolute
@@ -1277,7 +1273,7 @@ while true; do
 
     # Find and register available commands
     if [[ -d $bin_dir ]]; then
-        register_commands_in_directory "$bin_dir"
+        register_commands_in_directory "$bin_dir" "$is_root_dir"
     fi
 
     # Parse config file (including registering aliases)
@@ -1329,6 +1325,7 @@ while true; do
         break
     fi
 
+    merge_with_parent=false
     merging=true
     start_directory=$(dirname "$root")
 
@@ -1337,7 +1334,7 @@ done
 #endregion =====================================================================
 #region ======= PREPARE FOR TAB COMPLETION (IF NEEDED) =========================
 
-num_parameters_to_ignore=0
+declare -i num_parameters_to_ignore=0
 
 if [[ $action = 'complete-bash' ]]; then
 
@@ -1345,7 +1342,7 @@ if [[ $action = 'complete-bash' ]]; then
     # The current cursor position is available in $COMP_POINT.
     # Ignore everything after the cursor, and assign everything before it to $1,
     # $2, etc. as if it had been executed already.
-    args=${COMP_LINE:0:$COMP_POINT}
+    declare args=${COMP_LINE:0:$COMP_POINT}
 
     # shellcheck disable=SC2086 # We want this to be split into separate arguments
     set -- $args
@@ -1364,15 +1361,15 @@ fi
 #region ======= PARSE PARAMETERS AND FIND/RUN THE COMMAND ======================
 
 # If no command is given, we will list all available commands
-command_list_title='Available commands'
-command_list=(${registered_commands+"${registered_commands[@]}"})
+declare command_list_title='Available commands'
+declare -a command_list=(${registered_commands+"${registered_commands[@]}"})
 
 # Loop through each argument until we find a matching command
-current_directory=$main_bin_dir
-full_command=''
+declare current_directory=$main_bin_dir
+declare full_command=''
 
 while [[ $# -gt $num_parameters_to_ignore ]]; do
-    subcommand=$1
+    declare subcommand=$1
     shift
 
     # Special case for creating/editing the .binconfig file
@@ -1382,8 +1379,8 @@ while [[ $# -gt $num_parameters_to_ignore ]]; do
                 fail "$main_root/.binconfig already exists (use --edit to edit it)"
             fi
 
-            (# kcov-ignore-line: Usage not detected
-                output_started=false
+            ( # kcov-ignore-line: Usage not detected
+                declare output_started=false
 
                 if [[ $main_bin_dir_from_root != 'bin' ]]; then
                     echo "dir = $main_bin_dir_from_root"
@@ -1454,7 +1451,8 @@ while [[ $# -gt $num_parameters_to_ignore ]]; do
         fi
 
         mkdir -p "$current_directory"
-        script="$current_directory/$subcommand"
+        declare script="$current_directory/$subcommand"
+
         if [[ $template = '_TBC' ]]; then
             # Using '_TBC' as the placeholder allows the user to set it to a
             # blank string in the config file. We can't just initialise it to
@@ -1462,6 +1460,7 @@ while [[ $# -gt $num_parameters_to_ignore ]]; do
             # file to take precedence, not the last.
             template='#!/usr/bin/env bash\nset -euo pipefail\n\n'
         fi
+
         echo -e "$template" >"$script"
         chmod +x "$script"
         echo "Created script $script"
@@ -1565,7 +1564,7 @@ has_duplicate() {
 }
 
 # Commands
-shortened_commands=()
+declare -a shortened_commands=()
 
 for command in ${command_list+"${command_list[@]}"}; do
     short=$(remove_extension "$command")
@@ -1582,7 +1581,7 @@ for command in ${command_list+"${command_list[@]}"}; do
 done
 
 # Aliases
-shortened_aliases=()
+declare -a shortened_aliases=()
 
 for alias in ${aliases+"${aliases[@]}"}; do
     short=$(remove_extension "$alias")
@@ -1604,53 +1603,61 @@ done
 if [[ $action = 'complete-bash' ]]; then
 
     # Work out the full prefix we're looking for
-    prefix=''
+    declare parent_command=''
     if [[ -n $full_command ]]; then
-        prefix="${full_command:1} "
+        parent_command="${full_command:1} "
     fi
 
-    target="$prefix${1-}"
+    declare current_command=${1-}
+    declare typed_command="$parent_command$current_command"
 
     # Look for commands and aliases that match, and collect the first parameter for each
-    matches=()
-    matching_commands=()
+    declare alias command match
+    declare -a possible_results=()
+    declare -a matched_commands=()
 
     for command in ${shortened_commands+"${shortened_commands[@]}"}; do
-        if ! command_matches prefix "$target" "$command"; then
+        if ! command_matches prefix "$typed_command" "$command"; then
             continue
         fi
 
-        match=${command#"$prefix"}
-        match=${match/ */}
-        matches+=("$match")
-        matching_commands+=("$command")
+        match=${command#"$parent_command"} # Remove everything before the current argument
+        match=${match/ */} # Remove everything after the current argument (i.e. subcommands)
+        possible_results+=("$match")
+        matched_commands+=("$command")
     done
 
     for alias in ${shortened_aliases+"${shortened_aliases[@]}"}; do
-        if ! command_matches prefix "$target" "$alias"; then
+        if ! command_matches prefix "$typed_command" "$alias"; then
             continue
         fi
 
+        # Only list each command once - it doesn't matter which variant is
+        # typed, and Readline (by default) will only use the completion if
+        # there is single match (otherwise it just lists the possible matches)
         command=$(map_get original_commands "$alias")
-        if ! in_array "$command" ${matching_commands+"${matching_commands[@]}"}; then
-            match=${alias#"$prefix"}
-            match=${match/ */}
-            matches+=("$match")
-            matching_commands+=("$command")
+        if in_array "$command" ${matched_commands+"${matched_commands[@]}"}; then
+            continue
         fi
+
+        match=${alias#"$parent_command"} # Remove everything before the current argument
+        match=${match/ */} # Remove everything after the current argument (i.e. subcommands)
+        possible_results+=("$match")
+        matched_commands+=("$command")
     done
 
     # Output the matches and remove duplicates
-    for command in ${matches+"${matches[@]}"}; do
-        if is_hidden_command "$command" "${1-}"; then
+    for result in ${possible_results+"${possible_results[@]}"}; do
+
+        # Ignore commands that start with '_', unless the user typed the '_' themselves
+        if is_hidden_command "$result" "$current_command"; then
             continue
         fi
 
-        echo "$command"
+        echo "$result"
     done | sort | uniq
 
     exit
-
 fi
 
 #endregion =====================================================================
@@ -1685,7 +1692,7 @@ get_command_aliases() {
 }
 
 # Remove hidden commands
-visible_commands=()
+declare -a visible_commands=()
 
 for command in ${shortened_commands+"${shortened_commands[@]}"}; do
     if ! is_hidden_command "$command" "${full_command:1}"; then
@@ -1694,7 +1701,7 @@ for command in ${shortened_commands+"${shortened_commands[@]}"}; do
 done
 
 # Calculate the maximum length of a command in the list so we can align the help text
-maxlength=0
+declare -i maxlength=0
 
 for command in ${visible_commands+"${visible_commands[@]}"}; do
     if [[ ${#command} -gt $maxlength ]]; then
@@ -1706,12 +1713,14 @@ done
 echo "$LWHITE$BOLD$UNDERLINE$command_list_title$RESET"
 
 # Output the list of commands
+declare command command_aliases help
+
 for command in ${visible_commands+"${visible_commands[@]}"}; do
-    if command_help=$(get_command_help "$command"); then
+    if help=$(get_command_help "$command"); then
         if command_aliases=$(get_command_aliases "$command"); then
-            printf "%s %-${maxlength}s    %s\n" "$exe" "$command" "$command_help $GREY($command_aliases)$RESET"
+            printf "%s %-${maxlength}s    %s\n" "$exe" "$command" "$help $GREY($command_aliases)$RESET"
         else
-            printf "%s %-${maxlength}s    %s\n" "$exe" "$command" "$command_help"
+            printf "%s %-${maxlength}s    %s\n" "$exe" "$command" "$help"
         fi
     else
         if command_aliases=$(get_command_aliases "$command"); then
@@ -1730,6 +1739,7 @@ fi
 if [[ ${#broken_symlinks[@]} -gt 0 ]]; then
     echo
     echo "${YELLOW}Warning: The following symlinks point to targets that don't exist:${RESET}"
+    declare symlink
     for symlink in ${broken_symlinks+"${broken_symlinks[@]}"}; do
         echo "$symlink"
     done
@@ -1739,6 +1749,7 @@ fi
 if [[ ${#non_executable_files[@]} -gt 0 ]]; then
     echo
     echo "${YELLOW}Warning: The following files are not executable (chmod +x):${RESET}"
+    declare file
     for file in ${non_executable_files+"${non_executable_files[@]}"}; do
         echo "$file"
     done
@@ -1770,6 +1781,7 @@ done
 if [[ ${#missing_commands[@]} -gt 0 ]]; then
     echo
     echo "${YELLOW}Warning: The following commands listed in .binconfig do not exist:${RESET}"
+    declare command
     for command in ${missing_commands+"${missing_commands[@]}"}; do
         echo "[$command]"
     done
