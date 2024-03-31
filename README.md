@@ -506,7 +506,7 @@ In any case, aliases are listed alongside the help text when you run `bin` with 
 <pre>
 $ bin
 <strong>Available commands</strong>
-bin artisan    Run Laravel Artisan command with the appropriate version of PHP <em>(alias: art)</em>
+bin artisan    Run Laravel Artisan with the appropriate version of PHP <em>(alias: art)</em>
 bin deploy     Sync the code to the live server <em>(aliases: publish, push)</em>
 </pre>
 

@@ -177,7 +177,7 @@ Feature: Aliases
     | <pre>
     | $ bin
     | <strong>Available commands</strong>
-    | bin artisan    Run Laravel Artisan command with the appropriate version of PHP <em>(alias: art)</em>
+    | bin artisan    Run Laravel Artisan with the appropriate version of PHP <em>(alias: art)</em>
     | bin deploy     Sync the code to the live server <em>(aliases: publish, push)</em>
     | </pre>
 
@@ -208,7 +208,7 @@ Feature: Aliases
         """
         [artisan]
         alias = art
-        help = Run Laravel Artisan command with the appropriate version of PHP
+        help = Run Laravel Artisan with the appropriate version of PHP
 
         [deploy]
         alias = publish, push
@@ -219,7 +219,7 @@ Feature: Aliases
       And the output is:
         """
         Available commands
-        bin artisan    Run Laravel Artisan command with the appropriate version of PHP (alias: art)
+        bin artisan    Run Laravel Artisan with the appropriate version of PHP (alias: art)
         bin deploy     Sync the code to the live server (aliases: publish, push)
         """
 

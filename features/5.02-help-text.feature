@@ -30,7 +30,7 @@ Feature: Help text
       And a file '{ROOT}/project/.binconfig' with content:
         """
         [artisan]
-        help = Run Laravel Artisan command with the appropriate version of PHP
+        help = Run Laravel Artisan with the appropriate version of PHP
 
         [deploy]
         help = Sync the code to the live server
@@ -43,7 +43,7 @@ Feature: Help text
       And the output is:
         """
         Available commands
-        bin artisan    Run Laravel Artisan command with the appropriate version of PHP
+        bin artisan    Run Laravel Artisan with the appropriate version of PHP
         bin deploy     Sync the code to the live server
         bin php        Run the appropriate version of PHP for this project
         """
@@ -55,7 +55,7 @@ Feature: Help text
       And a file '{ROOT}/project/.binconfig' with content:
         """
         [artisan]
-        help = Run Laravel Artisan command with the appropriate version of PHP
+        help = Run Laravel Artisan with the appropriate version of PHP
 
         [php]
         help = Run the appropriate version of PHP for this project
@@ -65,7 +65,7 @@ Feature: Help text
       And the output is:
         """
         Available commands
-        bin artisan    Run Laravel Artisan command with the appropriate version of PHP
+        bin artisan    Run Laravel Artisan with the appropriate version of PHP
         bin deploy
         bin php        Run the appropriate version of PHP for this project
         """
