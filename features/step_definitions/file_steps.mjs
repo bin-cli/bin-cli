@@ -5,7 +5,7 @@ import {dirname} from 'path';
 import {promisify} from 'util';
 import * as paths from '../support/paths.mjs';
 import * as assert from 'assert';
-import isExecutable from 'is-executable';
+import {isExecutable} from 'is-executable';
 
 const readFile = promisify(fs.readFile);
 const stat = promisify(fs.stat);

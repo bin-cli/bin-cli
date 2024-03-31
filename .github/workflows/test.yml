@@ -30,7 +30,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 12
+          node-version-file: .nvmrc
           cache: npm
 
       - name: Install Kcov
@@ -92,7 +92,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 12
+          node-version-file: .nvmrc
           cache: npm
 
       - name: Install ShellCheck

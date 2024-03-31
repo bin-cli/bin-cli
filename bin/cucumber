@@ -2,4 +2,6 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+source 'lib/init-nvm.sh'
+
 exec npx cucumber-js "$@"
