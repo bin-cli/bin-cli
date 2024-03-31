@@ -6,4 +6,4 @@ Feature: Code quality
     # If the code size goes over this, I will need to update the wiki:
     # https://github.com/bin-cli/bin-cli/wiki/Just-vs-Bin-CLI
     # https://github.com/bin-cli/bin-cli/wiki/Task-vs-Bin-CLI
-    * Code size must be under 100 KB
+    * Code size must be under 50 KB
