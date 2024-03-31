@@ -995,6 +995,7 @@ find_matching_commands() {
     target=$2
     stop_after_first=${3-false}
 
+    # Find aliases that match, and map them to their underlying commands
     map_init commands_matching_aliases # global
 
     for alias in ${aliases+"${aliases[@]}"}; do
@@ -1004,18 +1005,17 @@ find_matching_commands() {
         fi
     done
 
+    # Find commands that match
     matching_commands=() # global
-    for command in ${registered_commands+"${registered_commands[@]}"}; do
-        if map_has commands_matching_aliases "$command"; then
-            matching_commands+=("$command") # global
-        elif command_matches "$type" "$target" "$command"; then
-            matching_commands+=("$command") # global
-        else
-            continue
-        fi
 
-        if $stop_after_first; then
-            break
+    for command in ${registered_commands+"${registered_commands[@]}"}; do
+        if map_has commands_matching_aliases "$command" || command_matches "$type" "$target" "$command"; then
+            matching_commands+=("$command") # global
+
+            # For 'has_matching_commands' we only need to know if there is at least one match
+            if $stop_after_first; then
+                break
+            fi
         fi
     done
 }
