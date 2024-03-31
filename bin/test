@@ -21,28 +21,28 @@ if [[ $result -eq 0 ]]; then
 fi
 
 # If it failed, output debugging information
-if [[ -f temp/root/command.txt ]]; then
+if [[ -f temp/command.txt ]]; then
     echo
     echo "${LMAGENTA}${BOLD}${UNDERLINE}Command${RESET}"
-    cat temp/root/command.txt
+    cat temp/command.txt
 fi
 
-if [[ -f temp/root/stdout.txt ]]; then
+if [[ -f temp/stdout.txt ]]; then
     echo
     echo "${LGREEN}${BOLD}${UNDERLINE}Output${RESET}"
-    cat temp/root/stdout.txt
+    cat temp/stdout.txt
 fi
 
-if [[ -f temp/root/stderr.txt ]]; then
+if [[ -f temp/stderr.txt ]]; then
     echo
     echo "${LRED}${BOLD}${UNDERLINE}Errors${RESET}"
-    cat temp/root/stderr.txt
+    cat temp/stderr.txt
 fi
 
-if [[ -f temp/root/debug.txt ]]; then
+if [[ -f temp/debug.txt ]]; then
     echo
     echo "${LCYAN}${BOLD}${UNDERLINE}Debug log${RESET}"
-    cat temp/root/debug.txt
+    cat temp/debug.txt
 fi
 
 # Return the result code
