@@ -1283,31 +1283,6 @@ while true; do
         parse_binconfig "$binconfig" "$root" "$bin_dir"
     fi
 
-    # Map symlink aliases to their underlying commands, now we know all the commands
-    # shellcheck disable=SC2154 # It doesn't recognise 'map_init' and 'map_set' as setting this variable
-    for alias in ${alias_to_executable+"${alias_to_executable[@]}"}; do
-        if executable=$(map_get alias_to_executable "$alias"); then
-            command=$(map_get executable_to_command "$executable")
-            map_set original_commands "$alias" "$command"
-        fi
-    done
-
-    for alias in ${aliases+"${aliases[@]}"}; do
-        # Check for conflicts
-        source=$(map_get alias_sources "$alias")
-        prevent_duplicate_command alias "$alias" "$source"
-
-        # Expand aliases to cover subcommands (e.g. if 'deploy' => 'push' then 'deploy live' => 'push live')
-        target=$(map_get original_commands "$alias")
-        for command in ${registered_commands+"${registered_commands[@]}"}; do
-            if [[ "$command" = "$target "* ]]; then
-                suffix=${command:${#target}}
-                aliases+=("$alias$suffix")
-                map_set original_commands "$alias$suffix" "$target$suffix"
-            fi
-        done
-    done
-
     # Set default values, if not given at the command line or in the config file
     if [[ -z $unique_prefix_matching ]]; then
         unique_prefix_matching=true
@@ -1331,6 +1306,31 @@ while true; do
     merging=true
     start_directory=$(dirname "$root")
 
+done
+
+# Map symlink aliases to their underlying commands, now we know all the commands
+# shellcheck disable=SC2154 # It doesn't recognise 'map_init' and 'map_set' as setting this variable
+for alias in ${alias_to_executable+"${alias_to_executable[@]}"}; do
+    if executable=$(map_get alias_to_executable "$alias"); then
+        command=$(map_get executable_to_command "$executable")
+        map_set original_commands "$alias" "$command"
+    fi
+done
+
+for alias in ${aliases+"${aliases[@]}"}; do
+    # Check for conflicts
+    source=$(map_get alias_sources "$alias")
+    prevent_duplicate_command alias "$alias" "$source"
+
+    # Expand aliases to cover subcommands (e.g. if 'deploy' => 'push' then 'deploy live' => 'push live')
+    target=$(map_get original_commands "$alias")
+    for command in ${registered_commands+"${registered_commands[@]}"}; do
+        if [[ "$command" = "$target "* ]]; then
+            suffix=${command:${#target}}
+            aliases+=("$alias$suffix")
+            map_set original_commands "$alias$suffix" "$target$suffix"
+        fi
+    done
 done
 
 #endregion =====================================================================
