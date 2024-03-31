@@ -160,7 +160,7 @@ alias bin='bin --prefix'
 
 ## Installation
 
-Bin CLI is a [single script](https://github.com/bin-cli/bin-cli/releases/latest/download/bin) that you can download to anywhere in your `$PATH`.
+Bin CLI is a single script that you can [download](https://github.com/bin-cli/bin-cli/releases/latest/download/bin) to anywhere in your `$PATH`.
 
 To install it system-wide (for all users) in `/usr/local/bin`:
 
@@ -217,7 +217,7 @@ PATH="$HOME/bin:$PATH"
 
 To upgrade to the latest version at any time, just repeat the same `wget` command as above.
 
-You may want to watch [this repo](https://github.com/bin-cli/bin-cli) to be notified when a new version is released - select either Watch > Custom > Releases, or Watch > All Activity.
+You may want to watch [this repo](https://github.com/bin-cli/bin-cli) to be notified when a new version is released - select Watch > Custom > Releases (or Watch > All Activity if you prefer).
 
 <!-- features/3.02-tab-completion.feature -->
 
@@ -357,7 +357,8 @@ The supported global keys are:
 
 - `dir` (string) - Sets a [custom script directory](#custom-script-directory)
 - `exact` (boolean) - Disables [unique prefix matching](#unique-prefix-matching)
-- `merge` (boolean or `optional`) - Enables [directory merging](#merging-directories)
+- `merge` (boolean, or the string `optional`) - Enables [directory merging](#merging-directories)
+- `template` (string) - Sets the template for [scripts created with `--create`](#creating--editing-scripts)
 
 The supported per-command keys are:
 

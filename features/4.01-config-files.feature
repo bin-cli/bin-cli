@@ -35,8 +35,8 @@ Feature: Config files
     |
     | - `dir` (string) - Sets a [custom script directory](#custom-script-directory)
     | - `exact` (boolean) - Disables [unique prefix matching](#unique-prefix-matching)
-    | - `merge` (boolean or `optional`) - Enables [directory merging](#merging-directories)
-      - `template` (string) - Sets the template for [scripts created with `--create`](#creating--editing-scripts)
+    | - `merge` (boolean, or the string `optional`) - Enables [directory merging](#merging-directories)
+    | - `template` (string) - Sets the template for [scripts created with `--create`](#creating--editing-scripts)
     |
     | The supported per-command keys are:
     |
