@@ -11,7 +11,6 @@ Before({name: 'Create test directory'}, async function () {
     await copy(`${paths.dist}/bin`, `${paths.root}/usr/bin/bin`);
 
     // Symlink the executables we need, since we won't be using the global $PATH
-    // We can't use {ROOT}/usr/bin here because it interferes with the /usr/bin path test
     const executables = [
         'bash', // bash
         'basename', // coreutils
@@ -29,6 +28,8 @@ Before({name: 'Create test directory'}, async function () {
     }
 
     for (const exe of executables) {
+        // We can't use '{root}/usr/bin' here because it would interfere with
+        // the '/usr/bin' path test, to use '{root}/global/bin' instead
         await ensureSymlink(await which(exe), `${paths.root}/global/bin/${exe}`);
     }
 
