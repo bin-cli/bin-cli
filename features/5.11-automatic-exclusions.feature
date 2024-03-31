@@ -155,7 +155,6 @@ Feature: Automatic exclusions
 
     | A number of common non-executable file types (`*.json`, `*.md`, `*.txt`, `*.yaml`, `*.yml`) are also excluded when using `dir = .`, even if they are executable, to reduce the noise when all files are executable (e.g. on FAT32 filesystems).
 
-
     Scenario: Non-executable files are not listed in the project root
       Given a file '{ROOT}/project/.binconfig' with content 'dir = .'
       And a script '{ROOT}/project/executable'
