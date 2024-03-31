@@ -2,7 +2,6 @@ import {Given, Then, When} from '@cucumber/cucumber';
 import {strict as assert} from 'assert';
 import {spawnSync} from 'child_process';
 import {ensureDir, exists, outputFile} from 'fs-extra';
-import {move} from 'fs-extra/lib/move/index.js';
 import * as paths from '../support/paths.mjs';
 import * as coverage from '../support/coverage.mjs';
 
@@ -83,11 +82,6 @@ async function run(command, env = {}) {
     await outputFile(`${paths.root}/stderr.txt`, stderr);
 
     this.runResult = {status, stdout, stderr};
-
-    // Stash the code coverage results for merging later
-    if (!this.disableKcov && await exists(`${paths.root}/coverage/result-${kcovId}`)) {
-        await move(`${paths.coverage}/result-${kcovId}`, `${paths.coverage}/result-${kcovId}`);
-    }
 }
 
 When('I run {string}', run);
