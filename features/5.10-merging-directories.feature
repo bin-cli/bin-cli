@@ -196,6 +196,24 @@ Feature: Merging Directories
       Then it fails with exit code 246
       And the error is "bin: The command 'mycommand' defined in {ROOT}/project/bin/mycommand conflicts with an existing command"
 
+    Scenario: If a child project command conflicts with a parent project subdirectory, an error is raised
+      Given a file '{ROOT}/project/subdir/.binconfig' with content 'merge = true'
+      And a script '{ROOT}/project/subdir/bin/mycommand'
+      And a script '{ROOT}/project/bin/mycommand/subcommand'
+      And the working directory is '{ROOT}/project/subdir'
+      When I run 'bin'
+      Then it fails with exit code 246
+      And the error is "bin: The command 'mycommand subcommand' defined in {ROOT}/project/bin/mycommand/subcommand conflicts with an existing command"
+
+    Scenario: If a child project subdirectory conflicts with a parent project command, an error is raised
+      Given a file '{ROOT}/project/subdir/.binconfig' with content 'merge = true'
+      And a script '{ROOT}/project/subdir/bin/mycommand/subcommand'
+      And a script '{ROOT}/project/bin/mycommand'
+      And the working directory is '{ROOT}/project/subdir'
+      When I run 'bin'
+      Then it fails with exit code 246
+      And the error is "bin: The command 'mycommand' defined in {ROOT}/project/bin/mycommand conflicts with an existing command"
+
   Rule: Merging works with inline commands
 
     | COLLAPSE: Does this work with inline commands and aliases?

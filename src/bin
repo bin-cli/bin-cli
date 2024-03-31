@@ -804,9 +804,15 @@ prevent_duplicate_command() {
     name=$2
     source=$3
 
-    if in_array "$name" ${registered_commands+"${registered_commands[@]}"}; then
-        fail "The $type '$name' defined in $source conflicts with an existing command"
-    fi
+    for command in ${registered_commands+"${registered_commands[@]}"}; do
+        if command_matches exact "$name" "$command" ||
+            # We need to check this both ways around, because they could be defined in either order
+            command_matches subcommands "$name" "$command" ||
+            command_matches subcommands "$command" "$name"
+        then
+            fail "The $type '$name' defined in $source conflicts with an existing command"
+        fi
+    done
 }
 
 register_executable_command() {
