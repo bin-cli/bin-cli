@@ -101,6 +101,17 @@ Feature: Creating/editing scripts
       Then it fails with exit code 246
       And the error is "bin: Command names may not start with '.'"
 
+    Scenario: If given an inline command, '.binconfig' is opened instead
+      Given a file '{ROOT}/project/.binconfig' with content:
+        """
+        [hello]
+        command = echo "Hello, world"
+        """
+      And a script '{ROOT}/usr/bin/editor' that outputs 'EXECUTED: editor "$@"'
+      When I run 'bin --edit hello'
+      Then it is successful
+      And the output is 'EXECUTED: editor {ROOT}/project/.binconfig'
+
   Rule: There is a command to create a script
 
     | The `--create` (`-c`) command will pre-fill the file with a typical Bash script template and make it executable.

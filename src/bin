@@ -1123,6 +1123,12 @@ run_command_if_only_one_match() {
     fi
 
     if script=$(map_get command_to_inline_script "$command"); then
+
+        if [[ $action = 'edit' ]]; then
+            root=$(map_get command_to_root "$command")
+            open_in_editor "$root/.binconfig"
+        fi
+
         # These variables are useful for inline commands, but aren't made available
         # to regular commands because it is better to use "$(dirname "$0")" instead
         export BIN_ROOT BIN_DIR

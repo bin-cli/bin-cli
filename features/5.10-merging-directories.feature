@@ -272,6 +272,32 @@ Feature: Merging Directories
         BIN_ROOT={ROOT}/project/subdir
         """
 
+    Scenario: The '--edit' command works correctly for inline commands when merging
+      Given a file '{ROOT}/project/subdir/subsubdir/.binconfig' with content:
+        """
+        merge = true
+
+        [grandchild]
+        command = inline command
+        """
+      And a file '{ROOT}/project/subdir/.binconfig' with content:
+        """
+        merge = true
+
+        [child]
+        command = inline command
+        """
+      And a file '{ROOT}/project/.binconfig' with content:
+        """
+        [parent]
+        command = inline command
+        """
+      And a script '{ROOT}/usr/bin/editor' that outputs 'EXECUTED: editor "$@"'
+      And the working directory is '{ROOT}/project/subdir/subsubdir'
+      When I run 'bin --edit child'
+      Then it is successful
+      And the output is 'EXECUTED: editor {ROOT}/project/subdir/.binconfig'
+
   Rule: The parent directory must exist, unless merge = optional
 
     | COLLAPSE: What if no parent project is found?
