@@ -1,6 +1,6 @@
 Feature: CLI arguments
 
-  Rule: Parsing arguments
+  Rule: Arguments are parsed correctly
 
     Scenario: '--' can be placed before executable names
       Given a script '{ROOT}/project/bin/--help' that outputs 'Help'
@@ -43,7 +43,7 @@ Feature: CLI arguments
         | --edit       | --completion |
         | --help       | --version    |
 
-  Rule: Help
+  Rule: There is a help command
 
     Scenario: The help message is displayed when using --help
       When I run 'bin --help'
@@ -55,7 +55,7 @@ Feature: CLI arguments
       Then it is successful
       And the output contains 'Usage: bin [OPTIONS] [--] [COMMAND] [ARGUMENTS...]'
 
-  Rule: Version
+  Rule: There is a version command
 
     Scenario: The version number is displayed when using --version
       When I run 'bin --version'

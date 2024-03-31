@@ -40,7 +40,7 @@ Feature: Aliasing `b` to `bin`
         b hello
         """
 
-  Rule: Symlinks to bin
+  Rule: Symlinks to bin work the same as aliases
 
     | COLLAPSE: Alternatively, you can use a symlink
     |

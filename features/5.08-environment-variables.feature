@@ -1,6 +1,6 @@
 Feature: Environment Variables To Use in Scripts
 
-  Rule: $BIN_COMMAND
+  Rule: $BIN_COMMAND is set to the command name
 
     | ### Environment Variables To Use in Scripts
     |
@@ -39,7 +39,7 @@ Feature: Environment Variables To Use in Scripts
       Then it is successful
       And the output is 'bin sample'
 
-  Rule: $BIN_COMMAND fallback
+  Rule: $0 should be used as a fallback for $BIN_COMMAND
 
     | But if you ran the script manually with `bin/sample -h`, it would output the fallback from `$0` instead:
     |
@@ -53,7 +53,7 @@ Feature: Environment Variables To Use in Scripts
       Then it is successful
       And the output is 'Usage: bin/sample [...]'
 
-  Rule: $BIN_EXE
+  Rule: $BIN_EXE is set to the name of the 'bin' executable
 
     | There is also `$BIN_EXE`, which is set to the name of the executable (typically just `bin`, but that [may be overridden](#aliasing-the-bin-command)).
 
