@@ -243,6 +243,35 @@ Feature: Merging Directories
         bin parent
         """
 
+    Scenario: $BIN_DIR and $BIN_ROOT are set correctly when merging
+      Given a file '{ROOT}/project/subdir/subsubdir/.binconfig' with content:
+        """
+        merge = true
+
+        [grandchild]
+        command = inline command
+        """
+      And a file '{ROOT}/project/subdir/.binconfig' with content:
+        """
+        merge = true
+
+        [child]
+        command = echo "BIN_DIR=$BIN_DIR"; echo "BIN_ROOT=$BIN_ROOT"
+        """
+      And a file '{ROOT}/project/.binconfig' with content:
+        """
+        [parent]
+        command = inline command
+        """
+      And the working directory is '{ROOT}/project/subdir/subsubdir'
+      When I run 'bin child'
+      Then it is successful
+      And the output is:
+        """
+        BIN_DIR={ROOT}/project/subdir/bin
+        BIN_ROOT={ROOT}/project/subdir
+        """
+
   Rule: The parent directory must exist, unless merge = optional
 
     | COLLAPSE: What if no parent project is found?

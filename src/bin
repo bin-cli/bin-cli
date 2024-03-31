@@ -790,8 +790,10 @@ broken_symlinks=()
 non_executable_files=()
 registered_commands=()
 
+map_init command_to_bin_dir
 map_init command_to_executable
 map_init command_to_inline_script
+map_init command_to_root
 map_init executable_to_command
 map_init original_commands
 
@@ -827,11 +829,15 @@ register_inline_command() {
     name=$1
     script=$2
     source=$3
+    root=$4
+    bin_dir=$5
 
     prevent_duplicate_command command "$name" "$source"
 
     registered_commands+=("$name")                     # global
     map_set command_to_inline_script "$name" "$script" # global
+    map_set command_to_root "$name" "$root"            # global
+    map_set command_to_bin_dir "$name" "$bin_dir"      # global
     map_set original_commands "$name" "$name"          # global
 }
 
@@ -1107,10 +1113,10 @@ run_command_if_only_one_match() {
 
     # Export the command name so it can be displayed in help messages
     # Typically with a fallback to $0 if it is unset: ${BIN_COMMAND-$0}
-    export BIN_COMMAND="$exe $command" # global
+    export BIN_COMMAND="$exe $command"
 
     # And this can be used to display other command names
-    export BIN_EXE="$exe" # global
+    export BIN_EXE="$exe"
 
     if executable=$(map_get command_to_executable "$command"); then
         run_command "$executable" "$@"
@@ -1119,8 +1125,9 @@ run_command_if_only_one_match() {
     if script=$(map_get command_to_inline_script "$command"); then
         # These variables are useful for inline commands, but aren't made available
         # to regular commands because it is better to use "$(dirname "$0")" instead
-        export BIN_ROOT="$root"   # global
-        export BIN_DIR="$bin_dir" # global
+        export BIN_ROOT BIN_DIR
+        BIN_ROOT=$(map_get command_to_root "$command")
+        BIN_DIR=$(map_get command_to_bin_dir "$command")
 
         run_command bash -c "$script" -- "$@"
     fi
