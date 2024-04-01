@@ -2,7 +2,7 @@
 
 *[MIT License](https://choosealicense.com/licenses/mit/)*
 
-**Copyright © 2023 [Dave James Miller](https://djm.me/)**
+**Copyright © 2023-2024 [Dave James Miller](https://djm.me/)**
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
