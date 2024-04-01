@@ -75,6 +75,12 @@ bin deploy
 bin hello
 </pre>
 
+<details><summary><em>Can I add descriptions to the commands?</em></summary><blockquote>
+
+Yes - see [Help text](#help-text), below.
+
+</blockquote></details>
+
 <!-- features/2.02-subcommands.feature -->
 
 ### Subcommands

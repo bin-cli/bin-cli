@@ -35,3 +35,9 @@ Feature: Listing commands
         Available Commands
         None found
         """
+
+  Rule: Help text is also supported
+
+    | COLLAPSE: Can I add descriptions to the commands?
+    |
+    | Yes - see [Help text](#help-text), below.
