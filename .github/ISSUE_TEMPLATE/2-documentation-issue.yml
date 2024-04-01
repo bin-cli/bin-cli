@@ -1,0 +1,20 @@
+name: Report a documentation issue
+description: Report a mistake, omission or lack of clarity in the Bin CLI documentation or wiki.
+labels: documentation
+
+body:
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: Please describe the problem.
+    validations:
+      required: true
+
+  - type: input
+    id: url
+    attributes:
+      label: URL
+      description: If this relates to a wiki page, please paste the URL here.
+    validations:
+      required: false
