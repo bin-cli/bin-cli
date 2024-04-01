@@ -153,7 +153,9 @@ Feature: Inline commands
 
     | COLLAPSE: How complex can the command be?
     |
-    | The command is executed within a Bash shell (`bash -c "$command"`), so it may contain logic operators (`&&`, `||`), multiple commands separated by `;`, and pretty much anything else that you can fit into a single line.
+    | The command is executed within a Bash shell (`bash -c "$command"`), so it may contain logic operators
+    | (`&&`, `||`), multiple commands separated by `;`, and pretty much anything else that you can fit into
+    | a single line. Multi-line commands are not supported.
 
     Scenario: Inline commands can contain multiple commands
       Given a file '{ROOT}/project/.binconfig' with content:
