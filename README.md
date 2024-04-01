@@ -71,7 +71,9 @@ repo/
 └── ...
 ```
 
-The scripts can be written in any language, or can even be compiled binaries, as long as they are executable (`chmod +x`). Here is a very simple `bin/hello` shell script:
+The scripts can be written in [any language](https://github.com/bin-cli/bin-cli/wiki/Hello%2C-world),
+or can even be compiled binaries, as long as they are executable (`chmod +x`). Here is a very simple
+`bin/hello` shell script:
 
 ```bash
 #!/bin/sh
