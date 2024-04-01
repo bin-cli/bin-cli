@@ -2,6 +2,6 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-source 'lib/init-nvm.sh'
+source 'lib/init-node.sh'
 
 exec npx markdown-link-check README.md --retry --verbose
