@@ -44,7 +44,7 @@
 
 <!-- features/1.00-introduction.md -->
 
-# Bin CLI – A simple task/script runner
+# Bin CLI – A simple task/script runner for any language
 
 Bin is a simple task runner, designed to be used in code repositories, with scripts written in any programming language.
 
