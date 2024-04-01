@@ -53,7 +53,7 @@ Feature: Aliasing `b` to `bin`
     | Per-user installation:
     |
     | ```bash
-    | $ ln -s bin ~/bin/b
+    | $ ln -s bin ~/.local/bin/b
     | ```
 
     # This doesn't work with kcov because $0 is set to 'bin' instead of 'b', though I'm not sure why

@@ -169,16 +169,16 @@ sudo wget https://github.com/bin-cli/bin-cli/releases/latest/download/bin -O /us
 sudo chmod +x /usr/local/bin/bin
 ```
 
-Or to install it for the current user only in `~/bin`:
+To install it for the current user only in `$HOME/.local/bin`:
 
 ```bash
-mkdir -p ~/bin
-wget https://github.com/bin-cli/bin-cli/releases/latest/download/bin -O ~/bin/bin
-chmod +x ~/bin/bin
+mkdir -p ~/.local/bin
+wget https://github.com/bin-cli/bin-cli/releases/latest/download/bin -O ~/.local/bin/bin
+chmod +x ~/.local/bin/bin
 
-# If ~/bin is not already in your $PATH:
-echo 'PATH="$HOME/bin:$PATH"' >> ~/.bash_profile
-PATH="$HOME/bin:$PATH"
+# If $HOME/.local/bin is not already in your $PATH:
+echo 'PATH="$HOME/.local/bin:$PATH"' >> ~/.profile
+PATH="$HOME/.local/bin:$PATH"
 ```
 
 <details>
@@ -199,7 +199,7 @@ PATH="$HOME/bin:$PATH"
 >
 > ```bash
 > sudo curl https://github.com/bin-cli/bin-cli/releases/latest/download/bin -Lo /usr/local/bin/bin
-> curl https://github.com/bin-cli/bin-cli/releases/latest/download/bin -Lo ~/bin/bin
+> curl https://github.com/bin-cli/bin-cli/releases/latest/download/bin -Lo ~/.local/bin/bin
 > ```
 >
 > At least one of `curl` or `wget` are usually installed, or can easily be
@@ -208,14 +208,14 @@ PATH="$HOME/bin:$PATH"
 >
 > ```bash
 > sudo http get https://github.com/bin-cli/bin-cli/releases/latest/download/bin -do /usr/local/bin/bin
-> http get https://github.com/bin-cli/bin-cli/releases/latest/download/bin -do ~/bin/bin
+> http get https://github.com/bin-cli/bin-cli/releases/latest/download/bin -do ~/.local/bin/bin
 > ```
 >
 > Or [Node.js](https://docs.npmjs.com/cli/commands/npx):
 >
 > ```bash
 > sudo npx download-cli https://github.com/bin-cli/bin-cli/releases/latest/download/bin -o /usr/local/bin/
-> npx download-cli https://github.com/bin-cli/bin-cli/releases/latest/download/bin -o ~/bin/
+> npx download-cli https://github.com/bin-cli/bin-cli/releases/latest/download/bin -o ~/.local/bin/
 > ```
 >
 > Or just click [this link](https://github.com/bin-cli/bin-cli/releases/latest/download/bin)
@@ -684,10 +684,10 @@ alias scr='bin --exe scr --dir scripts'
 
 <details><summary><em>Can I use an absolute path?</em></summary><blockquote>
 
-Not in a `.binconfig` file, but you can use an absolute path at the command line. For example, you could put your all generic development tools in `~/bin/dev/` and run them as `dev <script>`:
+Not in a `.binconfig` file, but you can use an absolute path at the command line. For example, you could put your all generic development tools in `~/.local/bin/dev/` and run them as `dev <script>`:
 
 ```bash
-alias dev="bin --exe dev --dir $HOME/bin/dev"
+alias dev="bin --exe dev --dir $HOME/.local/bin/dev"
 ```
 
 </blockquote></details>
@@ -775,7 +775,7 @@ $ sudo ln -s bin /usr/local/bin/b
 Per-user installation:
 
 ```bash
-$ ln -s bin ~/bin/b
+$ ln -s bin ~/.local/bin/b
 ```
 
 </blockquote></details>
@@ -855,7 +855,7 @@ Files that are not executable (not `chmod +x`) are listed as warnings in the com
 
 A number of common non-executable file types (`*.json`, `*.md`, `*.txt`, `*.yaml`, `*.yml`) are also excluded when using `dir = .`, even if they are executable, to reduce the noise when all files are executable (e.g. on FAT32 filesystems).
 
-The directories `/bin`, `/snap/bin`, `/usr/bin`, `/usr/local/bin` and `~/bin` are ignored when searching parent directories, unless there is a corresponding `.binconfig` file, because they are common locations for global executables (typically in `$PATH`).
+The directories `/bin`, `/snap/bin`, `/usr/bin`, `/usr/local/bin`, `$HOME/bin` and `$HOME/.local/bin` are ignored when searching parent directories, unless there is a corresponding `.binconfig` file, because they are common locations for global executables (typically in `$PATH`).
 
 <!-- features/6.00-cli-reference.md -->
 

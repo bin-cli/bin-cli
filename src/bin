@@ -566,6 +566,7 @@ is_common_bin_dir() {
         "$ROOT_DIR/usr/bin" \
         "$ROOT_DIR/usr/local/bin" \
         "$ROOT_DIR/snap/bin" \
+        "$HOME/.local/bin" \
         "$HOME/bin"
 }
 

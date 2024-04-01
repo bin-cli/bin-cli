@@ -192,7 +192,7 @@ Feature: Automatic exclusions
 
   Rule: Common bin directories are ignored
 
-    | The directories `/bin`, `/snap/bin`, `/usr/bin`, `/usr/local/bin` and `~/bin` are ignored when searching parent directories, unless there is a corresponding `.binconfig` file, because they are common locations for global executables (typically in `$PATH`).
+    | The directories `/bin`, `/snap/bin`, `/usr/bin`, `/usr/local/bin`, `$HOME/bin` and `$HOME/.local/bin` are ignored when searching parent directories, unless there is a corresponding `.binconfig` file, because they are common locations for global executables (typically in `$PATH`).
 
     Scenario Outline: Common bin directories are ignored when searching parent directories
       Given a script '{ROOT}<bin>/hello'
@@ -202,12 +202,13 @@ Feature: Automatic exclusions
       And the error is "bin: Could not find 'bin/' directory or '.binconfig' file starting from '{ROOT}<workdir>' (ignored '{ROOT}<bin>')"
 
       Examples:
-        | bin            | workdir                |
-        | /bin           | /example               |
-        | /usr/bin       | /usr/example           |
-        | /snap/bin      | /snap/example          |
-        | /usr/local/bin | /usr/local/bin/example |
-        | /home/user/bin | /home/user/example     |
+        | bin                   | workdir                   |
+        | /bin                  | /example                  |
+        | /usr/bin              | /usr/example              |
+        | /snap/bin             | /snap/example             |
+        | /usr/local/bin        | /usr/local/bin/example    |
+        | /home/user/bin        | /home/user/example        |
+        | /home/user/.local/bin | /home/user/.local/example |
 
     Scenario Outline: Common bin directories are not ignored if there is a .binconfig directory in the parent directory
       Given a script '{ROOT}<bin>/hello' that outputs 'Hello, World!'

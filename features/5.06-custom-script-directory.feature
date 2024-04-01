@@ -162,10 +162,10 @@ Feature: Custom script directory
 
     | COLLAPSE: Can I use an absolute path?
     |
-    | Not in a `.binconfig` file, but you can use an absolute path at the command line. For example, you could put your all generic development tools in `~/bin/dev/` and run them as `dev <script>`:
+    | Not in a `.binconfig` file, but you can use an absolute path at the command line. For example, you could put your all generic development tools in `~/.local/bin/dev/` and run them as `dev <script>`:
     |
     | ```bash
-    | alias dev="bin --exe dev --dir $HOME/bin/dev"
+    | alias dev="bin --exe dev --dir $HOME/.local/bin/dev"
     | ```
 
     Scenario: The 'dir' option cannot be an absolute path when set in .binconfig
