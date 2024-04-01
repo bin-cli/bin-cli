@@ -221,7 +221,7 @@ Feature: Tab completion
     |
     | If you prefer, you can manually run `bin --completion` and paste the output into the file instead.
 
-  Rule: Exclusions
+  Rule: Various files are excluded from tab completion
 
     Scenario: Scripts starting with '_' are excluded from tab completion
       Given a script '{ROOT}/project/bin/visible'
@@ -379,6 +379,8 @@ Feature: Tab completion
         | /usr/local/bin | /usr/local/.binconfig | /usr/local/bin/example |
         | /home/user/bin | /home/user/.binconfig | /home/user/example     |
 
+  Rule: Options are supported in tab completion
+
     Scenario Outline: Tab completion works after '<option>'
       Given a script '{ROOT}/project/bin/hello'
       When I tab complete 'bin <option> h'
@@ -433,6 +435,63 @@ Feature: Tab completion
         | --invalid       |
         | -v              |
         | --version       |
+
+    Scenario: Option names can be tab-completed (all)
+      When I tab complete 'bin -'
+      Then it is successful
+      And the output is:
+        """
+        --completion
+        --create
+        -c
+        --dir
+        --edit
+        -e
+        --exact
+        --exe
+        --fallback
+        --help
+        -h
+        --prefix
+        --shim
+        --version
+        -v
+        --
+        """
+
+    Scenario: Option names can be tab-completed (long options)
+      When I tab complete 'bin --'
+      Then it is successful
+      And the output is:
+        """
+        --completion
+        --create
+        --dir
+        --edit
+        --exact
+        --exe
+        --fallback
+        --help
+        --prefix
+        --shim
+        --version
+        --
+        """
+
+    Scenario: Option names can be tab-completed (partial match)
+      When I tab complete 'bin --e'
+      Then it is successful
+      And the output is:
+        """
+        --edit
+        --exact
+        --exe
+        """
+
+    Scenario: Option names are not tab-completed after '--'
+      When I tab complete 'bin -- -'
+      Then it is successful
+      And there is no output
 
   Rule: Other shells are not currently supported
 

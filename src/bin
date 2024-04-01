@@ -349,6 +349,8 @@ if [[ $action = 'complete-bash' ]]; then
     fi
 
     # Parse options used on the command line
+    can_have_more_options=true
+
     while [[ $# -gt $num_parameters_to_ignore ]]; do
         case $1 in
             --complete-bash)    fail "Cannot tab complete '$1'" ;;
@@ -366,13 +368,46 @@ if [[ $action = 'complete-bash' ]]; then
             --prefix)           unique_prefix_matching=true ;;
             --shim)             shim=true ;;
             --version | -v)     fail "Cannot tab complete '$1'" ;;
-            --)                 shift; break ;;
+            --)                 can_have_more_options=false; shift; break ;;
             -*)                 fail "Invalid option '$1'" ;;
             *)                  break ;;
         esac
 
         shift
     done
+
+    # Tab-complete option names (but only if the '-' is typed)
+    # (We don't currently support tab-completing the values - e.g. directory names for --dir)
+    if $can_have_more_options && [[ ${1-} = -* ]]; then
+
+        # kcov-ignore-start: Usage not detected
+        declare option_names=(
+            # '--complete-bash' # Shouldn't normally be entered by hand
+            '--completion'
+            '--create' '-c'
+            '--dir'
+            '--edit' '-e'
+            '--exact'
+            '--exe'
+            '--fallback'
+            '--help' '-h'
+            '--prefix'
+            '--shim'
+            '--version' '-v'
+            '--'
+        )
+        # kcov-ignore-end
+
+        declare option_name
+        for option_name in ${option_names+"${option_names[@]}"}; do
+            if [[ $option_name = "$1"* ]]; then
+                # 'echo' treats '-e' as an option rather than the string to output
+                printf "%s\n" "$option_name"
+            fi
+        done
+
+        exit
+    fi
 
 fi
 
