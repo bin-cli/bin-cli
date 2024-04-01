@@ -1,14 +1,13 @@
 {
   "devDependencies": {
     "@cucumber/cucumber": "^10.3.2",
-    "@cucumber/gherkin": "^28.0.0",
+    "@cucumber/gherkin": "^27.0.0",
     "@cucumber/messages": "^24.1.0",
     "fs-extra": "^11.2.0",
     "is-executable": "^2.0.1",
     "markdown-link-check": "~3.11.2",
     "marked": "^12.0.1",
     "shell-quote": "^1.8.1",
-    "string.prototype.replaceall": "^1.0.10",
     "which": "^4.0.0"
   }
 }
