@@ -130,6 +130,7 @@ fail() {
     # tab completion successfully returned nothing (although I don't know if
     # that makes any practical difference)
     if [[ ${action-} = 'complete-bash' ]]; then
+        debug "$message"
         exit
     fi
 
@@ -322,6 +323,58 @@ if [[ $action = 'completion' ]]; then
     fi
     echo "complete -C \"${complete_command[*]}\" -o default $exe"
     exit
+fi
+
+#endregion =====================================================================
+#region ======= PREPARE FOR TAB COMPLETION (IF NEEDED) =========================
+
+declare -i num_parameters_to_ignore=0
+
+if [[ $action = 'complete-bash' ]]; then
+
+    # The command being completed is available in $COMP_LINE.
+    # The current cursor position is available in $COMP_POINT.
+    # Ignore everything after the cursor, and assign everything before it to $1,
+    # $2, etc. as if it had been executed already.
+    declare args=${COMP_LINE:0:$COMP_POINT}
+
+    # shellcheck disable=SC2086 # We want this to be split into separate arguments
+    set -- $args
+
+    # Remove the command name (since that would be in $0 not $1)
+    shift
+
+    # If there is a space at the end, we want to complete the next parameter; otherwise the last one given
+    if [[ $args != *' ' ]]; then
+        num_parameters_to_ignore=1
+    fi
+
+    # Parse options used on the command line
+    while [[ $# -gt $num_parameters_to_ignore ]]; do
+        case $1 in
+            --complete-bash)    fail "Cannot tab complete '$1'" ;;
+            --completion)       fail "Cannot tab complete '$1'" ;;
+            --create | -c)      true ;; # Complete as normal to help with creating subcommands
+            --dir)              fixed_bin_dir=$2; shift ;;
+            --dir=*)            fixed_bin_dir=${1#*=} ;;
+            --edit | -e)        true ;; # Complete as normal
+            --exact)            unique_prefix_matching=false ;;
+            --exe)              is_custom_exe=true; exe=$2; shift ;;
+            --exe=*)            is_custom_exe=true; exe=${1#*=} ;;
+            --fallback)         fallback=$2; shift ;;
+            --fallback=*)       fallback=${1#*=} ;;
+            --help | -h)        fail "Cannot tab complete '$1'" ;;
+            --prefix)           unique_prefix_matching=true ;;
+            --shim)             shim=true ;;
+            --version | -v)     fail "Cannot tab complete '$1'" ;;
+            --)                 shift; break ;;
+            -*)                 fail "Invalid option '$1'" ;;
+            *)                  break ;;
+        esac
+
+        shift
+    done
+
 fi
 
 #endregion =====================================================================
@@ -1338,32 +1391,6 @@ for alias in ${aliases+"${aliases[@]}"}; do
         fi
     done
 done
-
-#endregion =====================================================================
-#region ======= PREPARE FOR TAB COMPLETION (IF NEEDED) =========================
-
-declare -i num_parameters_to_ignore=0
-
-if [[ $action = 'complete-bash' ]]; then
-
-    # The command being completed is available in $COMP_LINE.
-    # The current cursor position is available in $COMP_POINT.
-    # Ignore everything after the cursor, and assign everything before it to $1,
-    # $2, etc. as if it had been executed already.
-    declare args=${COMP_LINE:0:$COMP_POINT}
-
-    # shellcheck disable=SC2086 # We want this to be split into separate arguments
-    set -- $args
-
-    # Remove the command name (since that would be in $0 not $1)
-    shift
-
-    # If there is a space at the end, we want to complete the next parameter; otherwise the last one given
-    if [[ $args != *' ' ]]; then
-        num_parameters_to_ignore=1
-    fi
-
-fi
 
 #endregion =====================================================================
 #region ======= PARSE PARAMETERS AND FIND/RUN THE COMMAND ======================

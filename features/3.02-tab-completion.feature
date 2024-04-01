@@ -379,6 +379,61 @@ Feature: Tab completion
         | /usr/local/bin | /usr/local/.binconfig | /usr/local/bin/example |
         | /home/user/bin | /home/user/.binconfig | /home/user/example     |
 
+    Scenario Outline: Tab completion works after '<option>'
+      Given a script '{ROOT}/project/bin/hello'
+      When I tab complete 'bin <option> h'
+      Then it is successful
+      And the output is:
+        """
+        hello
+        """
+
+      Examples:
+        | option               |
+        | -c                   |
+        | --create             |
+        | -e                   |
+        | --edit               |
+        | --exact              |
+        | --exe something      |
+        | --exe=something      |
+        | --fallback something |
+        | --fallback=something |
+        | --prefix             |
+        | --shim               |
+        | --                   |
+
+    Scenario Outline: Tab completion works after '<option>' and changes the directory
+      And a script '{ROOT}/project/scripts/right'
+      And a script '{ROOT}/project/bin/wrong'
+      When I tab complete 'bin <option> '
+      Then it is successful
+      And the output is:
+        """
+        right
+        """
+
+      Examples:
+        | option        |
+        | --dir scripts |
+        | --dir=scripts |
+
+    Scenario Outline: Tab completion aborts after '<option>'
+      Given a script '{ROOT}/project/bin/hello'
+      When I tab complete 'bin <option> h'
+      Then it is successful
+      And there is no output
+
+      Examples:
+        | option          |
+        | --complete-bash |
+        | --completion    |
+        | -h              |
+        | --help          |
+        | --invalid       |
+        | -v              |
+        | --version       |
+
   Rule: Other shells are not currently supported
 
     | COLLAPSE: What about other shells (Zsh, Fish, etc)?
