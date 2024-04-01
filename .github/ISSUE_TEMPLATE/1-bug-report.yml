@@ -1,0 +1,28 @@
+name: Report a bug
+description: Report a problem with Bin CLI.
+labels: bug
+
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: What version of Bin CLI (`bin -v`), or which Git commit (`git rev-parse --short HEAD`), are you using?
+    validations:
+      required: true
+
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: What is the problem you are experiencing? Please include the command(s) you run and the full text of any error messages.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to Reproduce
+      description: Please include a link to a public Git repo that demonstrates the issue, if possible, or enough detail to reproduce the problem by hand.
+    validations:
+      required: true
