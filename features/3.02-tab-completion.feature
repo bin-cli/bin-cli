@@ -432,6 +432,7 @@ Feature: Tab completion
         | --completion    |
         | -h              |
         | --help          |
+        | --info          |
         | --invalid       |
         | -v              |
         | --version       |
@@ -452,6 +453,7 @@ Feature: Tab completion
         --fallback
         --help
         -h
+        --info
         --prefix
         --shim
         --version
@@ -472,6 +474,7 @@ Feature: Tab completion
         --exe
         --fallback
         --help
+        --info
         --prefix
         --shim
         --version

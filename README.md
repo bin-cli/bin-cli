@@ -880,6 +880,7 @@ Options that do something with a COMMAND:
 
 Options that do something special and don't accept a COMMAND:
   --completion          Output a tab completion script for the current shell
+  --info                Display information about the current project (root, bin directory and config file location)
   --help, -h            Display this help
   --version, -v         Display the current version number and exit
 

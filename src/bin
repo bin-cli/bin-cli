@@ -263,6 +263,7 @@ while [[ $# -gt 0 ]]; do
         --fallback)         set_option_value '--fallback' fallback "${2-}"; shift ;;
         --fallback=*)       set_option_value '--fallback' fallback "${1#*=}" ;;
         --help | -h)        set_action help ;;
+        --info)             set_action info ;;
         --prefix)           unique_prefix_matching=true ;;
         --shim)             shim=true ;;
         --version | -v)     set_action version ;;
@@ -296,6 +297,7 @@ if [[ $action = 'help' ]]; then
     echo
     echo "Options that do something special and don't accept a COMMAND:"
     echo "  --completion          Output a tab completion script for the current shell"
+    echo "  --info                Display information about the current project (root, bin directory and config file location)"
     echo "  --help, -h            Display this help"
     echo "  --version, -v         Display the current version number and exit"
     echo
@@ -365,6 +367,7 @@ if [[ $action = 'complete-bash' ]]; then
             --fallback)         set_option_value '--fallback' fallback "${2-}"; shift ;;
             --fallback=*)       set_option_value '--fallback' fallback "${1#*=}" ;;
             --help | -h)        fail "Cannot tab complete '$1'" ;;
+            --info)             fail "Cannot tab complete '$1'" ;;
             --prefix)           unique_prefix_matching=true ;;
             --shim)             shim=true ;;
             --version | -v)     fail "Cannot tab complete '$1'" ;;
@@ -391,6 +394,7 @@ if [[ $action = 'complete-bash' ]]; then
             '--exe'
             '--fallback'
             '--help' '-h'
+            '--info'
             '--prefix'
             '--shim'
             '--version' '-v'
@@ -1391,6 +1395,35 @@ while true; do
         main_root=$root
     fi
 
+    # Output environment info?
+    if [[ $action = 'info' ]]; then
+        if $merging; then
+            echo
+        fi
+
+        echo "Root:    $root/"
+
+        if [[ -f $binconfig ]]; then
+            echo "Config:  $binconfig"
+        else
+            echo "Config:  $binconfig (missing)"
+        fi
+
+        if [[ -d $bin_dir ]]; then
+            echo "Bin Dir: $bin_dir/"
+        else
+            echo "Bin Dir: $bin_dir/ (missing)"
+        fi
+
+        if ! $merge_with_parent; then
+            echo "Merge:   false"
+        elif $merge_is_optional; then
+            echo "Merge:   optional"
+        else
+            echo "Merge:   true"
+        fi
+    fi
+
     # Merge with parent?
     if ! $merge_with_parent; then
         break
@@ -1401,6 +1434,10 @@ while true; do
     start_directory=$(dirname "$root")
 
 done
+
+if [[ $action = 'info' ]]; then
+    exit
+fi
 
 # Map symlink aliases to their underlying commands, now we know all the commands
 # shellcheck disable=SC2154 # It doesn't recognise 'map_init' and 'map_set' as setting this variable

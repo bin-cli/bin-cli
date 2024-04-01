@@ -66,3 +66,69 @@ Feature: CLI arguments
       When I run 'bin -v'
       Then it is successful
       And the output is 'Bin CLI v1.2.3-dev'
+
+  Rule: There is an info command
+
+    Scenario: Project information is displayed when using --info with a bin/ directory
+      Given an empty directory '{ROOT}/project/bin'
+      When I run 'bin --info'
+      Then it is successful
+      And the output is:
+        """
+        Root:    {ROOT}/project/
+        Config:  {ROOT}/project/.binconfig (missing)
+        Bin Dir: {ROOT}/project/bin/
+        Merge:   false
+        """
+
+    Scenario: Project information is displayed when using --info with a .binconfig file
+      Given an empty file '{ROOT}/project/.binconfig'
+      When I run 'bin --info'
+      Then it is successful
+      And the output is:
+        """
+        Root:    {ROOT}/project/
+        Config:  {ROOT}/project/.binconfig
+        Bin Dir: {ROOT}/project/bin/ (missing)
+        Merge:   false
+        """
+
+    Scenario: Project information is displayed when using --info with a custom directory
+      Given an empty directory '{ROOT}/project/scripts'
+      And a file '{ROOT}/project/.binconfig' with content 'dir = scripts'
+      When I run 'bin --info'
+      Then it is successful
+      And the output is:
+        """
+        Root:    {ROOT}/project/
+        Config:  {ROOT}/project/.binconfig
+        Bin Dir: {ROOT}/project/scripts/
+        Merge:   false
+        """
+
+    Scenario: Every merged directory is listed by --info
+      Given an empty directory '{ROOT}/project/bin'
+      And an empty directory '{ROOT}/project/subdir/bin'
+      And an empty directory '{ROOT}/project/subdir/subsubdir/bin'
+      And a file '{ROOT}/project/subdir/.binconfig' with content 'merge = optional'
+      And a file '{ROOT}/project/subdir/subsubdir/.binconfig' with content 'merge = true'
+      And the working directory is '{ROOT}/project/subdir/subsubdir'
+      When I run 'bin --info'
+      Then it is successful
+      And the output is:
+        """
+        Root:    {ROOT}/project/subdir/subsubdir/
+        Config:  {ROOT}/project/subdir/subsubdir/.binconfig
+        Bin Dir: {ROOT}/project/subdir/subsubdir/bin/
+        Merge:   true
+
+        Root:    {ROOT}/project/subdir/
+        Config:  {ROOT}/project/subdir/.binconfig
+        Bin Dir: {ROOT}/project/subdir/bin/
+        Merge:   optional
+
+        Root:    {ROOT}/project/
+        Config:  {ROOT}/project/.binconfig (missing)
+        Bin Dir: {ROOT}/project/bin/
+        Merge:   false
+        """
