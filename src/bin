@@ -162,7 +162,7 @@ debug() {
     if [[ -n ${BIN_DEBUG_LOG-} ]]; then
         local line
         line=$(debug_line)
-        echo "$@" "${DEBUG_GREY}[line $line]${DEBUG_RESET}" >> "$BIN_DEBUG_LOG"
+        echo "$@" "${DEBUG_GREY}[line $line]${DEBUG_RESET}" >>"$BIN_DEBUG_LOG"
     fi
     # kcov-ignore-end
 }
@@ -205,22 +205,29 @@ bug() {
 # option given - but I think that is more confusing.)
 
 declare action=''
-declare argument_error=''
 
 set_action() {
     if [[ -n $action ]]; then
-        set_argument_error "The '--$action' and '--$1' arguments are incompatible"
+        fail "The '--$action' and '--$1' arguments are incompatible"
     fi
 
     action=$1 # global
 }
 
-set_argument_error() {
-    # Don't exit immediately because '--exe' may come after the parameter with the error
-    # But only display the first error encountered, as if we had exited immediately
-    if [[ -z $argument_error ]]; then
-        argument_error=$1 # global
+# Some options have required arguments - error if none is given.
+
+set_option_value() {
+    local option variable value
+
+    option=$1
+    variable=$2
+    value=$3
+
+    if [[ -z $value ]]; then
+        fail "The '$option' option requires a value"
     fi
+
+    eval "$variable=\$value" # global
 }
 
 # Now we can loop through the arguments and parse them. We stop once we reach
@@ -247,14 +254,14 @@ while [[ $# -gt 0 ]]; do
         --complete-bash)    set_action complete-bash ;;
         --completion)       set_action completion ;;
         --create | -c)      set_action create ;;
-        --dir)              fixed_bin_dir=$2; shift ;;
-        --dir=*)            fixed_bin_dir=${1#*=} ;;
+        --dir)              set_option_value '--dir' fixed_bin_dir "${2-}"; shift ;;
+        --dir=*)            set_option_value '--dir' fixed_bin_dir "${1#*=}" ;;
         --edit | -e)        set_action edit ;;
         --exact)            unique_prefix_matching=false ;;
-        --exe)              is_custom_exe=true; exe=$2; shift ;;
-        --exe=*)            is_custom_exe=true; exe=${1#*=} ;;
-        --fallback)         fallback=$2; shift ;;
-        --fallback=*)       fallback=${1#*=} ;;
+        --exe)              is_custom_exe=true; set_option_value '--exe' exe "${2-}"; shift ;;
+        --exe=*)            is_custom_exe=true; set_option_value '--exe' exe "${1#*=}" ;;
+        --fallback)         set_option_value '--fallback' fallback "${2-}"; shift ;;
+        --fallback=*)       set_option_value '--fallback' fallback "${1#*=}" ;;
         --help | -h)        set_action help ;;
         --prefix)           unique_prefix_matching=true ;;
         --shim)             shim=true ;;
@@ -266,14 +273,6 @@ while [[ $# -gt 0 ]]; do
 
     shift
 done
-
-if [[ -n $argument_error ]]; then
-    fail "$argument_error"
-fi
-
-if [[ -z $action ]]; then
-    action='run'
-fi
 
 #endregion =====================================================================
 #region ======= SIMPLE ACTIONS: HELP / VERSION / COMPLETION SCRIPT =============
@@ -314,14 +313,14 @@ fi
 # This doesn't do the tab completion - it just outputs the script to be 'eval'ed
 # in the shell to enable tab completion.
 if [[ $action = 'completion' ]]; then
-    declare complete_command=("$0" --complete-bash)
-    if [[ -n $fixed_bin_dir ]]; then
-        complete_command+=("--dir" "'$fixed_bin_dir'")
-    fi
+    declare complete_command=("$0")
     if $is_custom_exe; then
         complete_command+=("--exe" "'$exe'")
     fi
-    echo "complete -C \"${complete_command[*]}\" -o default $exe"
+    if [[ -n $fixed_bin_dir ]]; then
+        complete_command+=("--dir" "'$fixed_bin_dir'")
+    fi
+    echo "complete -C \"${complete_command[*]} --complete-bash\" -o default $exe"
     exit
 fi
 
@@ -355,14 +354,14 @@ if [[ $action = 'complete-bash' ]]; then
             --complete-bash)    fail "Cannot tab complete '$1'" ;;
             --completion)       fail "Cannot tab complete '$1'" ;;
             --create | -c)      true ;; # Complete as normal to help with creating subcommands
-            --dir)              fixed_bin_dir=$2; shift ;;
-            --dir=*)            fixed_bin_dir=${1#*=} ;;
+            --dir)              set_option_value '--dir' fixed_bin_dir "${2-}"; shift ;;
+            --dir=*)            set_option_value '--dir' fixed_bin_dir "${1#*=}" ;;
             --edit | -e)        true ;; # Complete as normal
             --exact)            unique_prefix_matching=false ;;
-            --exe)              is_custom_exe=true; exe=$2; shift ;;
-            --exe=*)            is_custom_exe=true; exe=${1#*=} ;;
-            --fallback)         fallback=$2; shift ;;
-            --fallback=*)       fallback=${1#*=} ;;
+            --exe)              is_custom_exe=true; set_option_value '--exe' exe "${2-}"; shift ;;
+            --exe=*)            is_custom_exe=true; set_option_value '--exe' exe "${1#*=}" ;;
+            --fallback)         set_option_value '--fallback' fallback "${2-}"; shift ;;
+            --fallback=*)       set_option_value '--fallback' fallback "${1#*=}" ;;
             --help | -h)        fail "Cannot tab complete '$1'" ;;
             --prefix)           unique_prefix_matching=true ;;
             --shim)             shim=true ;;

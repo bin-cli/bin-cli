@@ -61,3 +61,17 @@ Feature: Edge cases
       bin deploy live       (alias: publish live)
       bin deploy staging    (alias: publish staging)
       """
+
+  Scenario Outline: The '<option><suffix>' option requires a value
+    When I run 'bin <option><suffix>'
+    Then it fails with exit code 246
+    And the error is "bin: The '<option>' option requires a value"
+
+    Examples:
+      | option     | suffix |
+      | --dir      |        |
+      | --dir      | =      |
+      | --exe      |        |
+      | --exe      | =      |
+      | --fallback |        |
+      | --fallback | =      |

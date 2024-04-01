@@ -97,7 +97,7 @@ When('I tab complete {string} with arguments {string}', function (input, args) {
     const COMP_POINT = input.includes('|') ? input.indexOf('|') : input.length;
     const COMP_LINE = input.slice(0, COMP_POINT) + input.slice(COMP_POINT + 1);
 
-    return run.call(this, `bin --complete-bash ${args}`, {COMP_LINE, COMP_POINT});
+    return run.call(this, `bin ${args} --complete-bash`, {COMP_LINE, COMP_POINT});
 });
 
 Then('it is successful', function () {

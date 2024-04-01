@@ -192,7 +192,7 @@ Feature: Tab completion
       Then it is successful
       And the output is:
         """
-        complete -C "{ROOT}/usr/bin/bin --complete-bash --exe 'b'" -o default b
+        complete -C "{ROOT}/usr/bin/bin --exe 'b' --complete-bash" -o default b
         """
 
     Scenario: Tab completion supports custom directories
@@ -200,7 +200,7 @@ Feature: Tab completion
       Then it is successful
       And the output is:
         """
-        complete -C "{ROOT}/usr/bin/bin --complete-bash --dir 'scripts' --exe 'scr'" -o default scr
+        complete -C "{ROOT}/usr/bin/bin --exe 'scr' --dir 'scripts' --complete-bash" -o default scr
         """
 
     Scenario: Tab completion works for custom directories
