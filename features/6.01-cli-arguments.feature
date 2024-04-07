@@ -29,6 +29,7 @@ Feature: CLI arguments
         | create     |
         | edit       |
         | help       |
+        | info       |
         | version    |
 
     Scenario Outline: The <arg1> and <arg2> arguments are incompatible
