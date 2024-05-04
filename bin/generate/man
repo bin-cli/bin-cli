@@ -5,12 +5,13 @@ cd "$(dirname "$0")/../.."
 pages=(bin.1 binconfig.5)
 version=${1-v1.2.3}
 
-mkdir -p temp/dist
-cp src/pandoc.css temp/dist/pandoc.css
+mkdir -p temp/dist temp/pages
+cp src/pandoc.css temp/pages/pandoc.css
 
 for page in "${pages[@]}"; do
 
     rm -f "temp/dist/$page."*
+    rm -f "temp/pages/$page."*
 
     sed -E "s/\\\$VERSION/$version/g" "src/$page.md" > "temp/dist/$page.md"
 
@@ -33,6 +34,6 @@ for page in "${pages[@]}"; do
         --from markdown+hard_line_breaks-raw_html-smart \
         --to html \
         --css 'pandoc.css' \
-        "temp/dist/$page.md" \
+        "temp/pages/$page.md" \
         --output "temp/dist/$page.html"
 done

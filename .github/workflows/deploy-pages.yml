@@ -1,0 +1,40 @@
+name: Deploy to GitHub Pages
+
+on:
+  release:
+    types: [released]
+  workflow_dispatch:
+
+concurrency:
+  group: '${{ github.workflow }}'
+  cancel-in-progress: true
+
+env:
+  FORCE_COLOR: 1
+
+jobs:
+  generate:
+    name: Generate Man Pages
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate Man Pages
+        run: bin/generate/man "$GITHUB_REF_NAME"
+
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: temp/pages
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: generate
+    runs-on: ubuntu-22.04
+    permissions:
+      id-token: write
+      pages: write
+    steps:
+       - name: Deploy to GitHub Pages
+         uses: actions/deploy-pages@v4
