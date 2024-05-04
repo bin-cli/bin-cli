@@ -29,6 +29,7 @@ echo
 
 echo "${LCYAN}Building release version...${RESET}"
 bin/build "v$version"
+bin/generate/man "v$version"
 echo
 
 echo "${LCYAN}Tagging in Git (will trigger release via GitHub Actions)...${RESET}"
@@ -39,6 +40,8 @@ echo
 if [[ -d ~/.git && -f ~/.bin/bin ]]; then
     echo "${LCYAN}Copying to Dotfiles...${RESET}"
     cp temp/dist/bin ~/.bin/bin
+    cp temp/dist/bin.1 ~/.local/share/man/man1/bin.1
+    cp temp/dist/binconfig.5 ~/.local/share/man/man5/binconfig.5
     (
         cd
         git add .bin/bin
