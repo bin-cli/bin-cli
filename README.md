@@ -239,7 +239,7 @@ PATH="$HOME/.local/bin:$PATH"
 > The requirements are minimal:
 >
 > - Bash 3.x or above
-> - [Core utilities](https://www.gnu.org/software/coreutils/coreutils.html)
+> - [Core Utilities](https://www.gnu.org/software/coreutils/coreutils.html), [BusyBox](https://busybox.net/) or equivalent
 >   (specifically `basename`, `chmod`, `dirname`, `mkdir`, `readlink`, `sort`, `tr`, `uniq`)
 
 </details>
