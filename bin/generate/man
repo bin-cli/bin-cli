@@ -29,11 +29,13 @@ for page in "${pages[@]}"; do
         "temp/dist/$page.md" \
         --output "temp/dist/$page"
 
+    # Clearing the 'title' var so no <h1> is generated but <title> is still set
     pandoc \
         --standalone \
         --from markdown+hard_line_breaks-raw_html-smart \
         --to html \
         --css 'pandoc.css' \
+        --variable title='' \
         "temp/dist/$page.md" \
         --output "temp/pages/$page.html"
 done

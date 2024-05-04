@@ -1,3 +1,7 @@
+---
+title: bin(1) - Bin CLI Manual
+---
+
 # bin(1)
 
 ## NAME

@@ -1,3 +1,7 @@
+---
+title: binconfig(5) - Bin CLI Manual
+---
+
 # binconfig(5)
 
 ## NAME
