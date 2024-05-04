@@ -29,22 +29,11 @@ jobs:
       - name: Build
         run: bin/build "$GITHUB_REF_NAME"
 
-      - name: Prerelease
-        if: "contains(github.ref_name, '-')"
-        uses: crowbarmaster/GH-Automatic-Releases@v1.6.0
-        with:
-          repo_token: '${{ secrets.GITHUB_TOKEN }}'
-          draft: true
-          prerelease: true
-          files: |
-            temp/dist/bin
-
       - name: Release
-        if: "!contains(github.ref_name, '-')"
         uses: crowbarmaster/GH-Automatic-Releases@v1.6.0
         with:
           repo_token: '${{ secrets.GITHUB_TOKEN }}'
           draft: true
-          prerelease: false
+          prerelease: "${{ contains(github.ref_name, '-') }}"
           files: |
             temp/dist/bin
