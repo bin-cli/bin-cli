@@ -45,6 +45,8 @@ if [[ -d ~/.git && -f ~/.bin/bin ]]; then
     (
         cd
         git add .bin/bin
+        git add .local/share/man/man1/bin.1
+        git add .local/share/man/man5/binconfig.5
         git commit -m "Upgrade to Bin CLI v$version"
         git push
     )
