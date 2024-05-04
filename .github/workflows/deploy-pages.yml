@@ -20,6 +20,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install Pandoc
+        run: sudo apt-get update && sudo apt-get install -y pandoc
+
       - name: Generate Man Pages
         run: bin/generate/man "$GITHUB_REF_NAME"
 

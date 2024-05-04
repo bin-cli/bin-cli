@@ -29,6 +29,9 @@ jobs:
       - name: Build
         run: bin/build "$GITHUB_REF_NAME"
 
+      - name: Install Pandoc
+        run: sudo apt-get update && sudo apt-get install -y pandoc
+
       - name: Generate Man Pages
         run: bin/generate/man "$GITHUB_REF_NAME"
 
