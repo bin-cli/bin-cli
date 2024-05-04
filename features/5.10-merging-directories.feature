@@ -322,7 +322,7 @@ Feature: Merging Directories
     |
     | If you set `merge = true` but there is no parent `bin/` directory (or `.binconfig` file), Bin will exit with an error.
     |
-    | To avoid that, set `merge = optional` instead. This may be useful in sub-projects that have separate repositories, so you can't guarantee they will be cloned together.
+    | To avoid that, set `merge = optional` instead. This may be useful in subprojects that have separate repositories, so you can't guarantee they will be cloned together.
 
     Scenario: If the parent directory doesn't exist and 'merge = true', an error is raised
       Given a file '{ROOT}/project/.binconfig' with content 'merge = true'

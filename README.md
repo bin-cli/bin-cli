@@ -882,7 +882,7 @@ Yes - you can use any combination of scripts, inline commands and aliases in bot
 
 If you set `merge = true` but there is no parent `bin/` directory (or `.binconfig` file), Bin will exit with an error.
 
-To avoid that, set `merge = optional` instead. This may be useful in sub-projects that have separate repositories, so you can't guarantee they will be cloned together.
+To avoid that, set `merge = optional` instead. This may be useful in subprojects that have separate repositories, so you can't guarantee they will be cloned together.
 
 </blockquote></details>
 
