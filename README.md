@@ -342,6 +342,30 @@ Only Bash is supported at this time. I will add other shells if there is [demand
 
 </blockquote></details>
 
+<!-- features/3.03-man-pages.md -->
+
+## Man Pages
+
+To download the [man pages](https://bin-cli.github.io/bin-cli/bin.1.html) system-wide:
+
+```bash
+sudo mkdir -p /usr/local/share/man/man{1,5}
+sudo wget https://github.com/bin-cli/bin-cli/releases/latest/download/bin.1 -O /usr/local/share/man/man1/bin.1
+sudo wget https://github.com/bin-cli/bin-cli/releases/latest/download/binconfig.5 -O /usr/local/share/man/man5/binconfig.5
+```
+
+Or for the current user:
+
+```bash
+mkdir -p ~/.local/share/man/man{1,5}
+wget https://github.com/bin-cli/bin-cli/releases/latest/download/bin.1 -O ~/.local/share/man/man1/bin.1
+wget https://github.com/bin-cli/bin-cli/releases/latest/download/binconfig.5 -O ~/.local/share/man/man5/binconfig.5
+
+# If $HOME/.local/share/man is not already in your $MANPATH:
+echo 'MANPATH="$HOME/.local/share/man:$MANPATH"' >> ~/.profile
+MANPATH="$HOME/.local/share/man:$MANPATH"
+```
+
 <!-- features/4.00-per-project-setup.md -->
 
 ## Per-Project Setup
