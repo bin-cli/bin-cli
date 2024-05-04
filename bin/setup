@@ -35,7 +35,7 @@ require gawk
 require inotifywait inotify-tools
 require kcov
 require npm
-require ronn
+require pandoc
 require shellcheck
 echo
 
