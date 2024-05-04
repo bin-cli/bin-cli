@@ -94,4 +94,4 @@ Global settings may appear at the top of a file.
 ## SEE ALSO
 
 * [bin(1)](bin.1.html)
-* [https://github.com/bin-cli/bin-cli/tree/$VERSION#readme](https://github.com/bin-cli/bin-cli/tree/$VERSION#readme)
+* [https://github.com/bin-cli/bin-cli/tree/$VERSION#config-files](https://github.com/bin-cli/bin-cli/tree/$VERSION#readme)
