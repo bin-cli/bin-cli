@@ -299,7 +299,7 @@ if [[ $action = 'help' ]]; then
     echo "  --completion          Output a tab completion script for the current shell"
     echo "  --info                Display information about the current project (root, bin directory and config file location)"
     echo "  --help, -h            Display this help"
-    echo "  --version, -v         Display the current version number and exit"
+    echo "  --version, -v         Display the current version number"
     echo
     echo "Any options must be given before the command, because everything after the command will be passed as parameters to the script."
     echo
