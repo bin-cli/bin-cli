@@ -9,7 +9,7 @@ while true; do
 
     # Update the README first, if possible, so I don't have to wait to view the changes
     (
-        bin/generate-readme
+        bin/generate/readme
         bin/test "$@"
     ) || true
 

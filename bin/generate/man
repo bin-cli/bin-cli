@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/../.."
+
+pages=(bin.1 binconfig.5)
+version=${1-v1.2.3}
+
+mkdir -p temp/dist
+
+# Generate index.txt - used to generate links in the HTML version
+for page in "${pages[@]}"; do
+    # shellcheck disable=SC2206
+    fields=(${page//./ });
+    echo "${fields[0]}(${fields[1]}) $page.ronn"
+done > temp/dist/index.txt
+
+# Generate man pages in both roff and HTML formats
+export RONN_MANUAL='Bin CLI Manual'
+export RONN_ORGANIZATION="Bin CLI $version"
+
+for page in "${pages[@]}"; do
+    rm -f "temp/dist/$page."*
+    sed -E "s/\\\$VERSION/$version/g" "src/$page.md" > "temp/dist/$page.md"
+    ronn        "temp/dist/$page.md"
+    ronn --html "temp/dist/$page.md"
+done
