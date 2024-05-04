@@ -1,5 +1,5 @@
 ---
-title: binconfig(5) - Bin CLI Manual
+title: binconfig(5) - Bin CLI $VERSION Manual
 ---
 
 # binconfig(5)

@@ -1,5 +1,5 @@
 ---
-title: bin(1) - Bin CLI Manual
+title: bin(1) - Bin CLI $VERSION Manual
 ---
 
 # bin(1)
