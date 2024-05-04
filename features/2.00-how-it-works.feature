@@ -87,10 +87,10 @@ Feature: How It Works
 
   Rule: Security warning
 
-    | [!WARNING]
-    | Bin CLI executes arbitrary commands/scripts in the current working directory
-    | (or the directory specified by `--dir`) - the same as if you executed them
-    | directly. You should not run commands from untrusted sources.
+    | > [!WARNING]
+    | > Bin CLI executes arbitrary commands/scripts in the current working directory
+    | > (or the directory specified by `--dir`) - the same as if you executed them
+    | > directly. You should not run commands from untrusted sources.
 
   Rule: Commands can be executed when in a subdirectory
 
