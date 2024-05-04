@@ -34,6 +34,6 @@ for page in "${pages[@]}"; do
         --from markdown+hard_line_breaks-raw_html-smart \
         --to html \
         --css 'pandoc.css' \
-        "temp/pages/$page.md" \
-        --output "temp/dist/$page.html"
+        "temp/dist/$page.md" \
+        --output "temp/pages/$page.html"
 done
