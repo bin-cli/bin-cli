@@ -26,7 +26,7 @@ jobs:
         run: npm ci
 
       - name: Generate README
-        run: bin/generate-readme
+        run: bin/generate/readme
 
       - name: Commit & push changes
         uses: stefanzweifel/git-auto-commit-action@v5

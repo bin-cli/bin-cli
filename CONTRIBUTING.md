@@ -56,7 +56,7 @@ The [`README.md`](README.md) file is automatically generated, so please do not e
 
 In the `.feature` files, each line of Markdown must be prefixed with `|` - this ensures headings, which start with `#`, are not treated as comments.
 
-`README.md` will be [updated automatically](.github/workflows/update-readme.yml) when it is merged into the `main` branch. Alternatively, you can manually regenerate it by running `bin/generate-readme`. You will need either [nvm](https://github.com/nvm-sh/nvm) (recommended) or a suitable version of [Node.js](https://nodejs.org/) installed.
+`README.md` will be [updated automatically](.github/workflows/update-readme.yml) when it is merged into the `main` branch. Alternatively, you can manually regenerate it by running `bin/generate/readme`. You will need either [nvm](https://github.com/nvm-sh/nvm) (recommended) or a suitable version of [Node.js](https://nodejs.org/) installed.
 
 ### CLI Reference / Help Text
 
