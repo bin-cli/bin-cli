@@ -102,6 +102,11 @@ $ ../../../bin/hello       # Works, but is rather tedious to type :-/
 $ bin hello                # Still works :-)
 ```
 
+[!WARNING]
+Bin CLI executes arbitrary commands/scripts in the current working directory
+(or the directory specified by `--dir`) - the same as if you executed them
+directly. You should not run commands from untrusted sources.
+
 <!-- features/2.01-listing-commands.feature -->
 
 ### Listing Commands
