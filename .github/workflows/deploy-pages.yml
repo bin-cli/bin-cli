@@ -14,7 +14,7 @@ env:
 
 jobs:
   generate:
-    name: Generate Man Pages
+    name: Generate Pages
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
