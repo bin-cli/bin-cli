@@ -1,0 +1,111 @@
+name: Release Ubuntu PPA
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+' # Release (1.2.3)
+  workflow_dispatch:
+    # This should only be used to manually fix a failed release
+    inputs:
+      version:
+        description: 'Version number'
+        required: true
+      revision:
+        description: 'Package revision'
+        required: true
+        default: 1
+
+env:
+  FORCE_COLOR: 1
+
+jobs:
+  release:
+    name: Release PPA
+    runs-on: ubuntu-22.04
+    # To generate the GPG Key:
+    #   gpg --quick-generate-key bin-cli@djm.me
+    #   gpg --export-secret-key --armor --output private.pgp bin-cli@djm.me
+    #   Enter at https://github.com/bin-cli/bin-cli/settings/environments
+    # Upload to Launchpad:
+    #   gpg --list-keys
+    #   gpg --keyserver keyserver.ubuntu.com --send-keys <ID>
+    #   gpg --fingerprint bin-cli@djm.me
+    #   Enter at https://launchpad.net/~d13r/+editpgpkeys
+    # Decrypt the verification email:
+    #   gpg --decrypt
+    environment: launchpad
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          path: source
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y debmake equivs
+          sudo mk-build-deps -ir source/debian/control
+          rm -f *.changes
+
+      # Based on https://github.com/yuezk/publish-ppa-package/blob/3024c04/build.sh
+      # But that didn't work for me because it calls 'add-apt-repository' when the PPA doesn't have a key yet
+      - name: Build packages
+        env:
+          GPG_PASSPHRASE: '${{ secrets.PPA_GPG_PASSPHRASE }}'
+          GPG_PRIVATE_KEY: '${{ secrets.PPA_GPG_PRIVATE_KEY }}'
+          REVISION: "${{ inputs.revision || 1 }}"
+          VERSION: "${{ inputs.version || github.ref_name }}"
+        run: |
+          VERSION=${VERSION/v}
+
+          echo '::group::Load GPG key'
+          GPG_KEY_ID=$(echo "$GPG_PRIVATE_KEY" | gpg --import-options show-only --import | sed -n '2s/^\s*//p')
+          echo
+          echo "GPG_KEY_ID=$GPG_KEY_ID"
+          echo
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --passphrase "$GPG_PASSPHRASE" --import
+          echo '::endgroup::'
+
+          if gpg --list-keys | grep -q expired; then
+              echo 'GPG key has expired.' >&2
+              exit 1
+          fi
+
+          cd source
+
+          for series in $(distro-info --supported); do
+            ubuntu_version=$(distro-info --series "$series" -r | cut -d' ' -f1)
+
+            echo "::group::$series: Prepare changelog"
+
+            rm -f debian/changelog
+
+            debchange \
+              --create \
+              --controlmaint \
+              --distribution "$series" \
+              --package 'bin-cli' \
+              --newversion "${VERSION}+ubuntu${ubuntu_version}+ppa${REVISION}" \
+              'New upstream release'
+
+            echo '::endgroup::'
+
+            echo "::group::$series: Build package"
+
+            # '-S' = Build source only
+            # '-sa' = Include the source code
+            # '-k' = Signing key ID
+            # '-p' = GPG command
+            # Note: Using the long versions of these options (where available) does not seem to work!
+            # Note 2: Quoting '$GPG_PASSPHRASE' doesn't seem to work either
+            debuild \
+              -S \
+              -sa \
+              -k"$GPG_KEY_ID" \
+              -p"gpg --batch --passphrase $GPG_PASSPHRASE --pinentry-mode loopback"
+
+            echo '::endgroup::'
+          done
+
+      - name: Upload to Launchpad
+        run: |
+          dput ppa:bin-cli/bin-cli *.changes

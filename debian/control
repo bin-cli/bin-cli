@@ -1,0 +1,18 @@
+Source: bin-cli
+Maintainer: Dave James Miller <d@djm.me>
+Section: utils
+Priority: optional
+Build-Depends: debhelper-compat (= 12),
+               gawk,
+               pandoc
+Standards-Version: 4.6.0.1
+Homepage: https://github.com/bin-cli/bin-cli
+Vcs-Browser: https://github.com/bin-cli/bin-cli
+Vcs-Git: https://github.com/bin-cli/bin-cli.git
+
+Package: bin-cli
+Architecture: all
+Section: utils
+Priority: optional
+Depends: ${misc:Depends}, bash, coreutils
+Description: A simple task/script runner for any programming language
