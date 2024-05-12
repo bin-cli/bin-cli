@@ -10,6 +10,10 @@ on:
       version:
         description: 'Version number'
         required: true
+      series:
+        description: 'Ubuntu series'
+        required: true
+        default: 'all'
       revision:
         description: 'Package revision'
         required: true
@@ -52,11 +56,10 @@ jobs:
         env:
           GPG_PASSPHRASE: '${{ secrets.PPA_GPG_PASSPHRASE }}'
           GPG_PRIVATE_KEY: '${{ secrets.PPA_GPG_PRIVATE_KEY }}'
-          REVISION: "${{ inputs.revision || 1 }}"
           VERSION: "${{ inputs.version || github.ref_name }}"
+          SERIES: "${{ inputs.series || 'all' }}"
+          REVISION: "${{ inputs.revision || 1 }}"
         run: |
-          VERSION=${VERSION/v}
-
           echo '::group::Load GPG key'
           GPG_KEY_ID=$(echo "$GPG_PRIVATE_KEY" | gpg --import-options show-only --import | sed -n '2s/^\s*//p')
           echo
@@ -72,7 +75,15 @@ jobs:
 
           cd source
 
-          for series in $(distro-info --supported); do
+          # Remove the 'v' prefix
+          VERSION=${VERSION/v}
+
+          # Default to all supported Ubuntu series
+          if [[ $SERIES = 'all' ]]; then
+            SERIES=$(distro-info --supported)
+          fi
+
+          for series in $SERIES; do
             ubuntu_version=$(distro-info --series "$series" -r | cut -d' ' -f1)
 
             echo "::group::$series: Prepare changelog"
