@@ -1,5 +1,7 @@
 # Contributing to Bin CLI
 
+***Caveat:** I may or may not get around to dealing with issues/PRs/discussions - it depends how much they interest me at the time!*
+
 ## Reporting Bugs
 
 Please use the [Issues](https://github.com/bin-cli/bin-cli/issues) section to report bugs (except [security vulnerabilities](SECURITY.md)). You should include:
@@ -13,7 +15,7 @@ Please use the [Feature suggestions / requests](https://github.com/bin-cli/bin-c
 
 ## Contributing Code Changes
 
-You will need either [nvm](https://github.com/nvm-sh/nvm) (recommended) or a suitable version of [Node.js](https://nodejs.org/) installed to run the tests (which are powered by [Cucumber.js](https://cucumber.io/docs/installation/javascript/)).
+You will need either [nvm](https://github.com/nvm-sh/nvm) (recommended) or a suitable version of [Node.js](https://nodejs.org/) installed to run the tests (which are powered by [Cucumber.js](https://cucumber.io/docs/installation/javascript/)). The `bin/setup` script in the repo will install dependencies for you on Ubuntu, if you like.
 
 Clone the source code locally:
 
