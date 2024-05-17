@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/../.."
+
+# This must be first because it includes a variable called $VERSION
+source /etc/os-release
+
+# These variable names match those used in .github/workflows/release-ppa.yml
+series=$VERSION_CODENAME
+ubuntu_version=$VERSION_ID
+
+CHANGELOG='See https://github.com/bin-cli/bin-cli/releases/tag/v$VERSION'
+VERSION=${1-}
+REVISION=${2-1}
+
+if [[ $# -lt 1 || $VERSION = '--help' || $VERSION = '-h' ]]; then
+    echo "Usage: ${BIN_COMMAND-$0} <version> [revision=1]"
+    exit
+fi
+
+VERSION_SHORT=${VERSION%%+*}
+
+# This is copied from .github/workflows/release-ppa.yml verbatim
+rm -f debian/changelog
+
+debchange \
+  --create \
+  --controlmaint \
+  --distribution "$series" \
+  --package 'bin-cli' \
+  --newversion "${VERSION}+ubuntu${ubuntu_version}+ppa${REVISION}" \
+  "${CHANGELOG/\$VERSION/$VERSION_SHORT}"
+
+# This is different because (1) we build the binary version as well (which Launchpad
+# does normally), and (2) we don't sign it, since this is just for testing
+debuild \
+  -F \
+  -sa \
+  -us -uc
