@@ -17,10 +17,13 @@ endif
 
 install:
 	install -m 0755 -d "$(DESTDIR)$(bindir)"
-	install -m 0755 temp/dist/bin "$(DESTDIR)$(bindir)"
+	install -m 0755 temp/dist/bin "$(DESTDIR)$(bindir)/bin"
 	install -m 0755 -d "$(DESTDIR)$(man1dir)"
-	install -m 0644 temp/dist/bin.1.gz "$(DESTDIR)$(man1dir)"
-	install -m 0755 -d "$(DESTDIR)$(man3dir)"
-	install -m 0644 temp/dist/binconfig.5.gz "$(DESTDIR)$(man5dir)"
+	install -m 0644 temp/dist/bin.1.gz "$(DESTDIR)$(man1dir)/bin.1.gz"
+	install -m 0755 -d "$(DESTDIR)$(man5dir)"
+	install -m 0644 temp/dist/binconfig.5.gz "$(DESTDIR)$(man5dir)/binconfig.5.gz"
+
+clean:
+	rm -rf node_modules temp
 
 .PHONY: build install

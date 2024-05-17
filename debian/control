@@ -14,5 +14,15 @@ Package: bin-cli
 Architecture: all
 Section: utils
 Priority: optional
-Depends: ${misc:Depends}, bash, coreutils
-Description: A simple task/script runner for any programming language
+Depends: ${misc:Depends}
+Description: Simple task/script runner for any programming language
+ Bin CLI is a simple task runner, designed to be used in code repositories, with
+ scripts written in any programming language.
+ .
+ It automatically searches in parent directories, so you can run scripts from
+ anywhere in the project tree. It also supports aliases, unique prefix matching
+ and tab completion, reducing the amount you need to type.
+ .
+ Collaborators / contributors who choose not to install Bin can run the scripts
+ directly, so you can enjoy the benefits without adding a hard dependency or
+ extra barrier to entry.
