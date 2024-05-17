@@ -119,7 +119,8 @@ jobs:
               -S \
               -sa \
               -k"$GPG_KEY_ID" \
-              -p"gpg --batch --passphrase $GPG_PASSPHRASE --pinentry-mode loopback"
+              -p"gpg --batch --passphrase $GPG_PASSPHRASE --pinentry-mode loopback" \
+              --lintian-opts -i
 
             echo '::endgroup::'
           done

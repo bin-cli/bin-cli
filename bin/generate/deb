@@ -36,4 +36,5 @@ debchange \
 debuild \
   -F \
   -sa \
-  -us -uc
+  -us -uc \
+  --lintian-opts -i
