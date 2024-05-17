@@ -4,7 +4,8 @@
 	dh $@
 
 override_dh_auto_build:
-	dh_auto_build -- VERSION="`dpkg-parsechangelog --show-field Version`"
+	VERSION="$$(dpkg-parsechangelog --show-field Version)"; \
+	dh_auto_build -- VERSION="$${VERSION%%+*}"
 
 override_dh_auto_install:
 	dh_auto_install -- prefix=/usr
