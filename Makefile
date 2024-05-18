@@ -12,7 +12,7 @@ version := $(file < VERSION)
 
 # Default target - build files we need in the package, but not pages for the website
 .PHONY: all
-all: bin completion man
+all: bin completion man readme-html
 
 # Build the application itself
 .PHONY: bin
@@ -55,7 +55,7 @@ README.md: $(wildcard features/*.feature) $(wildcard features/*.md) bin/generate
 
 # Convert the README to HTML
 .PHONY: readme-html
-readme-html: temp/dist/readme.html
+readme-html: temp/dist/readme.html temp/dist/pandoc-readme.css
 
 temp/dist/pandoc-readme.css: src/pandoc-readme.css
 	mkdir -p temp/dist
