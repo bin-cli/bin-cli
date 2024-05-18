@@ -57,68 +57,68 @@ jobs:
       # But that didn't work for me because it calls 'add-apt-repository' when the PPA doesn't have a key yet
       - name: Build packages
         env:
-          GPG_PASSPHRASE: '${{ secrets.PPA_GPG_PASSPHRASE }}'
-          GPG_PRIVATE_KEY: '${{ secrets.PPA_GPG_PRIVATE_KEY }}'
-          VERSION: "${{ inputs.version || github.ref_name }}"
-          SERIES: "${{ inputs.series || 'all' }}"
-          REVISION: "${{ inputs.revision || 1 }}"
-          CHANGELOG: "${{ inputs.changelog || 'See https://github.com/bin-cli/bin-cli/releases/tag/v$VERSION' }}"
+          gpg_passphrase: '${{ secrets.PPA_GPG_PASSPHRASE }}'
+          gpg_private_key: '${{ secrets.PPA_GPG_PRIVATE_KEY }}'
+          version: "${{ inputs.version || github.ref_name }}"
+          series: "${{ inputs.series || 'all' }}"
+          revision: "${{ inputs.revision || 1 }}"
+          changelog: "${{ inputs.changelog || 'See https://github.com/bin-cli/bin-cli/releases/tag/v$VERSION' }}"
         run: |
           echo '::group::Load GPG key'
-          GPG_KEY_ID=$(echo "$GPG_PRIVATE_KEY" | gpg --import-options show-only --import | sed -n '2s/^\s*//p')
+          GPG_KEY_ID=$(echo "$gpg_private_key" | gpg --import-options show-only --import | sed -n '2s/^\s*//p')
           echo
           echo "GPG_KEY_ID=$GPG_KEY_ID"
           echo
-          echo "$GPG_PRIVATE_KEY" | gpg --batch --passphrase "$GPG_PASSPHRASE" --import
+          echo "$gpg_private_key" | gpg --batch --passphrase "$gpg_passphrase" --import
           echo '::endgroup::'
 
           if gpg --list-keys | grep -q expired; then
-              echo 'GPG key has expired.' >&2
-              exit 1
+            echo 'GPG key has expired.' >&2
+            exit 1
           fi
 
           cd source
 
           # Remove the 'v' prefix, if given
-          VERSION=${VERSION/v}
+          version=${version/v}
 
           # Default to all supported Ubuntu series
-          if [[ $SERIES = 'all' ]]; then
-            SERIES=$(distro-info --supported)
+          if [[ $series = 'all' ]]; then
+            series=$(distro-info --supported)
           fi
 
-          for series in $SERIES; do
-            ubuntu_version=$(distro-info --series "$series" -r | cut -d' ' -f1)
+          for ubuntu_codename in $series; do
+            ubuntu_version=$(distro-info --series "$ubuntu_codename" -r | cut -d' ' -f1)
 
-            echo "::group::$series ($ubuntu_version): Prepare changelog"
+            echo "::group::$ubuntu_codename ($ubuntu_version): Prepare changelog"
 
             rm -f debian/changelog
 
             debchange \
               --create \
               --controlmaint \
-              --distribution "$series" \
+              --distribution "$ubuntu_codename" \
               --package 'bin-cli' \
-              --newversion "${VERSION}+ubuntu${ubuntu_version}+ppa${REVISION}" \
-              "${CHANGELOG/\$VERSION/$VERSION}"
+              --newversion "${version}+ubuntu${ubuntu_version}+ppa${revision}" \
+              "${changelog/\$VERSION/$version}"
 
             cat debian/changelog
 
             echo '::endgroup::'
 
-            echo "::group::$series ($ubuntu_version): Build package"
+            echo "::group::$ubuntu_codename ($ubuntu_version): Build package"
 
             # '-S' = Build source only
             # '-sa' = Include the source code
             # '-k' = Signing key ID
             # '-p' = GPG command
             # Note: Using the long versions of these options (where available) does not seem to work!
-            # Note 2: Quoting '$GPG_PASSPHRASE' doesn't seem to work either
+            # Note 2: Quoting '$gpg_passphrase' doesn't seem to work either
             debuild \
               -S \
               -sa \
               -k"$GPG_KEY_ID" \
-              -p"gpg --batch --passphrase $GPG_PASSPHRASE --pinentry-mode loopback" \
+              -p"gpg --batch --passphrase $gpg_passphrase --pinentry-mode loopback" \
               --lintian-opts -i
 
             echo '::endgroup::'

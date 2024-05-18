@@ -29,8 +29,8 @@ jobs:
 
       - name: Set the version number
         env:
-          VERSION: "${{ inputs.version || github.ref_name }}"
-        run: echo "${VERSION/v}" > VERSION
+          version: "${{ inputs.version || github.ref_name }}"
+        run: echo "${version/v}" > VERSION
 
       - name: Generate HTML Pages
         run: make html

@@ -8,7 +8,7 @@ mandir      ?= $(datarootdir)/man
 man1dir     ?= $(mandir)/man1
 man5dir     ?= $(mandir)/man5
 
-VERSION := $(file < VERSION)
+version := $(file < VERSION)
 
 # Default target - build files we need in the package, but not pages for the website
 .PHONY: all
@@ -19,7 +19,7 @@ all: bin completion man
 bin: temp/dist/bin
 
 temp/dist/bin: src/bin bin/build VERSION
-	bin/build "$(VERSION)"
+	bin/build "$(version)"
 
 # Build the bash-completion script
 .PHONY: completion
@@ -33,14 +33,14 @@ temp/dist/bin.bash-completion: temp/dist/bin
 man: $(patsubst src/%.md,temp/dist/%.gz,$(wildcard src/*.md))
 
 temp/dist/%.gz: src/%.md bin/generate/man VERSION
-	bin/generate/man "$*" "$(VERSION)"
+	bin/generate/man "$*" "$(version)"
 
 # Build the HTML version of the man pages
 .PHONY: man-html
 man-html: $(patsubst src/%.md,temp/dist/%.html,$(wildcard src/*.md)) temp/dist/pandoc-man.css
 
 temp/dist/%.html: src/%.md bin/generate/man VERSION
-	bin/generate/man --html "$*" "$(VERSION)"
+	bin/generate/man --html "$*" "$(version)"
 
 temp/dist/pandoc-man.css: src/pandoc-man.css
 	mkdir -p temp/dist

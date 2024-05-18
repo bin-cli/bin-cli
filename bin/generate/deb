@@ -6,14 +6,14 @@ cd "$(dirname "$0")/../.."
 source /etc/os-release
 
 # These variable names match those used in .github/workflows/release-ppa.yml
-series=$VERSION_CODENAME
+ubuntu_codename=$VERSION_CODENAME
 ubuntu_version=$VERSION_ID
 
-CHANGELOG='See https://github.com/bin-cli/bin-cli/releases/tag/v$VERSION'
-VERSION=${1-}
-REVISION=${2-1}
+changelog='See https://github.com/bin-cli/bin-cli/releases/tag/v$VERSION'
+version=${1-}
+revision=${2-1}
 
-if [[ $# -lt 1 || $VERSION = '--help' || $VERSION = '-h' ]]; then
+if [[ $# -lt 1 || $version = '--help' || $version = '-h' ]]; then
     echo "Usage: ${BIN_COMMAND-$0} <version> [revision=1]"
     exit
 fi
@@ -24,10 +24,10 @@ rm -f debian/changelog
 debchange \
   --create \
   --controlmaint \
-  --distribution "$series" \
+  --distribution "$ubuntu_codename" \
   --package 'bin-cli' \
-  --newversion "${VERSION}+ubuntu${ubuntu_version}+ppa${REVISION}" \
-  "${CHANGELOG/\$VERSION/$VERSION}"
+  --newversion "${version}+ubuntu${ubuntu_version}+ppa${revision}" \
+  "${changelog/\$VERSION/$version}"
 
 # This is different because (1) we build the binary version as well (which Launchpad
 # does normally), and (2) we don't sign it, since this is just for testing
