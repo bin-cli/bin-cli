@@ -38,7 +38,7 @@ echo "${LYELLOW}Check the release status:${RESET}"
 echo 'https://github.com/bin-cli/bin-cli/actions'
 echo
 echo "${LYELLOW}Write the changelog and publish the release on GitHub:${RESET}"
-echo 'https://github.com/bin-cli/bin-cli/actions/workflows/release-github.yml'
+echo 'https://github.com/bin-cli/bin-cli/releases'
 echo
 echo "${LYELLOW}Approve the PPA release:${RESET}"
 echo 'https://github.com/bin-cli/bin-cli/actions/workflows/release-ppa.yml'
