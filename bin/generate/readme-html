@@ -8,7 +8,7 @@ sed 's/\[!WARNING]/WARNING:/; s#LICENSE.md#https://github.com/bin-cli/bin-cli/bl
         --from markdown \
         --to html \
         --strip-comments \
-        --css 'pandoc-docs.css' \
+        --css 'pandoc-readme.css' \
         --metadata title='Bin CLI' \
         --variable title='' \
         --output 'temp/dist/readme.html'

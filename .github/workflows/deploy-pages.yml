@@ -26,8 +26,8 @@ jobs:
       - name: Set the version number
         run: echo "${GITHUB_REF_NAME/v}" > VERSION
 
-      - name: Generate Pages
-        run: make pages
+      - name: Generate HTML Pages
+        run: make html
 
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3

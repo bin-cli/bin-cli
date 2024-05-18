@@ -35,9 +35,9 @@ man: $(patsubst src/%.md,temp/dist/%.gz,$(wildcard src/*.md))
 temp/dist/%.gz: src/%.md bin/generate/man VERSION
 	bin/generate/man "$*" "$(VERSION)"
 
-# Build the HTML version of the man pages for GitHub Pages
-.PHONY: pages
-pages: $(patsubst src/%.md,temp/dist/%.html,$(wildcard src/*.md)) temp/dist/pandoc-man.css
+# Build the HTML version of the man pages
+.PHONY: man-html
+man-html: $(patsubst src/%.md,temp/dist/%.html,$(wildcard src/*.md)) temp/dist/pandoc-man.css
 
 temp/dist/%.html: src/%.md bin/generate/man VERSION
 	bin/generate/man --html "$*" "$(VERSION)"
@@ -54,15 +54,19 @@ README.md: $(wildcard features/*.feature) $(wildcard features/*.md) bin/generate
 	bin/generate/readme
 
 # Convert the README to HTML
-.PHONY: docs
-docs: temp/dist/readme.html
+.PHONY: readme-html
+readme-html: temp/dist/readme.html
 
-temp/dist/pandoc-docs.css: src/pandoc-docs.css
+temp/dist/pandoc-readme.css: src/pandoc-readme.css
 	mkdir -p temp/dist
 	cp "$<" "$@"
 
-temp/dist/readme.html: README.md temp/dist/pandoc-docs.css
-	bin/generate/docs
+temp/dist/readme.html: README.md temp/dist/pandoc-readme.css
+	bin/generate/readme-html
+
+# Generate HTML readme and man pages for the website
+.PHONY: html
+html: man-html readme-html
 
 # Install the files that were previously built
 .PHONY: install
@@ -71,7 +75,7 @@ install:
 	install -Dm 0644 temp/dist/bin.bash-completion "$(DESTDIR)$(datarootdir)/bash-completion/completions/bin"
 	install -Dm 0644 temp/dist/bin.1.gz "$(DESTDIR)$(man1dir)/bin.1.gz"
 	install -Dm 0644 temp/dist/binconfig.5.gz "$(DESTDIR)$(man5dir)/binconfig.5.gz"
-	install -Dm 0644 temp/dist/pandoc-docs.css "$(DESTDIR)$(htmldir)/pandoc-docs.css"
+	install -Dm 0644 temp/dist/pandoc-readme.css "$(DESTDIR)$(htmldir)/pandoc-readme.css"
 	install -Dm 0644 temp/dist/readme.html "$(DESTDIR)$(htmldir)/index.html"
 
 # Clean up all generated files
