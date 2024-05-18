@@ -208,11 +208,24 @@ alias bin='bin --prefix'
 
 </blockquote></details>
 
-<!-- features/3.00-installation.md -->
+<!-- features/3.00-installation-ubuntu.md -->
 
-## Installation
+## Installation on Ubuntu
 
-Bin CLI is a single script that you can [download](https://github.com/bin-cli/bin-cli/releases/latest/download/bin) to anywhere in your `$PATH`.
+If you are using Ubuntu, you can install Bin CLI from the [official PPA package](https://launchpad.net/~bin-cli/+archive/ubuntu/bin-cli):
+
+```bash
+sudo add-apt-repository ppa:bin-cli/bin-cli
+sudo apt install bin-cli
+```
+
+This includes [man pages](https://bin-cli.github.io/bin-cli/bin.1.html) (`man bin`, `man binconfig`) and [tab completion](#tab-completion).
+
+<!-- features/4.00-manual-installation.md -->
+
+## Manual Installation
+
+Bin CLI is a single script that you can simply [download](https://github.com/bin-cli/bin-cli/releases/latest/download/bin) to anywhere in your `$PATH`.
 
 To install it system-wide (for all users) in `/usr/local/bin`:
 
@@ -275,7 +288,7 @@ PATH="$HOME/.local/bin:$PATH"
 
 </details>
 
-<!-- features/3.01-upgrading.md -->
+<!-- features/4.01-upgrading.md -->
 
 ### Upgrading
 
@@ -283,7 +296,7 @@ To upgrade to the latest version at any time, just repeat the same `wget` comman
 
 You may want to watch [this repo](https://github.com/bin-cli/bin-cli) to be notified when a new version is released - select Watch > Custom > Releases (or Watch > All Activity if you prefer).
 
-<!-- features/3.02-tab-completion.feature -->
+<!-- features/4.02-tab-completion.feature -->
 
 ### Tab Completion
 
@@ -342,7 +355,7 @@ Only Bash is supported at this time. I will add other shells if there is [demand
 
 </blockquote></details>
 
-<!-- features/3.03-man-pages.md -->
+<!-- features/4.03-man-pages.md -->
 
 ## Man Pages
 
@@ -366,7 +379,7 @@ echo 'MANPATH="$HOME/.local/share/man:$MANPATH"' >> ~/.profile
 MANPATH="$HOME/.local/share/man:$MANPATH"
 ```
 
-<!-- features/4.00-per-project-setup.md -->
+<!-- features/5.00-per-project-setup.md -->
 
 ## Per-Project Setup
 
@@ -410,7 +423,7 @@ bin sample
 
 </details>
 
-<!-- features/4.01-config-files.feature -->
+<!-- features/5.01-config-files.feature -->
 
 ### Config Files
 
@@ -487,11 +500,11 @@ Invalid command names are displayed as a warning when you run `bin`, after the c
 
 </blockquote></details>
 
-<!-- features/5.00-other-features.md -->
+<!-- features/6.00-other-features.md -->
 
 ## Other Features
 
-<!-- features/5.01-creating-edit-scripts.feature -->
+<!-- features/6.01-creating-edit-scripts.feature -->
 
 ### Creating / Editing Scripts
 
@@ -520,7 +533,7 @@ It is passed to `echo -e`, so you can use escape sequences such as `\n` for new 
 
 </blockquote></details>
 
-<!-- features/5.02-help-text.feature -->
+<!-- features/6.02-help-text.feature -->
 
 ### Help Text
 
@@ -553,7 +566,7 @@ help = Deploy to the production site
 help = Deploy to the staging site
 ```
 
-<!-- features/5.03-aliases.feature -->
+<!-- features/6.03-aliases.feature -->
 
 ### Aliases
 
@@ -632,7 +645,7 @@ Defining an alias that conflicts with a script or another alias will cause Bin t
 
 </blockquote></details>
 
-<!-- features/5.04-inline-commands.feature -->
+<!-- features/6.04-inline-commands.feature -->
 
 ### Inline Commands
 
@@ -678,7 +691,7 @@ That's why I recommend only using inline commands for very simple commands, such
 
 </blockquote></details>
 
-<!-- features/5.05-script-extensions.feature -->
+<!-- features/6.05-script-extensions.feature -->
 
 ### Script Extensions
 
@@ -716,7 +729,7 @@ You must include the extension in `.binconfig`:
 help = The extension is required here
 ```
 
-<!-- features/5.06-custom-script-directory.feature -->
+<!-- features/6.06-custom-script-directory.feature -->
 
 ### Custom Script Directory
 
@@ -770,7 +783,7 @@ alias dev="bin --exe dev --dir $HOME/.local/bin/dev"
 
 </blockquote></details>
 
-<!-- features/5.07-automatic-shims.feature -->
+<!-- features/6.07-automatic-shims.feature -->
 
 ### Automatic Shims
 
@@ -798,7 +811,7 @@ alias php='bin --fallback php8.1 php'
 
 Both of these options imply `--exact` - i.e. [unique prefix matching](#unique-prefix-matching) is disabled (otherwise it might call `bin/phpunit`, for example).
 
-<!-- features/5.08-environment-variables.feature -->
+<!-- features/6.08-environment-variables.feature -->
 
 ### Environment Variables To Use in Scripts
 
@@ -822,7 +835,7 @@ Usage: bin/sample [...]
 
 There is also `$BIN_EXE`, which is set to the name of the executable (typically just `bin`, but that [may be overridden](#aliasing-the-bin-command)).
 
-<!-- features/5.09-aliasing-the-bin-command.feature -->
+<!-- features/6.09-aliasing-the-bin-command.feature -->
 
 ### Aliasing the `bin` Command
 
@@ -858,7 +871,7 @@ $ ln -s bin ~/.local/bin/b
 
 </blockquote></details>
 
-<!-- features/5.10-merging-directories.feature -->
+<!-- features/6.10-merging-directories.feature -->
 
 ### Merging Directories
 
@@ -921,7 +934,7 @@ Yes - just set `merge = true` at each level below the first.
 
 </blockquote></details>
 
-<!-- features/5.11-automatic-exclusions.feature -->
+<!-- features/6.11-automatic-exclusions.feature -->
 
 ### Automatic Exclusions
 
@@ -935,7 +948,7 @@ A number of common non-executable file types (`*.json`, `*.md`, `*.txt`, `*.yaml
 
 The directories `/bin`, `/snap/bin`, `/usr/bin`, `/usr/local/bin`, `$HOME/bin` and `$HOME/.local/bin` are ignored when searching parent directories, unless there is a corresponding `.binconfig` file, because they are common locations for global executables (typically in `$PATH`).
 
-<!-- features/6.00-cli-reference.md -->
+<!-- features/7.00-cli-reference.md -->
 
 ## CLI Reference
 
@@ -969,9 +982,9 @@ For more details see https://github.com/bin-cli/bin-cli/tree/main#readme
 
 <!-- END auto-update-cli-reference -->
 
-<!-- features/6.01-cli-arguments.feature -->
+<!-- features/7.01-cli-arguments.feature -->
 
-<!-- features/7.00-license.md -->
+<!-- features/8.00-license.md -->
 
 ## License
 
