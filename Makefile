@@ -10,7 +10,7 @@ VERSION := $(file < VERSION)
 
 # Default target - build files we need in the package, but not pages for the website
 .PHONY: all
-all: bin man
+all: bin completion man
 
 # Build the application itself
 .PHONY: bin
@@ -18,6 +18,13 @@ bin: temp/dist/bin
 
 temp/dist/bin: src/bin bin/build VERSION
 	bin/build "$(VERSION)"
+
+# Build the bash-completion script
+.PHONY: completion
+completion: temp/dist/bin.bash-completion
+
+temp/dist/bin.bash-completion: temp/dist/bin
+	"$<" --completion > "$@"
 
 # Build the man pages
 .PHONY: man
@@ -40,6 +47,7 @@ temp/pages/pandoc.css: src/pandoc.css
 .PHONY: install
 install:
 	install -Dm 0755 temp/dist/bin "$(DESTDIR)$(bindir)/bin"
+	install -Dm 0644 temp/dist/bin.bash-completion "$(DESTDIR)$(datarootdir)/bash-completion/completions/bin"
 	install -Dm 0644 temp/dist/bin.1.gz "$(DESTDIR)$(man1dir)/bin.1.gz"
 	install -Dm 0644 temp/dist/binconfig.5.gz "$(DESTDIR)$(man5dir)/binconfig.5.gz"
 
