@@ -17,3 +17,7 @@ contact_links:
   - name: Share alternatives to Bin CLI
     url: https://github.com/bin-cli/bin-cli/discussions/new?category=alternatives-to-bin-cli
     about: Discuss the pros and cons of Bin CLI vs its competitors.
+
+  - name: Meta discussion
+    url: https://github.com/bin-cli/bin-cli/discussions/categories/meta-discussion
+    about: Issue category missing? Development process could be improved?
