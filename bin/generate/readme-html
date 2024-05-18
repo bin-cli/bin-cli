@@ -2,7 +2,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 
-sed 's/\[!WARNING]/WARNING:/; s#LICENSE.md#https://github.com/bin-cli/bin-cli/blob/main/LICENSE.md#' README.md |
+sed 's/\[!WARNING]/**WARNING:**/; s#LICENSE.md#https://github.com/bin-cli/bin-cli/blob/main/LICENSE.md#' README.md |
     pandoc \
         --standalone \
         --from markdown \
