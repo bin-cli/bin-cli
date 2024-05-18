@@ -30,7 +30,8 @@ require() {
     fi
 }
 
-echo "${LCYAN}Checking for missing dependencies...${RESET}"
+echo "${LCYAN}Checking for missing development dependencies...${RESET}"
+require debuild devscripts
 require gawk
 require inotifywait inotify-tools
 require kcov
