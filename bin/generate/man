@@ -22,7 +22,7 @@ if $html; then
             --standalone \
             --from markdown+hard_line_breaks-raw_html-smart \
             --to html \
-            --css 'pandoc.css' \
+            --css 'pandoc-man.css' \
             --variable title='' \
         > "temp/dist/$page.html"
 

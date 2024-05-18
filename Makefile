@@ -2,6 +2,8 @@ prefix      ?= /usr/local
 exec_prefix ?= $(prefix)
 bindir      ?= $(exec_prefix)/bin
 datarootdir ?= $(prefix)/share
+docdir      ?= $(datarootdir)/doc/bin-cli
+htmldir     ?= $(docdir)
 mandir      ?= $(datarootdir)/man
 man1dir     ?= $(mandir)/man1
 man5dir     ?= $(mandir)/man5
@@ -35,20 +37,32 @@ temp/dist/%.gz: src/%.md bin/generate/man VERSION
 
 # Build the HTML version of the man pages for GitHub Pages
 .PHONY: pages
-pages: $(patsubst src/%.md,temp/dist/%.html,$(wildcard src/*.md)) temp/dist/pandoc.css
+pages: $(patsubst src/%.md,temp/dist/%.html,$(wildcard src/*.md)) temp/dist/pandoc-man.css
 
 temp/dist/%.html: src/%.md bin/generate/man VERSION
 	bin/generate/man --html "$*" "$(VERSION)"
 
-temp/dist/pandoc.css: src/pandoc.css
+temp/dist/pandoc-man.css: src/pandoc-man.css
+	mkdir -p temp/dist
 	cp "$<" "$@"
 
-# Update the readme
+# Update the README
 .PHONY: readme
 readme: README.md
 
 README.md: $(wildcard features/*.feature) $(wildcard features/*.md) bin/generate/readme
 	bin/generate/readme
+
+# Convert the README to HTML
+.PHONY: docs
+docs: temp/dist/readme.html
+
+temp/dist/pandoc-docs.css: src/pandoc-docs.css
+	mkdir -p temp/dist
+	cp "$<" "$@"
+
+temp/dist/readme.html: README.md temp/dist/pandoc-docs.css
+	bin/generate/docs
 
 # Install the files that were previously built
 .PHONY: install
@@ -57,6 +71,8 @@ install:
 	install -Dm 0644 temp/dist/bin.bash-completion "$(DESTDIR)$(datarootdir)/bash-completion/completions/bin"
 	install -Dm 0644 temp/dist/bin.1.gz "$(DESTDIR)$(man1dir)/bin.1.gz"
 	install -Dm 0644 temp/dist/binconfig.5.gz "$(DESTDIR)$(man5dir)/binconfig.5.gz"
+	install -Dm 0644 temp/dist/pandoc-docs.css "$(DESTDIR)$(htmldir)/pandoc-docs.css"
+	install -Dm 0644 temp/dist/readme.html "$(DESTDIR)$(htmldir)/index.html"
 
 # Clean up all generated files
 .PHONY: clean
