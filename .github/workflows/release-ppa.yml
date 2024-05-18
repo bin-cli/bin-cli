@@ -90,7 +90,7 @@ jobs:
           for series in $SERIES; do
             ubuntu_version=$(distro-info --series "$series" -r | cut -d' ' -f1)
 
-            echo "::group::$series: Prepare changelog"
+            echo "::group::$series ($ubuntu_version): Prepare changelog"
 
             rm -f debian/changelog
 
@@ -106,7 +106,7 @@ jobs:
 
             echo '::endgroup::'
 
-            echo "::group::$series: Build package"
+            echo "::group::$series ($ubuntu_version): Build package"
 
             # '-S' = Build source only
             # '-sa' = Include the source code
