@@ -4,6 +4,7 @@ cd "$(dirname "$0")/.."
 
 RESET=$'\e[0m'
 LRED=$'\e[91m'
+LYELLOW=$'\e[93m'
 LCYAN=$'\e[96m'
 
 version=${1-}
@@ -18,18 +19,12 @@ if [[ -n $(git status --porcelain) ]]; then
     exit 1
 fi
 
-if [[ -n $(cd && git status --porcelain) ]]; then
-    echo "${LRED}Error: There are uncommitted changes in Dotfiles${RESET}" >&2
-    exit 1
-fi
-
-echo "${LCYAN}Testing locally...${RESET}"
+echo "${LCYAN}Testing the application...${RESET}"
 bin/test
 echo
 
-echo "${LCYAN}Building release version...${RESET}"
-bin/build "v$version"
-bin/generate/man "v$version"
+echo "${LCYAN}Testing the build process...${RESET}"
+make
 echo
 
 echo "${LCYAN}Tagging in Git (will trigger release via GitHub Actions)...${RESET}"
@@ -37,25 +32,16 @@ git tag "v$version"
 git push origin HEAD "v$version"
 echo
 
-if [[ -d ~/.git && -f ~/.bin/bin ]]; then
-    echo "${LCYAN}Copying to Dotfiles...${RESET}"
-    cp temp/dist/bin ~/.bin/bin
-    cp temp/dist/bin.1 ~/.local/share/man/man1/bin.1
-    cp temp/dist/binconfig.5 ~/.local/share/man/man5/binconfig.5
-    (
-        cd
-        git add .bin/bin
-        git add .local/share/man/man1/bin.1
-        git add .local/share/man/man5/binconfig.5
-        git commit -m "Upgrade to Bin CLI v$version"
-        git push
-    )
-    echo
-fi
-
-echo "${LCYAN}Finished${RESET}"
-echo 'Go here to check the release status:'
-echo '  https://github.com/bin-cli/bin-cli/actions'
+echo "${LCYAN}Done. Next steps:${RESET}"
 echo
-echo 'Then go here to write the changelog and publish the release:'
-echo '  https://github.com/bin-cli/bin-cli/releases'
+echo "${LYELLOW}Check the release status:${RESET}"
+echo 'https://github.com/bin-cli/bin-cli/actions'
+echo
+echo "${LYELLOW}Write the changelog and publish the release on GitHub:${RESET}"
+echo 'https://github.com/bin-cli/bin-cli/actions/workflows/release-github.yml'
+echo
+echo "${LYELLOW}Approve the PPA release:${RESET}"
+echo 'https://github.com/bin-cli/bin-cli/actions/workflows/release-ppa.yml'
+echo
+echo "${LYELLOW}Make sure all builds are published successfully on Launchpad:${RESET}"
+echo 'https://launchpad.net/~bin-cli/+archive/ubuntu/bin-cli/+packages'
