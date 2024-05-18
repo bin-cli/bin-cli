@@ -18,8 +18,6 @@ if [[ $# -lt 1 || $VERSION = '--help' || $VERSION = '-h' ]]; then
     exit
 fi
 
-VERSION_SHORT=${VERSION%%+*}
-
 # This is copied from .github/workflows/release-ppa.yml verbatim
 rm -f debian/changelog
 
@@ -29,7 +27,7 @@ debchange \
   --distribution "$series" \
   --package 'bin-cli' \
   --newversion "${VERSION}+ubuntu${ubuntu_version}+ppa${REVISION}" \
-  "${CHANGELOG/\$VERSION/$VERSION_SHORT}"
+  "${CHANGELOG/\$VERSION/$VERSION}"
 
 # This is different because (1) we build the binary version as well (which Launchpad
 # does normally), and (2) we don't sign it, since this is just for testing

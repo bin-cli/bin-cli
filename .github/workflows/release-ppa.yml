@@ -82,9 +82,6 @@ jobs:
           # Remove the 'v' prefix, if given
           VERSION=${VERSION/v}
 
-          # Remove the '+suffix' from the version used in the URL in the changelog
-          VERSION_SHORT=${VERSION%%+*}
-
           # Default to all supported Ubuntu series
           if [[ $SERIES = 'all' ]]; then
             SERIES=$(distro-info --supported)
@@ -103,7 +100,7 @@ jobs:
               --distribution "$series" \
               --package 'bin-cli' \
               --newversion "${VERSION}+ubuntu${ubuntu_version}+ppa${REVISION}" \
-              "${CHANGELOG/\$VERSION/$VERSION_SHORT}"
+              "${CHANGELOG/\$VERSION/$VERSION}"
 
             cat debian/changelog
 
