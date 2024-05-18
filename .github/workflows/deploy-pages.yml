@@ -4,6 +4,10 @@ on:
   release:
     types: [released]
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number'
+        required: true
 
 concurrency:
   group: '${{ github.workflow }}'
@@ -24,7 +28,9 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y pandoc
 
       - name: Set the version number
-        run: echo "${GITHUB_REF_NAME/v}" > VERSION
+        env:
+          VERSION: "${{ inputs.version || github.ref_name }}"
+        run: echo "${VERSION/v}" > VERSION
 
       - name: Generate HTML Pages
         run: make html
