@@ -316,7 +316,7 @@ fi
 # This doesn't do the tab completion - it just outputs the script to be 'eval'ed
 # in the shell to enable tab completion.
 if [[ $action = 'completion' ]]; then
-    declare complete_command=("$0")
+    declare complete_command=("$(basename "$0")")
     if $is_custom_exe; then
         complete_command+=("--exe" "'$exe'")
     fi
