@@ -3,7 +3,11 @@
 %:
 	prefix=/usr dh $@
 
-execute_before_dh_auto_build: VERSION
+# This doesn't work in Ubuntu 20.04
+#execute_before_dh_auto_build: VERSION
+
+override_dh_auto_build: VERSION
+	dh_auto_build
 
 VERSION: debian/changelog
 	dpkg-parsechangelog -l "$<" --show-field Version | sed 's/+.*//' > "$@"
