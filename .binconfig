@@ -11,15 +11,18 @@ help = Run Cucumber.js directly
 alias = d
 help = Build and run the latest development version of Bin
 
+[generate deb]
+help = Generate a Debian package (.deb) in the parent directory
+
 [generate readme]
 alias = generate docs
 help = Update the README file from the files in features/
 
 [generate man]
-help = Generate the Bin CLI man page from src/bin.1.md
+help = Generate a Bin CLI man page in temp/dist/ (or temp/pages/ for HTML versions)
 
 [man]
-help = Generate and display the Bin CLI man page
+help = Generate and display a Bin CLI man page
 
 [release]
 alias = deploy
