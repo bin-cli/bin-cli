@@ -37,8 +37,8 @@ temp/dist/%.gz: src/%.md bin/generate/man VERSION
 .PHONY: pages
 pages: $(patsubst src/%.md,temp/pages/%.html,$(wildcard src/*.md)) temp/pages/pandoc.css
 
-temp/pages/%.html: src/%.md bin/generate/page VERSION
-	bin/generate/page "$*" "$(VERSION)"
+temp/pages/%.html: src/%.md bin/generate/man VERSION
+	bin/generate/man --html "$*" "$(VERSION)"
 
 temp/pages/pandoc.css: src/pandoc.css
 	cp "$<" "$@"
