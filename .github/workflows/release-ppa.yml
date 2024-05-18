@@ -82,7 +82,7 @@ jobs:
           # Remove the 'v' prefix, if given
           VERSION=${VERSION/v}
 
-          # Remove the '+suffix' from the version shown in the changelog
+          # Remove the '+suffix' from the version used in the URL in the changelog
           VERSION_SHORT=${VERSION%%+*}
 
           # Default to all supported Ubuntu series

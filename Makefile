@@ -33,15 +33,22 @@ man: $(patsubst src/%.md,temp/dist/%.gz,$(wildcard src/*.md))
 temp/dist/%.gz: src/%.md bin/generate/man VERSION
 	bin/generate/man "$*" "$(VERSION)"
 
-# Build the HTML version of the man pages
+# Build the HTML version of the man pages for GitHub Pages
 .PHONY: pages
-pages: $(patsubst src/%.md,temp/pages/%.html,$(wildcard src/*.md)) temp/pages/pandoc.css
+pages: $(patsubst src/%.md,temp/dist/%.html,$(wildcard src/*.md)) temp/dist/pandoc.css
 
-temp/pages/%.html: src/%.md bin/generate/man VERSION
+temp/dist/%.html: src/%.md bin/generate/man VERSION
 	bin/generate/man --html "$*" "$(VERSION)"
 
-temp/pages/pandoc.css: src/pandoc.css
+temp/dist/pandoc.css: src/pandoc.css
 	cp "$<" "$@"
+
+# Update the readme
+.PHONY: readme
+readme: README.md
+
+README.md: $(wildcard features/*.feature) $(wildcard features/*.md) bin/generate/readme
+	bin/generate/readme
 
 # Install the files that were previously built
 .PHONY: install

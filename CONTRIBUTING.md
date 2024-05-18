@@ -73,7 +73,7 @@ bin/man bin
 bin/man binconfig
 ```
 
-To test the HTML versions, run `bin/generate/man` then open the HTML files generated in `temp/pages/`.
+To test the HTML versions, run `bin/generate/man` then open the HTML files generated in `temp/dist/`.
 
 ### Wiki
 

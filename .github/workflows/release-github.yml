@@ -27,14 +27,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build
-        run: bin/build "$GITHUB_REF_NAME"
-
       - name: Install Pandoc
         run: sudo apt-get update && sudo apt-get install -y pandoc
 
-      - name: Generate Man Pages
-        run: bin/generate/man "$GITHUB_REF_NAME"
+      - name: Set the version number
+        run: echo "${GITHUB_REF_NAME/v}" > VERSION
+
+      - name: Build package
+        run: make bin man
 
       - name: Create GitHub Draft Release
         uses: crowbarmaster/GH-Automatic-Releases@v1.6.0
@@ -44,5 +44,5 @@ jobs:
           prerelease: "${{ contains(github.ref_name, '-') }}"
           files: |
             temp/dist/bin
-            temp/dist/bin.1
-            temp/dist/binconfig.5
+            temp/dist/bin.1.gz
+            temp/dist/binconfig.5.gz
