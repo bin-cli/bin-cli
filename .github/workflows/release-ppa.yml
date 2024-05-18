@@ -105,6 +105,8 @@ jobs:
               --newversion "${VERSION}+ubuntu${ubuntu_version}+ppa${REVISION}" \
               "${CHANGELOG/\$VERSION/$VERSION_SHORT}"
 
+            cat debian/changelog
+
             echo '::endgroup::'
 
             echo "::group::$series: Build package"
