@@ -27,13 +27,13 @@ jobs:
       - name: Install Pandoc
         run: sudo apt-get update && sudo apt-get install -y pandoc
 
-      - name: Set the version number
+      - name: Generate HTML man pages
         env:
           version: "${{ inputs.version || github.ref_name }}"
-        run: echo "${version/v}" > VERSION
+        run: bin/generate/man-html "${version/v}"
 
-      - name: Generate HTML Pages
-        run: make html
+      - name: Generate HTML readme
+        run: bin/generate/readme-html
 
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3

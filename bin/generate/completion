@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/../.."
+
+if [[ ! -f temp/dist/bin ]]; then
+    bin/build
+fi
+
+temp/dist/bin --completion > temp/dist/bin.bash-completion

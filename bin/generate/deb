@@ -10,11 +10,11 @@ ubuntu_codename=$VERSION_CODENAME
 ubuntu_version=$VERSION_ID
 
 changelog='See https://github.com/bin-cli/bin-cli/releases/tag/v$VERSION'
-version=${1-}
+version=${1-1.2.3}
 revision=${2-1}
 
-if [[ $# -lt 1 || $version = '--help' || $version = '-h' ]]; then
-    echo "Usage: ${BIN_COMMAND-$0} <version> [revision=1]"
+if [[ $version = '--help' || $version = '-h' ]]; then
+    echo "Usage: ${BIN_COMMAND-$0} [version=1.2.3] [revision=1]"
     exit
 fi
 

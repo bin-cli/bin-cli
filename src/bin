@@ -72,10 +72,10 @@ shopt -s nullglob
 
 # The version number is set by 'bin/build', which is called by 'bin/release'. If
 # no version number is provided - including when running the tests - it defaults
-# to 'v1.2.3-dev'. We'll use a slightly different version here so we can tell if
+# to '1.2.3-dev'. We'll use a slightly different version here so we can tell if
 # something goes wrong with the build script.
 
-readonly VERSION='v1.2.3-source' # DO NOT CHANGE
+readonly VERSION='1.2.3-source' # DO NOT CHANGE
 
 #endregion =====================================================================
 #region ======= HELPERS: OUTPUT & ERROR HANDLING  ==============================
@@ -304,12 +304,12 @@ if [[ $action = 'help' ]]; then
     echo
     echo "Any options must be given before the command, because everything after the command will be passed as parameters to the script."
     echo
-    echo "For more details see https://github.com/bin-cli/bin-cli/tree/$VERSION#readme"
+    echo "For more details see https://github.com/bin-cli/bin-cli/tree/v$VERSION#readme"
     exit
 fi
 
 if [[ $action = 'version' ]]; then
-    echo "Bin CLI $VERSION"
+    echo "Bin CLI v$VERSION"
     exit
 fi
 
@@ -539,7 +539,7 @@ map_has() {
 
 # The BIN_TEST_ROOT env var is ignored in production builds, but is used as
 # an alternative to 'chroot' (which doesn't work on macOS) in the tests
-if [[ $VERSION = 'v1.2.3-dev' ]]; then
+if [[ $VERSION = '1.2.3-dev' ]]; then
     readonly ROOT_DIR=${BIN_TEST_ROOT-}
 else
     readonly ROOT_DIR='' # kcov-ignore-line: Not tested

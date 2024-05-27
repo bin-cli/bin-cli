@@ -1,5 +1,5 @@
 ---
-title: bin(1) - Bin CLI $VERSION Manual
+title: bin(1) - Bin CLI v$VERSION Manual
 ---
 
 # bin(1)
@@ -124,4 +124,4 @@ This is free software released under the MIT License. There is NO warranty; not 
 ## SEE ALSO
 
 * [binconfig(5)](binconfig.5.html)
-* [https://github.com/bin-cli/bin-cli/tree/$VERSION#readme](https://github.com/bin-cli/bin-cli/tree/$VERSION#readme)
+* [https://github.com/bin-cli/bin-cli/tree/v$VERSION#readme](https://github.com/bin-cli/bin-cli/tree/v$VERSION#readme)

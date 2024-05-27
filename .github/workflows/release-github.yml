@@ -30,11 +30,11 @@ jobs:
       - name: Install Pandoc
         run: sudo apt-get update && sudo apt-get install -y pandoc
 
-      - name: Set the version number
-        run: echo "${GITHUB_REF_NAME/v}" > VERSION
+      - name: Build Bin CLI
+        run: bin/build "${GITHUB_REF_NAME/v}"
 
-      - name: Build package
-        run: make bin man
+      - name: Build man pages
+        run: bin/generate/man "${GITHUB_REF_NAME/v}"
 
       - name: Create GitHub Draft Release
         uses: crowbarmaster/GH-Automatic-Releases@v1.6.0

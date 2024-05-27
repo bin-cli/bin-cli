@@ -2,6 +2,9 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 
+mkdir -p temp/dist
+cp src/pandoc-readme.css temp/dist/pandoc-readme.css
+
 sed 's/\[!WARNING]/**WARNING:**/; s#LICENSE.md#https://github.com/bin-cli/bin-cli/blob/main/LICENSE.md#' README.md |
     pandoc \
         --standalone \

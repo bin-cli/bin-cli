@@ -2,31 +2,12 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 
-html=false
-if [[ ${1-} = '--html' ]]; then
-    html=true
-    shift
-fi
-
-page=${1-bin.1}
-version=${2-v1.2.3}
+version=${1-1.2.3}
 
 mkdir -p temp/dist
 
-if $html; then
-
-    sed -E "s/\\\$VERSION/$version/g" "src/$page.md" |
-        # Clearing the 'title' var so no <h1> is generated but <title> is still set
-        # Extensions are the same as below
-        pandoc \
-            --standalone \
-            --from markdown+hard_line_breaks-raw_html-smart \
-            --to html \
-            --css 'pandoc-man.css' \
-            --variable title='' \
-        > "temp/dist/$page.html"
-
-else
+for page in src/*.md; do
+    page=$(basename "$page" .md)
 
     sed -E "s/\\\$VERSION/$version/g" "src/$page.md" |
         # Can't use '--shift-heading-level-by -1' while Ubuntu 20.04 is still supported
@@ -40,8 +21,7 @@ else
             --to man \
             --metadata date="$(date +'%B %Y')" \
             --metadata header='Bin CLI Manual' \
-            --metadata footer="Bin CLI $version" |
+            --metadata footer="Bin CLI v$version" |
         gzip -9 \
         > "temp/dist/$page.gz"
-
-fi
+done

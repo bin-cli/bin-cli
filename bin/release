@@ -23,8 +23,13 @@ echo "${LCYAN}Testing the application...${RESET}"
 bin/test
 echo
 
-echo "${LCYAN}Testing the build process...${RESET}"
-make
+echo "${LCYAN}Smoke testing the other build processes...${RESET}"
+# Excluding 'deb' because that is slower and write to files outside this directory
+bin/build "$version"
+bin/generate/completion
+bin/generate/man "$version"
+bin/generate/man-html "$version"
+bin/generate/readme-html
 echo
 
 echo "${LCYAN}Tagging in Git (will trigger release via GitHub Actions)...${RESET}"

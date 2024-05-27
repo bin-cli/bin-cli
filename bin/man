@@ -4,4 +4,4 @@ cd "$(dirname "$0")/.."
 
 bin/generate/man
 clear
-exec man -l temp/dist/${1-bin}.?
+exec man -l temp/dist/${1-bin}.?.gz

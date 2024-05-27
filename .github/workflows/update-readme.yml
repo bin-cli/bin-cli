@@ -29,7 +29,7 @@ jobs:
         run: npm ci
 
       - name: Generate README
-        run: make readme
+        run: bin/generate/readme
 
       # This doesn't do anything if the README didn't change
       - name: Commit & push changes
