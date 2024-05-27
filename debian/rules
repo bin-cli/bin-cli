@@ -1,13 +1,22 @@
 #!/usr/bin/make -f
-
 %:
-	prefix=/usr dh $@
+	dh $@
 
-# This doesn't work in Ubuntu 20.04
-#execute_before_dh_auto_build: VERSION
+override_dh_auto_clean:
+	rm -rf node_modules temp
 
-override_dh_auto_build: VERSION
-	dh_auto_build
+override_dh_auto_build:
+	$(eval VERSION := $(shell dpkg-parsechangelog --show-field Version | sed 's/+.*//'))
+	bin/build "$(VERSION)"
+	bin/generate/completion
+	bin/generate/man "$(VERSION)"
+	bin/generate/man-html "$(VERSION)"
+	bin/generate/readme-html
 
-VERSION: debian/changelog
-	dpkg-parsechangelog -l "$<" --show-field Version | sed 's/+.*//' > "$@"
+override_dh_auto_install:
+	install -Dm 0755 temp/dist/bin 					debian/bin-cli/usr/bin/bin
+	install -Dm 0644 temp/dist/bin.bash-completion	debian/bin-cli/usr/share/bash-completion/completions/bin
+	install -Dm 0644 temp/dist/bin.1.gz 			debian/bin-cli/usr/share/man/man1/bin.1.gz
+	install -Dm 0644 temp/dist/binconfig.5.gz 		debian/bin-cli/usr/share/man/man5/binconfig.5.gz
+	install -Dm 0644 temp/dist/pandoc-readme.css 	debian/bin-cli/usr/share/doc/bin-cli/pandoc-readme.css
+	install -Dm 0644 temp/dist/readme.html 			debian/bin-cli/usr/share/doc/bin-cli/index.html
