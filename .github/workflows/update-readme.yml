@@ -1,6 +1,7 @@
 name: Update README
 
 on:
+  pull_request:
   push:
     branches:
       - 'main'
@@ -15,6 +16,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: '${{ github.head_ref }}'
 
       - name: Install Node.js
         uses: actions/setup-node@v4
@@ -28,6 +31,7 @@ jobs:
       - name: Generate README
         run: make readme
 
+      # This doesn't do anything if the README didn't change
       - name: Commit & push changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
