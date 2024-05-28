@@ -221,6 +221,24 @@ sudo apt install bin-cli
 
 This includes [man pages](https://bin-cli.github.io/bin-cli/bin.1.html) (`man bin`, `man binconfig`) and [tab completion](#tab-completion).
 
+It will be upgraded automatically when you run `apt update && apt upgrade` or equivalent.
+
+<!-- features/3.01-installation-debian.md -->
+
+## Installation on Debian
+
+If you are using Debian, or another Debian-based operating system, you can install Bin CLI by downloading the .deb package:
+
+```bash
+cd /tmp
+wget https://github.com/bin-cli/bin-cli/releases/latest/download/bin-cli.deb
+sudo apt install ./bin-cli.deb
+```
+
+This includes [man pages](https://bin-cli.github.io/bin-cli/bin.1.html) (`man bin`, `man binconfig`) and [tab completion](#tab-completion).
+
+It will not be upgraded automatically.
+
 <!-- features/4.00-manual-installation.md -->
 
 ## Manual Installation

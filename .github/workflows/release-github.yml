@@ -34,8 +34,11 @@ jobs:
           rm -f *.changes
 
       - name: Build Bin CLI
-        # Generating the .deb builds the other files too
-        run: bin/generate/deb "${GITHUB_REF_NAME/v}"
+        run: |
+          # Generating the .deb builds the other files too
+          bin/generate/deb "${GITHUB_REF_NAME/v}"
+          # Rename the .deb file to have a known filename we can refer to in the README
+          mv dist/bin-cli_*.deb dist/bin-cli.deb
 
       - name: Create GitHub Draft Release
         uses: crowbarmaster/GH-Automatic-Releases@v1.6.0
@@ -45,6 +48,6 @@ jobs:
           prerelease: "${{ contains(github.ref_name, '-') }}"
           files: |
             dist/bin
-            dist/bin-cli_*.deb
+            dist/bin-cli.deb
             dist/bin.1.gz
             dist/binconfig.5.gz
