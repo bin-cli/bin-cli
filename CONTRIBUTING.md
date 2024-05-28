@@ -35,7 +35,11 @@ The `bin/setup` script will install most of these for you (except nvm/Node.js) o
 If you don't want to install them locally, you can use Docker:
 
 ```bash
-docker build --build-arg UID=$UID -t bin-cli-dev .
+# Run *one* of these to build the image using the given base image
+docker build --build-arg base=ubuntu:22.04 --build-arg UID=$UID -t bin-cli-dev .
+docker build --build-arg base=fedora:40 --build-arg UID=$UID -t bin-cli-dev .
+
+# Then start a container based on that image (this start a Bash shell)
 docker run -v "$PWD:/home/docker/bin-cli" -it --rm bin-cli-dev
 ```
 

@@ -7,18 +7,23 @@ LCYAN=$'\e[96m'
 
 to_install=()
 
-sudo() {
-    # This is mainly to allow running in Docker
-    if [[ $UID -eq 0 ]]; then
-        "$@"
-    else
-        command sudo "$@"
-    fi
-}
+debian=false
+redhat=false
+if [[ -f /etc/debian-release ]]; then
+    debian=true
+elif [[ -f /etc/redhat-release ]]; then
+    redhat=true
+fi
+
+sudo=
+if [[ $UID -gt 0 ]]; then
+    sudo='sudo'
+fi
 
 require() {
     local command=$1
-    local package=${2-$1}
+    local apt_package=${2-$command}
+    local rpm_package=${3-$apt_package}
 
     printf '%-13s' "$command"
 
@@ -26,13 +31,22 @@ require() {
         echo 'Already installed'
     else
         echo 'Missing'
-        to_install+=("$package")
+        if $redhat; then
+            to_install+=("$rpm_package")
+        else
+            to_install+=("$apt_package")
+        fi
     fi
 }
 
 echo "${LCYAN}Checking for missing development dependencies...${RESET}"
-require dh debhelper
-require debuild devscripts
+
+if $debian; then
+    require dh debhelper
+    require debuild devscripts
+fi
+
+require curl
 require gawk
 require inotifywait inotify-tools
 require kcov
@@ -44,8 +58,12 @@ echo
 
 if [[ ${#to_install[@]} -gt 0 ]]; then
     echo "${LCYAN}Installing missing dependencies...${RESET}"
-    sudo apt-get update
-    echo
-    sudo apt-get -y install "${to_install[@]}"
+    if $redhat; then
+        $sudo dnf install -y "${to_install[@]}"
+    else
+        $sudo apt-get update
+        echo
+        $sudo apt-get -y install "${to_install[@]}"
+    fi
     echo
 fi

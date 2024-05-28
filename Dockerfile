@@ -1,4 +1,4 @@
-# kcov is not available in Ubuntu 24.04 yet (28 May 2024)
+# kcov is not available in Ubuntu 24.04 yet, nor in Debian 10/11/12 (28 May 2024)
 ARG base=ubuntu:22.04
 FROM ${base}
 
@@ -7,10 +7,8 @@ COPY bin/setup /root/setup
 RUN /root/setup
 
 # Install Bin CLI itself
-RUN apt-get update && \
-    apt-get install -y software-properties-common && \
-    add-apt-repository -y ppa:bin-cli/bin-cli && \
-    apt-get install -y bin-cli
+RUN curl https://github.com/bin-cli/bin-cli/releases/latest/download/bin -Lo /usr/local/bin/bin && \
+    chmod +x /usr/local/bin/bin
 
 # Create non-root user ('kcov' doesn't seem to work correctly as root;
 # and it also ensures the generated files have the correct owner outside)
