@@ -375,7 +375,7 @@ Only Bash is supported at this time. I will add other shells if there is [demand
 
 <!-- features/4.03-man-pages.md -->
 
-## Man Pages
+### Man Pages
 
 To download the [man pages](https://bin-cli.github.io/bin-cli/bin.1.html) system-wide:
 
