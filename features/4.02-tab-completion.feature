@@ -500,4 +500,4 @@ Feature: Tab completion
 
     | COLLAPSE: What about other shells (Zsh, Fish, etc)?
     |
-    | Only Bash is supported at this time. I will add other shells if there is [demand for it](https://github.com/bin-cli/bin-cli/discussions/categories/ideas), or gladly accept [pull requests](https://github.com/bin-cli/bin-cli/pulls).
+    | Only Bash is supported at this time. I will add other shells if there is [demand for it](https://github.com/bin-cli/bin-cli/issues/12), or gladly accept [pull requests](https://github.com/bin-cli/bin-cli/pulls).
