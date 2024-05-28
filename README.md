@@ -253,9 +253,9 @@ sudo apt remove bin-cli
 
 <!-- features/3.02-installation-redhat.md -->
 
-## Installation on RedHat
+## Installation on Red Hat
 
-If you are using RedHat, or another RedHat-based operating system, you can install Bin CLI by downloading the .rpm package:
+If you are using Red Hat, or another Red Hat-based operating system, you can install Bin CLI by downloading the .rpm package:
 
 ```bash
 cd /tmp
