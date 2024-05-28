@@ -4,6 +4,9 @@ help = Generate a build of Bin into dist/
 [check-readme-links]
 help = Check for broken links in the README
 
+[clean]
+help = Delete dist/, temp/ and node_modules/
+
 [cucumber]
 help = Run Cucumber.js directly
 
