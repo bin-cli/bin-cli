@@ -11,7 +11,7 @@ if [[ $version = '--help' || $version = '-h' ]]; then
 fi
 
 mkdir -p dist
-awk -f lib/build.awk -v "version=$version" src/bin > dist/bin
+sed "s/readonly VERSION=.*/readonly VERSION='$version'/" src/bin > dist/bin
 chmod +x dist/bin
 
 # Smoke test
