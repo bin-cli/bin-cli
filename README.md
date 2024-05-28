@@ -223,6 +223,12 @@ This includes [man pages](https://bin-cli.github.io/bin-cli/bin.1.html) (`man bi
 
 It will be upgraded automatically when you run `apt update && apt upgrade` or equivalent.
 
+To remove it again:
+
+```bash
+sudo apt remove bin-cli
+```
+
 <!-- features/3.01-installation-debian.md -->
 
 ## Installation on Debian
@@ -239,6 +245,12 @@ This includes [man pages](https://bin-cli.github.io/bin-cli/bin.1.html) (`man bi
 
 It will not be upgraded automatically.
 
+To remove it again:
+
+```bash
+sudo apt remove bin-cli
+```
+
 <!-- features/3.02-installation-redhat.md -->
 
 ## Installation on RedHat
@@ -248,12 +260,18 @@ If you are using RedHat, or another RedHat-based operating system, you can insta
 ```bash
 cd /tmp
 wget https://github.com/bin-cli/bin-cli/releases/latest/download/bin-cli.rpm
-sudo rpm -i bin-cli.rpm
+sudo rpm -iv bin-cli.rpm
 ```
 
 This includes [man pages](https://bin-cli.github.io/bin-cli/bin.1.html) (`man bin`, `man binconfig`) and [tab completion](#tab-completion).
 
 It will not be upgraded automatically.
+
+To remove it again:
+
+```bash
+sudo rpm -ev bin-cli
+```
 
 <!-- features/4.00-manual-installation.md -->
 
@@ -280,6 +298,18 @@ echo 'PATH="$HOME/.local/bin:$PATH"' >> ~/.profile
 PATH="$HOME/.local/bin:$PATH"
 ```
 
+To remove it again, just delete the file:
+
+```bash
+sudo rm /usr/local/bin/bin
+```
+
+Or:
+
+```bash
+rm ~/.local/bin/bin
+```
+
 <details>
 <summary><em>What are the system requirements?</em></summary>
 
@@ -303,7 +333,7 @@ PATH="$HOME/.local/bin:$PATH"
 >
 > At least one of `curl` or `wget` are usually installed, or can easily be
 > installed, so that covers 99.99% of cases... But just for completeness - you
-> can also use [HTTPie](https://httpie.io/docs/cli):
+> can also use any other HTTP client - e.g. [HTTPie](https://httpie.io/docs/cli):
 >
 > ```bash
 > sudo http get https://github.com/bin-cli/bin-cli/releases/latest/download/bin -do /usr/local/bin/bin
