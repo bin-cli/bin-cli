@@ -27,14 +27,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Pandoc
-        run: sudo apt-get update && sudo apt-get install -y pandoc
+      - name: Install dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y debmake equivs
+          sudo mk-build-deps -ir source/debian/control
+          rm -f *.changes
 
       - name: Build Bin CLI
-        run: bin/build "${GITHUB_REF_NAME/v}"
-
-      - name: Build man pages
-        run: bin/generate/man "${GITHUB_REF_NAME/v}"
+        # Generating the .deb builds the other files too
+        run: bin/generate/deb "${GITHUB_REF_NAME/v}"
 
       - name: Create GitHub Draft Release
         uses: crowbarmaster/GH-Automatic-Releases@v1.6.0
@@ -44,5 +45,6 @@ jobs:
           prerelease: "${{ contains(github.ref_name, '-') }}"
           files: |
             dist/bin
+            dist/bin-cli_*.deb
             dist/bin.1.gz
             dist/binconfig.5.gz
