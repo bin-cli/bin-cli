@@ -39,7 +39,7 @@ echo
 echo "${LCYAN}Done. Next steps:${RESET}"
 echo
 echo "${LYELLOW}Check the release status:${RESET}"
-echo 'https://github.com/bin-cli/bin-cli/actions'
+echo 'https://github.com/bin-cli/bin-cli/actions/workflows/release-github.yml'
 echo
 echo "${LYELLOW}Write the changelog and publish the release on GitHub:${RESET}"
 echo 'https://github.com/bin-cli/bin-cli/releases'
