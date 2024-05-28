@@ -1,17 +1,16 @@
 # Contributing to Bin CLI
 
-***Caveat:** I may or may not get around to dealing with issues/PRs/discussions - it depends how much they interest me at the time!*
-
 ## Reporting Bugs
 
 Please use the [Issues](https://github.com/bin-cli/bin-cli/issues) section to report bugs (except [security vulnerabilities](SECURITY.md)). You should include:
 
-- A link to a public Git repo that demonstrates the issue, if possible, or enough detail to reproduce the problem by hand
+- The version number (or Git commit ID) of Bin CLI
 - A copy (or screenshot) of the terminal output, including the command(s) run and the full text of any error messages
+- A link to a public Git repo that demonstrates the issue (if possible) or enough detail to reproduce the problem by hand
 
 ## Suggesting New Features
 
-Please use the [Feature suggestions / requests](https://github.com/bin-cli/bin-cli/discussions/categories/feature-suggestions-requests) discussion category in the first instance.
+Please open an [Issue](https://github.com/bin-cli/bin-cli/issues) 
 
 ## Contributing Code Changes
 
@@ -30,7 +29,7 @@ cd bin-cli
 bin/watch
 ```
 
-To test the changes interactively, run `bin/dev`, which will both build and run the development version. You can also `alias bin="$PWD/bin/dev"` to make it the default version temporarily, or copy `dist/bin` to `$HOME/.local/bin/bin` or `/usr/local/bin/bin` (as appropriate) to replace the installed version.
+To test the changes interactively, run `bin/dev`, which will both build and run the development version. You can also `alias bin="$PWD/bin/dev"` to make it the default version temporarily, or add `dist/` to your `$PATH`.
 
 To submit your changes as a pull request, [fork the repository on GitHub](https://github.com/bin-cli/bin-cli/fork) then run:
 
@@ -48,8 +47,6 @@ git push -u myfork HEAD
 
 Browse to the repository fork on GitHub (`https://github.com/YOUR_USERNAME/bin-cli/tree/YOUR_BRANCH`) and click "Compare & pull request". Finally, check/update the details and click "Create pull request".
 
-**Note:** Changes without passing tests won't be merged - but feel free to open a draft pull request if you are unable to complete it yourself or want to discuss it before finishing it.
-
 ## Contributing Documentation Changes
 
 ### README
@@ -58,7 +55,7 @@ The [`README.md`](README.md) file is automatically generated, so please do not e
 
 In the `.feature` files, each line of Markdown must be prefixed with `|` - this ensures headings, which start with `#`, are not treated as comments.
 
-`README.md` will be [updated automatically](.github/workflows/update-readme.yml) when it is merged into the `main` branch. Alternatively, you can manually regenerate it by running `bin/generate/readme`. You will need either [nvm](https://github.com/nvm-sh/nvm) (recommended) or a suitable version of [Node.js](https://nodejs.org/) installed.
+`README.md` will be [updated automatically](.github/workflows/update-readme.yml) by GitHub Actions. Alternatively, you can manually regenerate it by running `bin/generate/readme`. You will need either [nvm](https://github.com/nvm-sh/nvm) (recommended) or a suitable version of [Node.js](https://nodejs.org/) installed.
 
 ### CLI Reference / Help Text
 
@@ -66,7 +63,7 @@ The [CLI Reference](README.md#cli-reference) is taken directly from the `bin --h
 
 ### Man Pages
 
-The [man pages](https://bin-cli.github.io/bin-cli/bin.1.html) are generated from the Markdown files in the [src/](src/) folder. To test them:
+The [man pages](https://bin-cli.github.io/bin-cli/bin.1.html) are generated from the Markdown files in the [man/](man/) folder. To test them, run:
 
 ```bash
 bin/man bin
@@ -77,4 +74,4 @@ To test the HTML versions, run `bin/generate/man` then open the HTML files gener
 
 ### Wiki
 
-[The wiki](https://github.com/bin-cli/bin-cli/wiki) is used for tangential tips and thoughts. Editing is restricted, both to prevent spam and because it contains my personal views rather than factual information. Please use the [Discussions](https://github.com/bin-cli/bin-cli/discussions) section to share your own tips and thoughts, or open an [Issue](https://github.com/bin-cli/bin-cli/issues) if you believe there is a mistake.
+[The wiki](https://github.com/bin-cli/bin-cli/wiki) is used for tangential tips and thoughts. Editing is restricted, both to prevent spam and because it contains my personal views rather than factual information. Feel free to open an [Issue](https://github.com/bin-cli/bin-cli/issues) if you think anything could be improved.
