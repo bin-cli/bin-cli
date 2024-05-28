@@ -393,7 +393,7 @@ MANPATH="$HOME/.local/share/man:$MANPATH"
 
 ### Upgrading
 
-To upgrade to the latest version at any time, just repeat the same `wget` command as above.
+To upgrade to the latest version at any time, just repeat the same `wget` commands as above.
 
 You may want to watch [this repo](https://github.com/bin-cli/bin-cli) to be notified when a new version is released - select Watch > Custom > Releases (or Watch > All Activity if you prefer).
 
