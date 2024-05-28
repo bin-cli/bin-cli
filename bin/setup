@@ -47,6 +47,3 @@ if [[ ${#to_install[@]} -gt 0 ]]; then
     sudo apt-get -y install "${to_install[@]}"
     echo
 fi
-
-echo "${LCYAN}Installing/updating Node modules...${RESET}"
-npm ci

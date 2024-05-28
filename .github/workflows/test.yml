@@ -47,7 +47,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bin
-          path: temp/dist/bin
+          path: dist/bin
 
       - name: Upload 'coverage/' artifact
         if: always()

@@ -1,5 +1,5 @@
 [build]
-help = Generate a build of Bin into temp/dist/
+help = Generate a build of Bin into dist/
 
 [check-readme-links]
 help = Check for broken links in the README
@@ -12,22 +12,22 @@ alias = d
 help = Build and run the latest development version of Bin
 
 [generate completion]
-help = Generate a static Bash completion script in temp/dist/
+help = Generate a static Bash completion script in dist/
 
 [generate deb]
-help = Generate an unsigned Debian package (.deb) in temp/dist/
+help = Generate an unsigned Debian package (.deb) in dist/
 
 [generate man]
-help = Generate man pages in temp/dist/
+help = Generate man pages in dist/
 
 [generate man-html]
-help = Generate HTML versions of the man pages in temp/dist/
+help = Generate HTML versions of the man pages in dist/
 
 [generate readme]
 help = Generate README.md file from the files in features/
 
 [generate readme-html]
-help = Generate a HTML version of the README file in temp/dist/
+help = Generate a HTML version of the README file in dist/
 
 [man]
 help = Generate and display a Bin CLI man page

@@ -4,12 +4,12 @@ cd "$(dirname "$0")/../.."
 
 version=${1-1.2.3}
 
-mkdir -p temp/dist
+mkdir -p dist
 
-for page in src/*.md; do
-    page=$(basename "$page" .md)
+for source in man/*.md; do
+    page=$(basename "$source" .md)
 
-    sed -E "s/\\\$VERSION/$version/g" "src/$page.md" |
+    sed -E "s/\\\$VERSION/$version/g" "$source" |
         # Can't use '--shift-heading-level-by -1' while Ubuntu 20.04 is still supported
         sed -E '/^# /d; s/^#(#+) /\1 /' |
         # '+hard_line_breaks' preserves line breaks in the source file
@@ -23,5 +23,5 @@ for page in src/*.md; do
             --metadata header='Bin CLI Manual' \
             --metadata footer="Bin CLI v$version" |
         gzip -9 \
-        > "temp/dist/$page.gz"
+        > "dist/$page.gz"
 done

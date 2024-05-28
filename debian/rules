@@ -3,7 +3,7 @@
 	dh $@
 
 override_dh_auto_clean:
-	rm -rf node_modules temp
+	bin/clean
 
 override_dh_auto_build:
 	$(eval VERSION := $(shell dpkg-parsechangelog --show-field Version | sed 's/+.*//'))
@@ -14,9 +14,9 @@ override_dh_auto_build:
 	bin/generate/readme-html
 
 override_dh_auto_install:
-	install -Dm 0755 temp/dist/bin 					debian/bin-cli/usr/bin/bin
-	install -Dm 0644 temp/dist/bin.bash-completion	debian/bin-cli/usr/share/bash-completion/completions/bin
-	install -Dm 0644 temp/dist/bin.1.gz 			debian/bin-cli/usr/share/man/man1/bin.1.gz
-	install -Dm 0644 temp/dist/binconfig.5.gz 		debian/bin-cli/usr/share/man/man5/binconfig.5.gz
-	install -Dm 0644 temp/dist/pandoc-readme.css 	debian/bin-cli/usr/share/doc/bin-cli/pandoc-readme.css
-	install -Dm 0644 temp/dist/readme.html 			debian/bin-cli/usr/share/doc/bin-cli/index.html
+	install -Dm 0755 dist/bin                   debian/bin-cli/usr/bin/bin
+	install -Dm 0644 dist/bin.bash-completion   debian/bin-cli/usr/share/bash-completion/completions/bin
+	install -Dm 0644 dist/bin.1.gz              debian/bin-cli/usr/share/man/man1/bin.1.gz
+	install -Dm 0644 dist/binconfig.5.gz        debian/bin-cli/usr/share/man/man5/binconfig.5.gz
+	install -Dm 0644 dist/readme.css            debian/bin-cli/usr/share/doc/bin-cli/readme.css
+	install -Dm 0644 dist/readme.html           debian/bin-cli/usr/share/doc/bin-cli/index.html

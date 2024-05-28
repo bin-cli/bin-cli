@@ -39,9 +39,9 @@ debuild \
 
 # We can't stop 'debuild' outputting files in the parent directory,
 # but we can move them after the fact
-mkdir -p temp/dist/
-mv "../bin-cli_${version}+ubuntu${ubuntu_version}+ppa${revision}"* temp/dist/
+mkdir -p dist/
+mv "../bin-cli_${version}+ubuntu${ubuntu_version}+ppa${revision}"* dist/
 
 # List the contents to verify it
 echo
-dpkg -c "temp/dist/bin-cli_${version}+ubuntu${ubuntu_version}+ppa${revision}_all.deb"
+dpkg -c "dist/bin-cli_${version}+ubuntu${ubuntu_version}+ppa${revision}_all.deb"

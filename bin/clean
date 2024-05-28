@@ -2,6 +2,4 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-bin/generate/man
-clear
-exec man -l dist/${1-bin}.?.gz
+rm -rf dist node_modules temp

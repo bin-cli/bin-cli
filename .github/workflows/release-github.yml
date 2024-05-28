@@ -43,6 +43,6 @@ jobs:
           draft: true
           prerelease: "${{ contains(github.ref_name, '-') }}"
           files: |
-            temp/dist/bin
-            temp/dist/bin.1.gz
-            temp/dist/binconfig.5.gz
+            dist/bin
+            dist/bin.1.gz
+            dist/binconfig.5.gz

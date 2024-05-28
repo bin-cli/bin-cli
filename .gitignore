@@ -6,5 +6,6 @@
 !/debian/rules
 !/debian/source
 
+/dist/
 /node_modules/
 /temp/

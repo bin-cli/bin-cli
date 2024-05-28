@@ -30,7 +30,7 @@ cd bin-cli
 bin/watch
 ```
 
-To test the changes interactively, run `bin/dev`, which will both build and run the development version. You can also `alias bin="$PWD/bin/dev"` to make it the default version temporarily, or copy `temp/dist/bin` to `$HOME/.local/bin/bin` or `/usr/local/bin/bin` (as appropriate) to replace the installed version.
+To test the changes interactively, run `bin/dev`, which will both build and run the development version. You can also `alias bin="$PWD/bin/dev"` to make it the default version temporarily, or copy `dist/bin` to `$HOME/.local/bin/bin` or `/usr/local/bin/bin` (as appropriate) to replace the installed version.
 
 To submit your changes as a pull request, [fork the repository on GitHub](https://github.com/bin-cli/bin-cli/fork) then run:
 
@@ -73,7 +73,7 @@ bin/man bin
 bin/man binconfig
 ```
 
-To test the HTML versions, run `bin/generate/man` then open the HTML files generated in `temp/dist/`.
+To test the HTML versions, run `bin/generate/man` then open the HTML files generated in `dist/`.
 
 ### Wiki
 

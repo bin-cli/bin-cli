@@ -10,9 +10,9 @@ if [[ $version = '--help' || $version = '-h' ]]; then
     exit
 fi
 
-mkdir -p temp/dist
-awk -f lib/build.awk -v "version=$version" src/bin > temp/dist/bin
-chmod +x temp/dist/bin
+mkdir -p dist
+awk -f lib/build.awk -v "version=$version" src/bin > dist/bin
+chmod +x dist/bin
 
 # Smoke test
-temp/dist/bin -v
+dist/bin -v

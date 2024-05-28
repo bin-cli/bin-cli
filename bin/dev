@@ -5,4 +5,4 @@ root="$(dirname "$(dirname "$0")")"
 
 "$root/bin/build" >/dev/null
 
-exec "$root/temp/dist/bin" "$@"
+exec "$root/dist/bin" "$@"

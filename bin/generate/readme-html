@@ -2,8 +2,8 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 
-mkdir -p temp/dist
-cp src/pandoc-readme.css temp/dist/pandoc-readme.css
+mkdir -p dist
+cp css/readme.css dist/readme.css
 
 sed 's/\[!WARNING]/**WARNING:**/; s#LICENSE.md#https://github.com/bin-cli/bin-cli/blob/main/LICENSE.md#' README.md |
     pandoc \
@@ -11,7 +11,7 @@ sed 's/\[!WARNING]/**WARNING:**/; s#LICENSE.md#https://github.com/bin-cli/bin-cl
         --from markdown \
         --to html \
         --strip-comments \
-        --css 'pandoc-readme.css' \
+        --css 'readme.css' \
         --metadata title='Bin CLI' \
         --variable title='' \
-        --output 'temp/dist/readme.html'
+        --output 'dist/readme.html'
