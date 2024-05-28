@@ -33,12 +33,15 @@ jobs:
           sudo mk-build-deps -ir source/debian/control
           rm -f *.changes
 
-      - name: Build Bin CLI
+      - name: Build DEB package
         run: |
-          # Generating the .deb builds the other files too
           bin/generate/deb "${GITHUB_REF_NAME/v}"
-          # Rename the .deb file to have a known filename we can refer to in the README
-          mv dist/bin-cli_*.deb dist/bin-cli.deb
+          mv dist /tmp/dist-deb
+
+      - name: Build RPM package
+        run: |
+          bin/generate/rpm "${GITHUB_REF_NAME/v}"
+          mv dist /tmp/dist-rpm
 
       - name: Create GitHub Draft Release
         uses: crowbarmaster/GH-Automatic-Releases@v1.6.0
@@ -47,7 +50,8 @@ jobs:
           draft: true
           prerelease: "${{ contains(github.ref_name, '-') }}"
           files: |
-            dist/bin
-            dist/bin-cli.deb
-            dist/bin.1.gz
-            dist/binconfig.5.gz
+            /tmp/dist-deb/bin
+            /tmp/dist-deb/bin.1.gz
+            /tmp/dist-deb/binconfig.5.gz
+            /tmp/dist-deb/bin-cli.deb
+            /tmp/dist-rpm/bin-cli.rpm

@@ -239,6 +239,22 @@ This includes [man pages](https://bin-cli.github.io/bin-cli/bin.1.html) (`man bi
 
 It will not be upgraded automatically.
 
+<!-- features/3.02-installation-redhat.md -->
+
+## Installation on RedHat
+
+If you are using RedHat, or another RedHat-based operating system, you can install Bin CLI by downloading the .rpm package:
+
+```bash
+cd /tmp
+wget https://github.com/bin-cli/bin-cli/releases/latest/download/bin-cli.rpm
+sudo rpm -i bin-cli.deb
+```
+
+This includes [man pages](https://bin-cli.github.io/bin-cli/bin.1.html) (`man bin`, `man binconfig`) and [tab completion](#tab-completion).
+
+It will not be upgraded automatically.
+
 <!-- features/4.00-manual-installation.md -->
 
 ## Manual Installation

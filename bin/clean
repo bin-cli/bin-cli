@@ -2,4 +2,10 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-rm -rf dist node_modules temp
+rm -rf \
+    dist \
+    node_modules \
+    rpm/BUILDROOT \
+    rpm/RPMS \
+    rpm/SRPMS \
+    temp

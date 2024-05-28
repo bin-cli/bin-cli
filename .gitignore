@@ -4,6 +4,9 @@
 !/debian/rules
 !/debian/source
 
+/rpm/*
+!/rpm/SPECS
+
 /dist/
 /node_modules/
 /temp/
