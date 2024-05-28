@@ -248,7 +248,7 @@ If you are using RedHat, or another RedHat-based operating system, you can insta
 ```bash
 cd /tmp
 wget https://github.com/bin-cli/bin-cli/releases/latest/download/bin-cli.rpm
-sudo rpm -i bin-cli.deb
+sudo rpm -i bin-cli.rpm
 ```
 
 This includes [man pages](https://bin-cli.github.io/bin-cli/bin.1.html) (`man bin`, `man binconfig`) and [tab completion](#tab-completion).
