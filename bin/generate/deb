@@ -2,19 +2,12 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 
-# This must be first because it includes a variable called $VERSION
-source /etc/os-release
-
-# These variable names match those used in .github/workflows/release-ppa.yml
-ubuntu_codename=$VERSION_CODENAME
-ubuntu_version=$VERSION_ID
-
 changelog='See https://github.com/bin-cli/bin-cli/releases/tag/v$VERSION'
 version=${1-1.2.3}
-revision=${2-1}
+official_version=${version/[+-]*}
 
 if [[ $version = '--help' || $version = '-h' ]]; then
-    echo "Usage: ${BIN_COMMAND-$0} [version=1.2.3] [revision=1]"
+    echo "Usage: ${BIN_COMMAND-$0} [version=1.2.3]"
     exit
 fi
 
@@ -24,24 +17,20 @@ rm -f debian/changelog
 debchange \
   --create \
   --controlmaint \
-  --distribution "$ubuntu_codename" \
   --package 'bin-cli' \
-  --newversion "${version}+ubuntu${ubuntu_version}+ppa${revision}" \
-  "${changelog/\$VERSION/$version}"
+  --newversion "$version" \
+  "${changelog/\$VERSION/$official_version}"
 
-# This is different because (1) we build the binary version as well (which Launchpad
-# does normally), and (2) we don't sign it, since this is just for testing
+# '-A' = Build binary package for the 'all' architecture
+# '--lintian-opts -i' = Display detailed information about errors
 debuild \
-  -F \
-  -sa \
-  -us -uc \
+  -A \
   --lintian-opts -i
 
-# We can't stop 'debuild' outputting files in the parent directory,
-# but we can move them after the fact
+# We can't stop 'debuild' outputting files in the parent directory, but we can move them after the fact
 mkdir -p dist/
-mv "../bin-cli_${version}+ubuntu${ubuntu_version}+ppa${revision}"* dist/
+mv "../bin-cli_${version}"* dist/
 
 # List the contents to verify it
 echo
-dpkg -c "dist/bin-cli_${version}+ubuntu${ubuntu_version}+ppa${revision}_all.deb"
+dpkg -c "dist/bin-cli_${version}_all.deb"

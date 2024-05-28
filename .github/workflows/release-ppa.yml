@@ -108,10 +108,11 @@ jobs:
 
             echo "::group::$ubuntu_codename ($ubuntu_version): Build package"
 
-            # '-S' = Build source only
+            # '-S' = Build source package only
             # '-sa' = Include the source code
             # '-k' = Signing key ID
             # '-p' = GPG command
+            # '--lintian-opts -i' = Display detailed information about errors
             # Note: Using the long versions of these options (where available) does not seem to work!
             # Note 2: Quoting '$gpg_passphrase' doesn't seem to work either
             debuild \
