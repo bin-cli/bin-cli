@@ -306,15 +306,7 @@ PATH="$HOME/.local/bin:$PATH"
 
 </details>
 
-<!-- features/4.01-upgrading.md -->
-
-### Upgrading
-
-To upgrade to the latest version at any time, just repeat the same `wget` command as above.
-
-You may want to watch [this repo](https://github.com/bin-cli/bin-cli) to be notified when a new version is released - select Watch > Custom > Releases (or Watch > All Activity if you prefer).
-
-<!-- features/4.02-tab-completion.feature -->
+<!-- features/4.01-tab-completion.feature -->
 
 ### Tab Completion
 
@@ -373,7 +365,7 @@ Only Bash is supported at this time. I will add other shells if there is [demand
 
 </blockquote></details>
 
-<!-- features/4.03-man-pages.md -->
+<!-- features/4.02-man-pages.md -->
 
 ### Man Pages
 
@@ -396,6 +388,14 @@ wget https://github.com/bin-cli/bin-cli/releases/latest/download/binconfig.5.gz 
 echo 'MANPATH="$HOME/.local/share/man:$MANPATH"' >> ~/.profile
 MANPATH="$HOME/.local/share/man:$MANPATH"
 ```
+
+<!-- features/4.03-upgrading.md -->
+
+### Upgrading
+
+To upgrade to the latest version at any time, just repeat the same `wget` command as above.
+
+You may want to watch [this repo](https://github.com/bin-cli/bin-cli) to be notified when a new version is released - select Watch > Custom > Releases (or Watch > All Activity if you prefer).
 
 <!-- features/5.00-per-project-setup.md -->
 
