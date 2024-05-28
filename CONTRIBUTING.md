@@ -10,26 +10,42 @@ Please use the [Issues](https://github.com/bin-cli/bin-cli/issues) section to re
 
 ## Suggesting New Features
 
-Please open an [Issue](https://github.com/bin-cli/bin-cli/issues) 
+Please open an [Issue](https://github.com/bin-cli/bin-cli/issues)
 
 ## Contributing Code Changes
-
-You will need either [nvm](https://github.com/nvm-sh/nvm) (recommended) or a suitable version of [Node.js](https://nodejs.org/) installed to run the tests (which are powered by [Cucumber.js](https://cucumber.io/docs/installation/javascript/)). The `bin/setup` script in the repo will install dependencies for you on Ubuntu, if you like.
 
 Clone the source code locally:
 
 ```bash
 git clone https://github.com/bin-cli/bin-cli.git
+cd bin-cli
 ```
 
-Make changes to `src/bin`, and update the tests in `features/*.feature` to match. Run the `bin/watch` command to automatically build and test the changes:
+Make changes to `src/bin`, and update the tests in `features/*.feature` to match.
+
+To run the tests locally, you will need:
+
+- Either [nvm](https://github.com/nvm-sh/nvm) (recommended) or a recent version of [Node.js](https://nodejs.org/) (tests are powered by [Cucumber.js](https://cucumber.io/docs/installation/javascript/))
+- [kcov](https://simonkagstrom.github.io/kcov/)
+- [ShellCheck](https://www.shellcheck.net/)
+- [awk](https://www.gnu.org/software/gawk/manual/gawk.html)
+
+The `bin/setup` script will install most of these for you (except nvm/Node.js) on Ubuntu.
+
+If you don't want to install them locally, you can use Docker:
 
 ```bash
-cd bin-cli
+docker build --build-arg UID=$UID -t bin-cli-dev .
+docker run -v "$PWD:/home/docker/bin-cli" -it --rm bin-cli-dev
+```
+
+Run the `bin/watch` command to automatically build and test the changes:
+
+```bash
 bin/watch
 ```
 
-To test the changes interactively, run `bin/dev`, which will both build and run the development version. You can also `alias bin="$PWD/bin/dev"` to make it the default version temporarily, or add `dist/` to your `$PATH`.
+To test the changes interactively, run `bin/dev`, which will both build and run the development version.
 
 To submit your changes as a pull request, [fork the repository on GitHub](https://github.com/bin-cli/bin-cli/fork) then run:
 
@@ -47,6 +63,17 @@ git push -u myfork HEAD
 
 Browse to the repository fork on GitHub (`https://github.com/YOUR_USERNAME/bin-cli/tree/YOUR_BRANCH`) and click "Compare & pull request". Finally, check/update the details and click "Create pull request".
 
+To free up space used by Docker:
+
+```bash
+docker image rm bin-cli-dev
+
+# Optional (be careful not to remove anything you're still using)
+docker container prune
+docker image prune
+docker builder prune
+```
+
 ## Contributing Documentation Changes
 
 ### README
@@ -55,7 +82,7 @@ The [`README.md`](README.md) file is automatically generated, so please do not e
 
 In the `.feature` files, each line of Markdown must be prefixed with `|` - this ensures headings, which start with `#`, are not treated as comments.
 
-`README.md` will be [updated automatically](.github/workflows/update-readme.yml) by GitHub Actions. Alternatively, you can manually regenerate it by running `bin/generate/readme`. You will need either [nvm](https://github.com/nvm-sh/nvm) (recommended) or a suitable version of [Node.js](https://nodejs.org/) installed.
+`README.md` will be [updated automatically](.github/workflows/update-readme.yml) by GitHub Actions. Alternatively, you can manually regenerate it by running `bin/generate/readme`. You will need either [nvm](https://github.com/nvm-sh/nvm) (recommended) or a suitable version of [Node.js](https://nodejs.org/) installed - or you can use Docker, as described above.
 
 ### CLI Reference / Help Text
 
@@ -63,7 +90,7 @@ The [CLI Reference](README.md#cli-reference) is taken directly from the `bin --h
 
 ### Man Pages
 
-The [man pages](https://bin-cli.github.io/bin-cli/bin.1.html) are generated from the Markdown files in the [man/](man/) folder. To test them, run:
+The [man pages](https://bin-cli.github.io/bin-cli/bin.1.html) are generated from the Markdown files in the [man/](man/) folder using [Pandoc](https://pandoc.org/). To test them, run:
 
 ```bash
 bin/man bin
