@@ -4,7 +4,7 @@ Feature: Automatic shims
 
     | ### Automatic Shims
     |
-    | I often use Bin to create shims for other executables - for example, [different PHP versions](https://github.com/bin-cli/bin-cli/wiki/PHP-version-shim) or [running scripts inside Docker](https://github.com/bin-cli/bin-cli/wiki/Docker-shim).
+    | I often use Bin to create shims for other executables - for example, [different PHP versions](https://github.com/bin-cli/bin-cli/wiki/PHP-Version-Shim) or [running scripts inside Docker](https://github.com/bin-cli/bin-cli/wiki/Docker-Exec-Shim).
     |
     | Rather than typing `bin php` every time, I use a Bash alias to run it automatically:
     |

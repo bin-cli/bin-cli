@@ -71,7 +71,7 @@ repo/
 └── ...
 ```
 
-The scripts can be written in [any language](https://github.com/bin-cli/bin-cli/wiki/Hello%2C-world),
+The scripts can be written in [any language](https://github.com/bin-cli/bin-cli/wiki/Hello%2C-World),
 or can even be compiled binaries, as long as they are executable (`chmod +x`). Here is a very simple
 `bin/hello` shell script:
 
@@ -851,7 +851,7 @@ alias dev="bin --exe dev --dir $HOME/.local/bin/dev"
 
 ### Automatic Shims
 
-I often use Bin to create shims for other executables - for example, [different PHP versions](https://github.com/bin-cli/bin-cli/wiki/PHP-version-shim) or [running scripts inside Docker](https://github.com/bin-cli/bin-cli/wiki/Docker-shim).
+I often use Bin to create shims for other executables - for example, [different PHP versions](https://github.com/bin-cli/bin-cli/wiki/PHP-Version-Shim) or [running scripts inside Docker](https://github.com/bin-cli/bin-cli/wiki/Docker-Exec-Shim).
 
 Rather than typing `bin php` every time, I use a Bash alias to run it automatically:
 
