@@ -1,6 +1,3 @@
-[build]
-help = Generate a build of Bin into dist/
-
 [check-readme-links]
 help = Check for broken links in the README
 
@@ -13,6 +10,10 @@ help = Run Cucumber.js directly
 [dev]
 alias = d
 help = Build and run the latest development version of Bin
+
+[generate bin]
+alias = build
+help = Generate a build of Bin CLI into dist/
 
 [generate completion]
 help = Generate a static Bash completion script in dist/
@@ -32,6 +33,9 @@ help = Generate README.md file from the files in features/
 [generate readme-html]
 help = Generate a HTML version of the README file in dist/
 
+[generate rpm]
+help = Generate an unsigned RPM package in dist/
+
 [man]
 help = Generate and display a Bin CLI man page
 
@@ -45,9 +49,12 @@ help = Install development dependencies (on Ubuntu)
 [simple-test]
 help = Build and run only a few simple tests - mainly used as smoke tests on Windows
 
-[watch]
+[watch bin]
 alias = tdd
-help = Watch for changes to source files, run all tests automatically and update the README
+help = Watch for changes to source files, rebuild Bin CLI and run all tests automatically
+
+[watch readme]
+help = Watch for changes to features/ and rebuild the README automatically
 
 [test]
 help = Build and run tests, and display debugging information if it fails

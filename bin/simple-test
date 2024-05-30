@@ -3,7 +3,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 # Build
-bin/build
+bin/generate/bin
 
 bin="$PWD/dist/bin"
 

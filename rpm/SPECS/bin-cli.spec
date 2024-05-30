@@ -20,7 +20,7 @@ directly, so you can enjoy the benefits without adding a hard dependency or
 extra barrier to entry.
 
 %build
-bin/build "%{version}"
+bin/generate/bin "%{version}"
 bin/generate/completion
 bin/generate/man "%{version}"
 bin/generate/man-html "%{version}"

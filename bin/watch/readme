@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/../.."
+
+while true; do
+
+    # Generate the README
+    bin/generate/readme || true
+
+    # Wait until something changes
+    inotifywait -qqr \
+        -e create -e modify -e move -e attrib -e delete \
+        bin/generate/readme features
+
+done

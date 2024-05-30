@@ -70,8 +70,8 @@ shopt -s nullglob
 #endregion =====================================================================
 #region ======= VERSION ========================================================
 
-# The version number is set by 'bin/build', which is called by 'bin/release'. If
-# no version number is provided - including when running the tests - it defaults
+# The version number is set by 'bin/generate/bin', which is called by 'bin/release'.
+# If no version number is provided - including when running the tests - it defaults
 # to '1.2.3-dev'. We'll use a slightly different version here so we can tell if
 # something goes wrong with the build script.
 

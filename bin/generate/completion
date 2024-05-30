@@ -3,7 +3,7 @@ set -euo pipefail
 cd "$(dirname "$0")/../.."
 
 if [[ ! -f dist/bin ]]; then
-    bin/build
+    bin/generate/bin
 fi
 
 dist/bin --completion > dist/bin.bash-completion

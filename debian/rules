@@ -7,7 +7,7 @@ override_dh_auto_clean:
 
 override_dh_auto_build:
 	$(eval VERSION := $(shell dpkg-parsechangelog --show-field Version | sed 's/+.*//'))
-	bin/build "$(VERSION)"
+	bin/generate/bin "$(VERSION)"
 	bin/generate/completion
 	bin/generate/man "$(VERSION)"
 	bin/generate/man-html "$(VERSION)"
