@@ -35,7 +35,18 @@ Feature: Aliases
       Then it is successful
       And the output is 'Copying to production...'
 
-    Scenario: Aliases can be subcommands
+    Scenario: Unique prefix matching works for aliases pointing to subcommands
+      Given a script '{ROOT}/project/bin/deploy/live' that outputs 'Copying to production...'
+      And a file '{ROOT}/project/.binconfig' with content:
+        """
+        [deploy live]
+        alias = publish
+        """
+      When I run 'bin pub'
+      Then it is successful
+      And the output is 'Copying to production...'
+
+    Scenario: Aliases can define subcommands
       Given a script '{ROOT}/project/bin/publish' that outputs 'Copying to production...'
       And a file '{ROOT}/project/.binconfig' with content:
         """

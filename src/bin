@@ -1094,27 +1094,35 @@ find_matching_commands() {
     target=$2
     stop_after_first=${3-false}
 
-    # Find aliases that match, and map them to their underlying commands
-    map_init commands_matching_aliases # global
-
-    for alias in ${aliases+"${aliases[@]}"}; do
-        if command_matches "$type" "$target" "$alias"; then
-            command=$(map_get original_commands "$alias")
-            map_set commands_matching_aliases "$command" true # global
-        fi
-    done
-
-    # Find commands that match
+    # Find commands and aliases that match
     matching_commands=() # global
+    map_init matched_original_commands # global
 
-    for command in ${registered_commands+"${registered_commands[@]}"}; do
-        if map_has commands_matching_aliases "$command" || command_matches "$type" "$target" "$command"; then
-            matching_commands+=("$command") # global
+    for command in ${registered_commands+"${registered_commands[@]}"} ${aliases+"${aliases[@]}"}; do
 
-            # For 'has_matching_commands' we only need to know if there is at least one match
-            if $stop_after_first; then
-                break
-            fi
+        # Don't match the same command more than once, even if it has aliases that also match
+        original_command=$(map_get original_commands "$command")
+        if map_has matched_original_commands "$original_command"; then
+            continue
+        fi
+
+        # Ignore aliases that don't actually map to a valid command
+        if ! map_has command_to_executable "$original_command" && ! map_has command_to_inline_script "$original_command"; then
+            continue
+        fi
+
+        # Check if the command actually matches (after the above checks because this is more expensive)
+        if ! command_matches "$type" "$target" "$command"; then
+            continue
+        fi
+
+        # It does match, so add it to the results
+        matching_commands+=("$command") # global
+        map_set matched_original_commands "$original_command" true # global
+
+        # For 'has_matching_commands', we only need to know if there is at least one match, so stop early
+        if $stop_after_first; then
+            break
         fi
     done
 }
@@ -1208,7 +1216,7 @@ run_command_if_only_one_match() {
         return
     fi
 
-    command=${matching_commands[0]}
+    command=$(map_get original_commands "${matching_commands[0]}")
 
     # Export the command name so it can be displayed in help messages
     # Typically with a fallback to $0 if it is unset: ${BIN_COMMAND-$0}
