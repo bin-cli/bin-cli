@@ -990,7 +990,7 @@ register_commands_in_directory() {
 #endregion =====================================================================
 #region ======= HELPERS: ALIASES ===============================================
 
-declare -a aliases=()
+declare -a registered_aliases=()
 map_init alias_sources
 map_init alias_to_executable
 
@@ -1014,7 +1014,7 @@ register_command_alias() {
 
     prevent_duplicate_alias "$alias" "$source"
 
-    aliases+=("$alias")                           # global
+    registered_aliases+=("$alias")                # global
     map_set original_commands "$alias" "$command" # global
     map_set alias_sources "$alias" "$source"      # global
 }
@@ -1028,7 +1028,7 @@ register_symlink_alias() {
 
     prevent_duplicate_alias "$alias" "$source"
 
-    aliases+=("$alias")                                # global
+    registered_aliases+=("$alias")                     # global
     map_set alias_to_executable "$alias" "$executable" # global
     map_set alias_sources "$alias" "$source"           # global
 }
@@ -1098,7 +1098,7 @@ find_matching_commands() {
     matching_commands=() # global
     map_init matched_original_commands # global
 
-    for command in ${registered_commands+"${registered_commands[@]}"} ${aliases+"${aliases[@]}"}; do
+    for command in ${registered_commands+"${registered_commands[@]}"} ${registered_aliases+"${registered_aliases[@]}"}; do
 
         # Don't match the same command more than once, even if it has aliases that also match
         original_command=$(map_get original_commands "$command")
@@ -1457,7 +1457,7 @@ for alias in ${alias_to_executable+"${alias_to_executable[@]}"}; do
     fi
 done
 
-for alias in ${aliases+"${aliases[@]}"}; do
+for alias in ${registered_aliases+"${registered_aliases[@]}"}; do
     # Check for conflicts
     source=$(map_get alias_sources "$alias")
     prevent_duplicate_command alias "$alias" "$source"
@@ -1467,7 +1467,7 @@ for alias in ${aliases+"${aliases[@]}"}; do
     for command in ${registered_commands+"${registered_commands[@]}"}; do
         if [[ "$command" = "$target "* ]]; then
             suffix=${command:${#target}}
-            aliases+=("$alias$suffix")
+            registered_aliases+=("$alias$suffix")
             map_set original_commands "$alias$suffix" "$target$suffix"
         fi
     done
@@ -1667,7 +1667,7 @@ has_duplicate() {
         esac
     done
 
-    for alias in ${aliases+"${aliases[@]}"}; do
+    for alias in ${registered_aliases+"${registered_aliases[@]}"}; do
         case "$alias" in
             "$short") return 0 ;;
             "$short "*) return 0 ;;
@@ -1699,7 +1699,7 @@ done
 # Aliases
 declare -a shortened_aliases=()
 
-for alias in ${aliases+"${aliases[@]}"}; do
+for alias in ${registered_aliases+"${registered_aliases[@]}"}; do
     short=$(remove_extension "$alias")
 
     if [[ "$short" = "$alias" ]]; then
