@@ -740,6 +740,7 @@ declare -a commands_listed_in_binconfig=()
 declare merge_is_optional=false
 declare merge_with_parent=false
 declare template='_TBC'
+map_init command_args
 map_init command_help
 
 parse_binconfig() {
@@ -851,6 +852,12 @@ set_command_option() {
             alias=$(trim "$alias")
             register_command_alias "$alias" "$command" "$binconfig line $line"
         done
+
+    elif [[ $key = 'args' ]]; then
+
+        if [[ -n "$value" ]]; then
+            register_command_args "$command" "$value"
+        fi
 
     elif [[ $key = 'command' ]]; then
 
@@ -1256,7 +1263,25 @@ run_command_if_only_one_match() {
 }
 
 #endregion =====================================================================
-#region ======= HELPERS: COMMAND HELP TEXT =====================================
+#region ======= HELPERS: COMMAND HELP TEXT & ARGUMENTS =========================
+
+register_command_args() {
+    local command args
+
+    command=$1
+    args=$2
+
+    map_set command_args "$command" "$args" # global
+}
+
+get_command_args() {
+    local command original_command
+
+    command=$1
+
+    original_command=$(map_get original_commands "$command")
+    map_get command_args "$original_command"
+}
 
 register_command_help() {
     local command help
@@ -1516,6 +1541,7 @@ while [[ $# -gt $num_parameters_to_ignore ]]; do
                     fi
                     echo "[$command]"
                     echo 'alias ='
+                    echo 'args ='
                     echo 'help ='
                     output_started=true
                 done
@@ -1824,11 +1850,18 @@ for command in ${shortened_commands+"${shortened_commands[@]}"}; do
 done
 
 # Calculate the maximum length of a command in the list so we can align the help text
+declare -i length=0
 declare -i maxlength=0
 
 for command in ${visible_commands+"${visible_commands[@]}"}; do
-    if [[ ${#command} -gt $maxlength ]]; then
-        maxlength=${#command}
+    length=${#command}
+
+    if args=$(get_command_args "$command"); then
+        length=$(( length + ${#args} + 1 ))
+    fi
+
+    if [[ $length -gt $maxlength ]]; then
+        maxlength=$length
     fi
 done
 
@@ -1837,21 +1870,37 @@ echo "$LCYAN$BOLD$UNDERLINE$command_list_title$RESET"
 
 # Output the list of commands
 declare command command_aliases help
+declare -i spaces=0
 
 for command in ${visible_commands+"${visible_commands[@]}"}; do
+    # bin <command>
+    echo -n "${LWHITE}${exe} ${command}${RESET}"
+    length=${#command}
+
+    # <args>
+    if args=$(get_command_args "$command"); then
+        echo -n " ${LCYAN}${args}${RESET}"
+        length=$(( length + ${#args} + 1 ))
+    fi
+
+    # Calculate spaces to line up the columns
+    spaces=$(( maxlength - length ))
+
+    # Help text and/or aliases
     if help=$(get_command_help "$command"); then
-        if command_aliases=$(get_command_aliases "$command"); then
-            printf "$LWHITE%s %-${maxlength}s$RESET    %s $GREY(%s)$RESET\n" "$exe" "$command" "$help" "$command_aliases"
+        if aliases=$(get_command_aliases "$command"); then
+            printf "%${spaces}s    %s $GREY(%s)$RESET" '' "$help" "$aliases"
         else
-            printf "$LWHITE%s %-${maxlength}s$RESET    %s\n" "$exe" "$command" "$help"
+            printf "%${spaces}s    %s" '' "$help"
         fi
     else
-        if command_aliases=$(get_command_aliases "$command"); then
-            printf "$LWHITE%s %-${maxlength}s$RESET    $GREY(%s)$RESET\n" "$exe" "$command" "$command_aliases"
-        else
-            printf "$LWHITE%s %s$RESET\n" "$exe" "$command"
+        if aliases=$(get_command_aliases "$command"); then
+            printf "%${spaces}s    $GREY(%s)$RESET" '' "$aliases"
         fi
     fi
+
+    # New line
+    echo
 done | sort
 
 if [[ ${#visible_commands[@]} -eq 0 ]]; then

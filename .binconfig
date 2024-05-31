@@ -5,26 +5,32 @@ help = Check for broken links in the README
 help = Delete dist/, temp/ and node_modules/
 
 [cucumber]
+args = [...]
 help = Run Cucumber.js directly
 
 [dev]
 alias = d
+args = [...]
 help = Build and run the latest development version of Bin
 
 [generate bin]
 alias = build
+args = [version]
 help = Generate a build of Bin CLI into dist/
 
 [generate completion]
 help = Generate a static Bash completion script in dist/
 
 [generate deb]
+args = [version]
 help = Generate an unsigned Debian package (.deb) in dist/
 
 [generate man]
+args = [version]
 help = Generate man pages in dist/
 
 [generate man-html]
+args = [version]
 help = Generate HTML versions of the man pages in dist/
 
 [generate readme]
@@ -34,13 +40,16 @@ help = Generate README.md file from the files in features/
 help = Generate a HTML version of the README file in dist/
 
 [generate rpm]
+args = [version]
 help = Generate an unsigned RPM package in dist/
 
 [man]
+args = [page]
 help = Generate and display a Bin CLI man page
 
 [release]
 alias = deploy
+args = [version]
 help = Create a new release of Bin with the given version number
 
 [setup]

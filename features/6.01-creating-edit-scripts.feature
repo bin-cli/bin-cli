@@ -261,10 +261,12 @@ Feature: Creating/editing scripts
         """
         [hello]
         alias =
+        args =
         help =
 
         [world]
         alias =
+        args =
         help =
         """
 
@@ -309,10 +311,12 @@ Feature: Creating/editing scripts
 
         [hello]
         alias =
+        args =
         help =
 
         [world]
         alias =
+        args =
         help =
         """
 

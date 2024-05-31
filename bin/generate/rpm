@@ -2,9 +2,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 
-changelog='See https://github.com/bin-cli/bin-cli/releases/tag/v$VERSION'
 version=${1-1.2.3}
-official_version=${version/[+-]*}
 
 if [[ $version = '--help' || $version = '-h' ]]; then
     echo "Usage: ${BIN_COMMAND-$0} [version=1.2.3]"

@@ -628,6 +628,24 @@ help = Deploy to the production site
 help = Deploy to the staging site
 ```
 
+You can also list the arguments that each command accepts:
+
+```ini
+[test]
+args = [suite]
+help = Run the given test suite, or all test suites
+```
+
+I recommended keeping this short - one or two arguments - and writing `[...]` if there are many arguments available. For example:
+
+<pre>
+$ bin
+<strong>Available Commands</strong>
+bin artisan [...]    Run Laravel Artisan with the appropriate version of PHP
+bin deploy           Sync the code to the live server
+bin test [suite]     Run the given test suite, or all test suites
+</pre>
+
 <!-- features/6.03-aliases.feature -->
 
 ### Aliases

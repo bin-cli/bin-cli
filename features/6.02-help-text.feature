@@ -136,3 +136,50 @@ Feature: Help text
         bin deploy live       Deploy to the production site
         bin deploy staging    Deploy to the staging site
         """
+
+  Rule: Arguments are displayed in command listings
+
+    | You can also list the arguments that each command accepts:
+    |
+    | ```ini
+    | [test]
+    | args = [suite]
+    | help = Run the given test suite, or all test suites
+    | ```
+    |
+    | I recommended keeping this short - one or two arguments - and writing `[...]` if there are many arguments available. For example:
+    |
+    | <pre>
+    | $ bin
+    | <strong>Available Commands</strong>
+    | bin artisan [...]    Run Laravel Artisan with the appropriate version of PHP
+    | bin deploy           Sync the code to the live server
+    | bin test [suite]     Run the given test suite, or all test suites
+    | </pre>
+
+    Scenario: Command arguments configured in .binconfig are displayed in command listings
+      Given a script '{ROOT}/project/bin/artisan'
+      And a script '{ROOT}/project/bin/deploy'
+      And a script '{ROOT}/project/bin/test'
+      And a file '{ROOT}/project/.binconfig' with content:
+        """
+        [artisan]
+        args = [...]
+        help = Run Laravel Artisan with the appropriate version of PHP
+
+        [deploy]
+        help = Sync the code to the live server
+
+        [test]
+        args = [suite]
+        help = Run the given test suite, or all test suites
+        """
+      When I run 'bin'
+      Then it is successful
+      And the output is:
+        """
+        Available Commands
+        bin artisan [...]    Run Laravel Artisan with the appropriate version of PHP
+        bin deploy           Sync the code to the live server
+        bin test [suite]     Run the given test suite, or all test suites
+        """
