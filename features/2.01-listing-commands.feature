@@ -7,7 +7,7 @@ Feature: Listing commands
     | If you run `bin` on its own, it will list all available commands:
     |
     | <pre>
-    | $ bin hel
+    | $ bin
     | <strong>Available Commands</strong>
     | bin build
     | bin deploy
