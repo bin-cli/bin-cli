@@ -43,6 +43,14 @@ Feature: CLI arguments
         | --completion | --help       |
         | --edit       | --completion |
         | --help       | --version    |
+        | -c           | -h           |
+        | -e           | --completion |
+        | --help       | -v           |
+
+    Scenario: Specifying the same argument more than once doesn't cause an error
+      Given a script '{ROOT}/usr/bin/editor'
+      When I run 'bin -h -h --help --help'
+      Then it is successful
 
   Rule: There is a help command
 

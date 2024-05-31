@@ -204,14 +204,21 @@ bug() {
 # specifies more than one. (The alternative would be silently using the last
 # option given - but I think that is more confusing.)
 
+declare action_argument=''
 declare action=''
 
 set_action() {
-    if [[ -n $action ]]; then
-        fail "The '--$action' and '--$1' arguments are incompatible"
+    # Ignore repeated arguments, e.g. '-e -e'
+    if [[ "$2" = "$action" ]]; then
+        return
     fi
 
-    action=$1 # global
+    if [[ -n $action ]]; then
+        fail "The '$action_argument' and '$1' arguments are incompatible"
+    fi
+
+    action_argument=$1 # global
+    action=$2 # global
 }
 
 # Some options have required arguments - error if none is given.
@@ -251,22 +258,22 @@ declare unique_prefix_matching='' # may be boolean or empty
 
 while [[ $# -gt 0 ]]; do
     case $1 in
-        --complete-bash)    set_action complete-bash ;;
-        --completion)       set_action completion ;;
-        --create | -c)      set_action create ;;
+        --complete-bash)    set_action "$1" complete-bash ;;
+        --completion)       set_action "$1" completion ;;
+        --create | -c)      set_action "$1" create ;;
         --dir)              set_option_value '--dir' fixed_bin_dir "${2-}"; shift ;;
         --dir=*)            set_option_value '--dir' fixed_bin_dir "${1#*=}" ;;
-        --edit | -e)        set_action edit ;;
+        --edit | -e)        set_action "$1" edit ;;
         --exact)            unique_prefix_matching=false ;;
         --exe)              is_custom_exe=true; set_option_value '--exe' exe "${2-}"; shift ;;
         --exe=*)            is_custom_exe=true; set_option_value '--exe' exe "${1#*=}" ;;
         --fallback)         set_option_value '--fallback' fallback "${2-}"; shift ;;
         --fallback=*)       set_option_value '--fallback' fallback "${1#*=}" ;;
-        --help | -h)        set_action help ;;
-        --info)             set_action info ;;
+        --help | -h)        set_action "$1" help ;;
+        --info)             set_action "$1" info ;;
         --prefix)           unique_prefix_matching=true ;;
         --shim)             shim=true ;;
-        --version | -v)     set_action version ;;
+        --version | -v)     set_action "$1" version ;;
         --)                 shift; break ;;
         -*)                 fail "Invalid option '$1'" ;;
         *)                  break ;;
