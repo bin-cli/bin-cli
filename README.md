@@ -243,7 +243,7 @@ sudo apt install ./bin-cli.deb
 
 This includes [man pages](https://bin-cli.github.io/bin-cli/bin.1.html) (`man bin`, `man binconfig`) and [tab completion](#tab-completion).
 
-It will not be upgraded automatically.
+It will not be upgraded automatically. If you want to be notified when a new version is released, watch [this repo](https://github.com/bin-cli/bin-cli) (select Watch > Custom > Releases, or Watch > All Activity if you prefer).
 
 To remove it again:
 
@@ -265,7 +265,7 @@ sudo rpm -iv bin-cli.rpm
 
 This includes [man pages](https://bin-cli.github.io/bin-cli/bin.1.html) (`man bin`, `man binconfig`) and [tab completion](#tab-completion).
 
-It will not be upgraded automatically.
+It will not be upgraded automatically. If you want to be notified when a new version is released, watch [this repo](https://github.com/bin-cli/bin-cli) (select Watch > Custom > Releases, or Watch > All Activity if you prefer).
 
 To remove it again:
 
@@ -439,9 +439,7 @@ MANPATH="$HOME/.local/share/man:$MANPATH"
 
 ### Upgrading
 
-To upgrade to the latest version at any time, just repeat the same `wget` commands as above.
-
-You may want to watch [this repo](https://github.com/bin-cli/bin-cli) to be notified when a new version is released - select Watch > Custom > Releases (or Watch > All Activity if you prefer).
+To upgrade to the latest version at any time, just repeat the same `wget` command(s) as above. If you want to be notified when a new version is released, watch [this repo](https://github.com/bin-cli/bin-cli) (select Watch > Custom > Releases, or Watch > All Activity if you prefer).
 
 <!-- features/5.00-per-project-setup.md -->
 
