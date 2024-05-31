@@ -25,6 +25,7 @@ Feature: Config files
     | ; Settings for each command (script)
     | [hello]
     | alias = hi
+    | args = [name]
     | help = Say "Hello, World!"
     |
     | [phpunit]
@@ -41,6 +42,7 @@ Feature: Config files
     | The supported per-command keys are:
     |
     | - `alias`/`aliases` (comma-separated strings) - [Aliases](#aliases)
+    | - `args` (string) - [List of arguments](#help-text)
     | - `help` (string) - [Help text](#help-text)
     | - `command` (string) - [Inline commands](#inline-commands)
 
