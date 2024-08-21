@@ -554,17 +554,7 @@ map_get() {
 }
 
 map_has() {
-    local key map map_key
-
-    map=$1
-    key=$2
-
-    if $associative_arrays_supported; then
-        [[ -v "map__${map}[${key}]" ]]
-    else
-        map_key=$(map_key "$map" "$key")
-        [[ -n ${!map_key+isset} ]]
-    fi
+    map_get "$1" "$2" >/dev/null
 }
 
 #endregion =====================================================================
