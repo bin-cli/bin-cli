@@ -492,7 +492,7 @@ map_init() {
 
     # Also create an array of raw keys so we can loop through them
     # We'll do this even if associative arrays are supported for simplicity
-    eval "declare -ga $map=()" # global
+    eval "$map=()" # global
 }
 
 map_key() {
