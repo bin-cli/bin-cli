@@ -1,4 +1,4 @@
-import {After, Given, Then, When} from '@cucumber/cucumber';
+import {After, Before, Given, Then, When} from '@cucumber/cucumber';
 import {strict as assert} from 'assert';
 import {spawnSync} from 'child_process';
 import {ensureDir, exists, outputFile, remove} from 'fs-extra';
@@ -153,6 +153,13 @@ Then('the error is:', function (expected) {
 Then('the error is {string}', function (expected) {
     expected = paths.replace(expected);
     assert.equal(this.runResult.stderr, `${expected}\n`);
+});
+
+Before({name: 'Remove temp files'}, async function (hook) {
+    await remove(`${paths.temp}/command.txt`);
+    await remove(`${paths.temp}/stdout.txt`);
+    await remove(`${paths.temp}/stderr.txt`);
+    await remove(`${paths.temp}/debug.txt`);
 });
 
 After({name: 'Remove temp files', tags: 'not @exit'}, async function (hook) {
