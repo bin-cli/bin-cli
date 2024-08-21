@@ -469,16 +469,30 @@ in_array() {
 # with the key being hex-encoded if necessary. This does mean all maps are
 # global - they can't be local to a function.
 
+# But when associative arrays are supported, they are much faster, so we'll use
+# them.
+
+if (( BASH_VERSINFO[0] >= 4 )) && [[ ${BIN_DEBUG_ASSOC_ARRAYS-} != true ]]; then
+    associative_arrays_supported=true
+else
+    associative_arrays_supported=false
+fi
+
 map_init() {
     local map
 
     map=$1
 
-    # Clear any existing values so maps can be reset/reused
-    eval "unset \"\${!map__${map}__@}\"" # global
+    if $associative_arrays_supported; then
+        eval "declare -gA map__$map=()"
+    else
+        # Clear any existing values so maps can be reset/reused
+        eval "unset \"\${!map__${map}__@}\"" # global
+    fi
 
     # Also create an array of raw keys so we can loop through them
-    eval "$map=()" # global
+    # We'll do this even if associative arrays are supported for simplicity
+    eval "declare -ga $map=()" # global
 }
 
 map_key() {
@@ -507,27 +521,36 @@ map_set() {
     key=$2
     value=$3
 
-    # Store the values in separate variables
-    map_key=$(map_key "$map" "$key")
-    printf -v "$map_key" %s "$value" # global
+    if $associative_arrays_supported; then
+        eval "map__${map}[\$key]=\$value"
+    else
+        # Store the values in separate variables
+        map_key=$(map_key "$map" "$key")
+        printf -v "$map_key" %s "$value" # global
+    fi
 
     # Also add it to an array of raw keys so we can loop through them
     eval "$map+=(\"\$key\")" # global
 }
 
 map_get() {
-    local key map map_key
+    local key map map_key value
 
     map=$1
     key=$2
 
-    map_key=$(map_key "$map" "$key")
+    if $associative_arrays_supported; then
+        eval "value=\${map__${map}[\$key]-}"
+    else
+        map_key=$(map_key "$map" "$key")
+        value="${!map_key-}"
+    fi
 
-    if [[ -z ${!map_key+isset} ]]; then
+    if [[ -z $value ]]; then
         return 1
     fi
 
-    echo "${!map_key}"
+    echo "$value"
 }
 
 map_has() {
@@ -536,9 +559,12 @@ map_has() {
     map=$1
     key=$2
 
-    map_key=$(map_key "$map" "$key")
-
-    [[ -n ${!map_key+isset} ]]
+    if $associative_arrays_supported; then
+        [[ -v "map__${map}[${key}]" ]]
+    else
+        map_key=$(map_key "$map" "$key")
+        [[ -n ${!map_key+isset} ]]
+    fi
 }
 
 #endregion =====================================================================

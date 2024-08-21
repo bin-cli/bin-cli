@@ -75,3 +75,12 @@ Feature: Edge cases
       | --exe      | =      |
       | --fallback |        |
       | --fallback | =      |
+
+    Scenario: Associative arrays are emulated in Bash <4
+      # On its own this test doesn't really prove anything, but this gets the
+      # code coverage back to 100%, then we run tests on macOS on GitHub Actions
+      Given an environment variable 'BIN_DEBUG_ASSOC_ARRAYS' set to 'true'
+      And a script '{ROOT}/project/bin/hello' that outputs "Hello, ${1:-World}!"
+      When I run 'bin hello'
+      Then it is successful
+      And the output is 'Hello, World!'
