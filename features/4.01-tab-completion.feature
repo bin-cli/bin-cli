@@ -178,7 +178,7 @@ Feature: Tab completion
     | command -v bin &>/dev/null && eval "$(bin --completion --exact)"
     | ```
     |
-    | Similarly, if you are using an alias with a [custom script directory](#custom-script-directory), e.g. `alias src='bin --dir scripts'`, add the same parameter here:
+    | Similarly, if you are using an alias with a [custom script directory](#custom-script-directory), e.g. `alias scr='bin --dir scripts'`, add the same parameter here:
     |
     | ```bash
     | # e.g. in /usr/share/bash-completion/completions/scr
