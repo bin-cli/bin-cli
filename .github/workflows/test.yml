@@ -22,7 +22,7 @@ jobs:
   # compiled script and coverage report in case they are needed
   test-on-ubuntu:
     name: Test on Ubuntu
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04 # https://github.com/bin-cli/bin-cli/issues/43
     steps:
       - name: Checkout
         uses: actions/checkout@v4
