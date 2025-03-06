@@ -42,6 +42,7 @@ require() {
 echo "${LCYAN}Checking for missing development dependencies...${RESET}"
 
 require curl
+require debchange devscripts
 require gawk
 require inotifywait inotify-tools
 require kcov
