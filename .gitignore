@@ -1,12 +1,15 @@
+/.idea/
+
 /debian/*
 !/debian/control
 !/debian/copyright
 !/debian/rules
 !/debian/source
 
+/dist/
+/node_modules/
+
 /rpm/*
 !/rpm/SPECS
 
-/dist/
-/node_modules/
 /temp/
