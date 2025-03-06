@@ -48,7 +48,7 @@ Feature: Config files
 
     Scenario: Directories above .binconfig are not searched when .binconfig exists
       Given an empty file '{ROOT}/project/root/.binconfig'
-      And a script '{ROOT}/project/bin/hello' that outputs 'Hello, World!'
+      And a script '{ROOT}/project/bin/hello'
       And the working directory is '{ROOT}/project/root'
       When I run 'bin hello'
       Then it fails with exit code 127
