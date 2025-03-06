@@ -158,6 +158,23 @@ Feature: Custom script directory
         bin hello
         """
 
+    Scenario: .binconfig may be in the same directory when using --dir
+      Given a file '{ROOT}/project/scripts/.binconfig' with content:
+        """
+        dir = .
+
+        [hello]
+        help = Hello, World!
+        """
+      And a script '{ROOT}/project/scripts/hello'
+      When I run 'bin --dir scripts'
+      Then it is successful
+      And the output is:
+        """
+        Available Commands
+        bin hello    Hello, World!
+        """
+
     Scenario: When --dir is used and a matching .binconfig can't be found, the 'not found' error should be adapted accordingly
       Given a script '{ROOT}/project/scripts/hello'
       And the working directory is '{ROOT}/project/root'

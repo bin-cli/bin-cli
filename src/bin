@@ -604,7 +604,12 @@ relative_path() {
     parent=$1
     child=$2
 
-    echo "${child#"${parent}/"}"
+    if [[ "$parent" = "$child" ]]; then
+        echo '.'
+    else
+        # We don't need to support the case where $child is not inside $parent
+        echo "${child#"${parent}/"}"
+    fi
 }
 
 #endregion =====================================================================
