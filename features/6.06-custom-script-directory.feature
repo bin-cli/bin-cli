@@ -158,6 +158,13 @@ Feature: Custom script directory
         bin hello
         """
 
+    Scenario: When --dir is used and a matching .binconfig can't be found, the 'not found' error should be adapted accordingly
+      Given a script '{ROOT}/project/scripts/hello'
+      And the working directory is '{ROOT}/project/root'
+      When I run 'bin --dir scripts other'
+      Then it fails with exit code 127
+      And the error is "bin: Command 'other' not found in {ROOT}/project/scripts/"
+
   Rule: The script directory can be set to an absolute path at the command line
 
     | COLLAPSE: Can I use an absolute path?
@@ -185,3 +192,9 @@ Feature: Custom script directory
       When I run 'bin --dir /missing hello'
       Then it fails with exit code 246
       And the error is "bin: Specified directory '/missing/' is missing"
+
+    Scenario: When --dir is an absolute path and a matching .binconfig can't be found, the 'not found' error should be adapted accordingly
+      Given a script '{ROOT}/project/scripts/dev/hello'
+      When I run 'bin --dir {ROOT}/project/scripts/dev other'
+      Then it fails with exit code 127
+      And the error is "bin: Command 'other' not found in {ROOT}/project/scripts/dev/"

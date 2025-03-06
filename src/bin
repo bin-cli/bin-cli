@@ -1669,10 +1669,13 @@ while [[ $# -gt $num_parameters_to_ignore ]]; do
         fi
 
         append=''
-        if in_array "${full_command:1}" completion create edit help info version; then
-            append="${NEW_LINE}${GREY}Perhaps you meant to run 'bin --${full_command:1}'?${RESET}"
+        if [[ -n $main_binconfig ]]; then
+            append="${append} or $main_binconfig"
         fi
-        fail "Command '${full_command:1}' not found in $main_bin_dir/ or $main_binconfig$append" $ERR_NOT_FOUND
+        if in_array "${full_command:1}" completion create edit help info version; then
+            append="${append}${NEW_LINE}${GREY}Perhaps you meant to run 'bin --${full_command:1}'?${RESET}"
+        fi
+        fail "Command '${full_command:1}' not found in $main_bin_dir/$append" $ERR_NOT_FOUND
     fi
 
     # Otherwise display the list of matches

@@ -85,6 +85,14 @@ Feature: How It Works
       And there is no output
       And the error is 'Something is wrong'
 
+    Scenario: An error is given if the command doesn't exist
+      Given a script '{ROOT}/project/bin/hello'
+      And the working directory is '{ROOT}/project/root'
+      When I run 'bin other'
+      Then it fails with exit code 127
+      And the error is "bin: Command 'other' not found in {ROOT}/project/bin/ or {ROOT}/project/.binconfig"
+
+
   Rule: Security warning
 
     | > [!WARNING]
