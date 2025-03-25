@@ -25,10 +25,10 @@ jobs:
     runs-on: ubuntu-22.04 # https://github.com/bin-cli/bin-cli/issues/43
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Install Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -44,14 +44,14 @@ jobs:
 
       - name: Upload 'bin' artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: bin
           path: dist/bin
 
       - name: Upload 'coverage/' artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: coverage
           path: temp/coverage/merged/
@@ -61,10 +61,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Install Alpine Linux in chroot
-        uses: jirutka/setup-alpine@v1
+        uses: jirutka/setup-alpine@cf5fddcea495dcc19c0f991c6f6fa6a7abf3d50a # v1.3.0
 
       - name: Install Bash and Node.js
         shell: alpine.sh --root {0}
@@ -87,10 +87,10 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Install Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -113,7 +113,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Run simple tests
         shell: bash
@@ -124,7 +124,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Run simple tests
         shell: C:\msys64\usr\bin\bash.exe {0}
@@ -135,10 +135,10 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Install Cygwin
-        uses: egor-tensin/setup-cygwin@v4
+        uses: egor-tensin/setup-cygwin@d2c752bab416d4b0662591bd366fc2686297c82d # v4.0.1
 
       - name: Run simple tests
         shell: C:\tools\cygwin\bin\bash.exe -e {0}
@@ -149,10 +149,10 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Install WSL distribution
-        uses: Vampire/setup-wsl@v3
+        uses: Vampire/setup-wsl@6c400b755bcd0583e60c2e7aa0cdc61794355c9b # 3.1.4
 
       - name: Run simple tests
         shell: wsl-bash {0}
