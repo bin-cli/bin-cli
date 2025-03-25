@@ -8,6 +8,6 @@
     "markdown-link-check": "~3.11.2",
     "marked": "^12.0.1",
     "shell-quote": "^1.8.1",
-    "which": "^4.0.0"
+    "which": "^5.0.0"
   }
 }
