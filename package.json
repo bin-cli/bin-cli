@@ -5,7 +5,7 @@
     "@cucumber/messages": "^27.2.0",
     "fs-extra": "^11.2.0",
     "is-executable": "^2.0.1",
-    "markdown-link-check": "~3.11.2",
+    "markdown-link-check": "~3.13.7",
     "marked": "^12.0.1",
     "shell-quote": "^1.8.1",
     "which": "^5.0.0"
