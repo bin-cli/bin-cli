@@ -1,5 +1,8 @@
 name: Release Ubuntu PPA
 
+permissions:
+  contents: read
+
 on:
   push:
     tags:
