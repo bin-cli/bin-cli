@@ -1,8 +1,5 @@
 name: Release Ubuntu PPA
 
-permissions:
-  contents: read
-
 on:
   push:
     tags:
@@ -24,6 +21,9 @@ on:
         description: 'Changelog'
         required: true
         default: 'See https://github.com/bin-cli/bin-cli/releases/tag/v$VERSION'
+
+permissions:
+  contents: read
 
 env:
   FORCE_COLOR: 1
