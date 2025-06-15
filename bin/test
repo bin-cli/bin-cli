@@ -13,36 +13,34 @@ LCYAN=$'\e[96m'
 result=0
 
 # Build
-bin/generate/bin || result=$?
+bin/generate/bin || exit
 
 # Run tests
-if [[ $result -eq 0 ]]; then
-    bin/cucumber --fail-fast "$@" || result=$?
-fi
+bin/cucumber --fail-fast "$@" || result=$?
 
 # If it failed, output debugging information
-if [[ -f temp/command.txt ]]; then
+if [[ -f /tmp/bin-cli/command.txt ]]; then
     echo
     echo "${LMAGENTA}${BOLD}${UNDERLINE}Command${RESET}"
-    cat temp/command.txt
+    cat /tmp/bin-cli/command.txt
 fi
 
-if [[ -f temp/stdout.txt ]]; then
+if [[ -f /tmp/bin-cli/stdout.txt ]]; then
     echo
     echo "${LGREEN}${BOLD}${UNDERLINE}Output${RESET}"
-    cat temp/stdout.txt
+    cat /tmp/bin-cli/stdout.txt
 fi
 
-if [[ -f temp/stderr.txt ]]; then
+if [[ -f /tmp/bin-cli/stderr.txt ]]; then
     echo
     echo "${LRED}${BOLD}${UNDERLINE}Errors${RESET}"
-    cat temp/stderr.txt
+    cat /tmp/bin-cli/stderr.txt
 fi
 
-if [[ -f temp/debug.txt ]]; then
+if [[ -f /tmp/bin-cli/debug.txt ]]; then
     echo
     echo "${LCYAN}${BOLD}${UNDERLINE}Debug log${RESET}"
-    cat temp/debug.txt
+    cat /tmp/bin-cli/debug.txt
 fi
 
 # Return the result code

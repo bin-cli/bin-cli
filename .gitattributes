@@ -1,3 +1,4 @@
 * text eol=lf
 
+/Cargo.lock binary
 /package-lock.json binary

@@ -18,7 +18,7 @@ Then('ShellCheck must report no errors', async function () {
         // '--enable=quote-safe-variables', // Too verbose
         '--enable=require-double-brackets',
         // '--enable=require-variable-braces', // Too verbose
-        `${paths.dist}/bin`,
+        `${paths.target}/bin`,
     ]);
 
     const result = spawnSync(command, {

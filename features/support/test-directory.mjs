@@ -8,7 +8,7 @@ Before({name: 'Create test directory'}, async function () {
     await emptyDir(paths.root);
 
     // Copy the 'bin' executable so we have a known path
-    await copy(`${paths.dist}/bin`, `${paths.root}/usr/bin/bin`);
+    await copy(`${paths.target}/bin`, `${paths.root}/usr/bin/bin`);
 
     // Symlink the executables we need, since we won't be using the global $PATH
     const executables = [
@@ -22,10 +22,6 @@ Before({name: 'Create test directory'}, async function () {
         'tr', // coreutils
         'uniq', // coreutils
     ];
-
-    if (!this.disableKcov && !process.env.DISABLE_KCOV) {
-        executables.push('kcov');
-    }
 
     for (const exe of executables) {
         // We can't use '{root}/usr/bin' here because it would interfere with

@@ -4,6 +4,13 @@ cd "$(dirname "$0")/../.."
 
 while true; do
 
+    # Output some blank space because Tmux doesn't insert any into the
+    # scrollback buffer, making it hard to see where the new run started
+    printf '%*s' "$(tput lines)" '' | tr ' ' '\n'
+    printf '%*s\n' "$(tput cols)" '' | tr ' ' '='
+    echo " $(date)"
+    printf '%*s\n' "$(tput cols)" '' | tr ' ' '='
+
     # Clear the screen
     clear
 
@@ -13,6 +20,10 @@ while true; do
     # Wait until something changes
     inotifywait -qqr \
         -e create -e modify -e move -e attrib -e delete \
+        --exclude '.*~$' \
         bin/generate/bin features src
+
+    # Wait a moment for everything to settle
+    sleep 0.2
 
 done

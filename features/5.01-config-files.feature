@@ -77,7 +77,7 @@ Feature: Config files
     |
     | - Spaces are allowed around the `=` signs, and are automatically trimmed from the start/end of lines.
     | - Values should not be quoted - quotes will be treated as part of the value. This avoids the need to escape inner quotes.
-    | - Boolean values can be set to `true`/`false` (recommended), `yes`/`no`, `on`/`off` or `1`/`0` (all case-insensitive). Anything else triggers an error.
+    | - Boolean values can be set to `true`/`false` (recommended), `yes`/`no`, `on`/`off`, `t`/`f`, `y`/`n`, or `1`/`0` (all case-insensitive). Anything else triggers an error.
     | - Lines that start with `;` or `#` are comments, which are ignored. No other lines can contain comments.
 
     Scenario: Spaces around the = sign are optional

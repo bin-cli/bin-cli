@@ -23,7 +23,11 @@ Feature: Tab completion
       Then it is successful
       And the output is:
         """
-        complete -C "bin --complete-bash" -o default bin
+        _bin() {
+          local args=${COMP_LINE:0:COMP_POINT}
+          COMPREPLY=( $(bin --complete-bash -- "$args" $args) )
+        }
+        complete -F _bin -o default bin
         """
 
     Scenario: Tab completion works for simple commands
@@ -97,16 +101,6 @@ Feature: Tab completion
         live
         """
 
-    Scenario: Tab completion works with the cursor in the middle of the string
-      Given a script '{ROOT}/project/bin/deploy/live'
-      And a script '{ROOT}/project/bin/deploy/staging'
-      When I tab complete 'bin d|eploy '
-      Then it is successful
-      And the output is:
-        """
-        deploy
-        """
-
     Scenario: Nothing is output for parameters after the last command
       Given a script '{ROOT}/project/bin/deploy/live'
       When I tab complete 'bin deploy live '
@@ -150,8 +144,7 @@ Feature: Tab completion
       And a file '{ROOT}/project/.binconfig' with content:
         """
         [deploy]
-        alias = publish
-        alias = push
+        aliases = publish, push
         """
       When I tab complete 'bin p'
       Then it is successful
@@ -192,7 +185,11 @@ Feature: Tab completion
       Then it is successful
       And the output is:
         """
-        complete -C "bin --exe 'b' --complete-bash" -o default b
+        _b() {
+          local args=${COMP_LINE:0:COMP_POINT}
+          COMPREPLY=( $(bin --exe 'b' --complete-bash -- "$args" $args) )
+        }
+        complete -F _b -o default b
         """
 
     Scenario: Tab completion supports custom directories
@@ -200,11 +197,15 @@ Feature: Tab completion
       Then it is successful
       And the output is:
         """
-        complete -C "bin --exe 'scr' --dir 'scripts' --complete-bash" -o default scr
+        _scr() {
+          local args=${COMP_LINE:0:COMP_POINT}
+          COMPREPLY=( $(bin --exe 'scr' --dir 'scripts' --complete-bash -- "$args" $args) )
+        }
+        complete -F _scr -o default scr
         """
 
     Scenario: Tab completion works for custom directories
-      And a script '{ROOT}/project/scripts/right'
+      Given a script '{ROOT}/project/scripts/right'
       And a script '{ROOT}/project/bin/wrong'
       When I tab complete 'scr ' with arguments "--dir 'scripts' --exe 'scr'"
       Then it is successful

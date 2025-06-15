@@ -28,14 +28,14 @@ Options that can be used with a command:
 > **--exact**
 > : Disable unique prefix matching.
 >
+> **--no-exact**, **--prefix**
+> : Enable unique prefix matching (overrides [.binconfig](binconfig.5.html)).
+>
 > **--exe** _NAME_, **--exe**=_NAME_
 > : Override the executable name displayed in the command list.
 >
 > **--fallback** _COMMAND_, **--fallback**=_COMMAND_
 > : If the command is not found, run the given global command (implies **--exact**).
->
-> **--prefix**
-> : Enable unique prefix matching (overrides [.binconfig](binconfig.5.html)).
 >
 > **--shim**
 > : If the command is not found, run the global command with the same name (implies **--exact**).

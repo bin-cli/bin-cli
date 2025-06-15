@@ -3,7 +3,6 @@ import {strict as assert} from 'assert';
 import {spawnSync} from 'child_process';
 import {ensureDir, exists, outputFile, remove} from 'fs-extra';
 import * as paths from '../support/paths.mjs';
-import * as coverage from '../support/coverage.mjs';
 
 Given('the working directory is {string}', async function (directory) {
     directory = paths.replace(directory);
@@ -25,33 +24,10 @@ async function run(command, env = {}) {
         HOME: `${paths.root}/home/user`,
         PATH: `${paths.root}/usr/bin:${paths.root}/global/bin`,
         BIN_DEBUG_LOG: `${paths.temp}/debug.txt`,
-        BIN_TEST_ROOT: paths.root,
+        RUST_BACKTRACE: '1',
         ...env,
         ...(this.env || {}),
     };
-
-    // Use kcov to measure code coverage
-    // Except on one particular test where it doesn't work
-    let kcovId;
-
-    if (!this.disableKcov && !process.env.DISABLE_KCOV) {
-        await ensureDir(paths.coverage);
-
-        kcovId = coverage.nextId();
-
-        command = [
-            'kcov',
-            // Using --collect-only doesn't work in kcov 38
-            // https://github.com/SimonKagstrom/kcov/issues/342
-            // '--collect-only',
-            // --debug-force-bash-stderr seems to be required to pass through the stdout/stderr
-            // https://github.com/SimonKagstrom/kcov/issues/362#issuecomment-962489973
-            '--debug-force-bash-stderr',
-            `--include-path=${paths.root}/usr/bin/bin`,
-            '--path-strip-level=0',
-            `${paths.coverage}/result-${kcovId}`,
-        ].join(' ') + ' ' + command;
-    }
 
     // Write the command to a file to be displayed by the 'bin/tdd' script if the test fails
     let env_string = '';
@@ -87,17 +63,11 @@ async function run(command, env = {}) {
 When('I run {string}', run);
 
 When('I tab complete {string}', function (input) {
-    const COMP_POINT = input.includes('|') ? input.indexOf('|') : input.length;
-    const COMP_LINE = input.slice(0, COMP_POINT) + input.slice(COMP_POINT + 1);
-
-    return run.call(this, 'bin --complete-bash', {COMP_LINE, COMP_POINT});
+    return run.call(this, `bin --complete-bash -- "${input}" ${input}`);
 });
 
 When('I tab complete {string} with arguments {string}', function (input, args) {
-    const COMP_POINT = input.includes('|') ? input.indexOf('|') : input.length;
-    const COMP_LINE = input.slice(0, COMP_POINT) + input.slice(COMP_POINT + 1);
-
-    return run.call(this, `bin ${args} --complete-bash`, {COMP_LINE, COMP_POINT});
+    return run.call(this, `bin ${args} --complete-bash -- "${input}" ${input}`);
 });
 
 Then('it is successful', function () {

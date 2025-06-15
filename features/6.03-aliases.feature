@@ -65,14 +65,6 @@ Feature: Aliases
     | [deploy]
     | aliases = publish, push
     | ```
-    |
-    | Or you can list them on separate lines instead:
-    |
-    | ```ini
-    | [deploy]
-    | alias = publish
-    | alias = push
-    | ```
 
     Scenario: Multiple aliases can be defined on one line
       Given a script '{ROOT}/project/bin/deploy' that outputs 'Copying to production...'
@@ -91,18 +83,6 @@ Feature: Aliases
         """
         [deploy]
         aliases = publish, push
-        """
-      When I run 'bin push'
-      Then it is successful
-      And the output is 'Copying to production...'
-
-    Scenario: Multiple aliases can be defined on separate lines
-      Given a script '{ROOT}/project/bin/deploy' that outputs 'Copying to production...'
-      And a file '{ROOT}/project/.binconfig' with content:
-        """
-        [deploy]
-        alias = publish
-        alias = push
         """
       When I run 'bin push'
       Then it is successful

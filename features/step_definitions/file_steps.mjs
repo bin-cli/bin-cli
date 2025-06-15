@@ -78,6 +78,6 @@ Then('there is a script {string} with content:', async function (file, content) 
 });
 
 Given('Code size must be under {int} KB', async function (expected_size_in_kb) {
-    const codeStat = await stat(`${paths.dist}/bin`);
+    const codeStat = await stat(`${paths.target}/bin`);
     assert.ok(codeStat.size < expected_size_in_kb * 1024, `Code size is ${codeStat.size} bytes (${Math.round(codeStat.size / 1024)} KB)`);
 });

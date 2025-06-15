@@ -93,16 +93,17 @@ Feature: Unique prefix matching
     | exact = true
     | ```
     |
-    | To enable it again, overriding the config file, use `--prefix`:
+    | To enable it again, overriding the config file, use `--no-exact` or `--prefix`:
     |
     | ```bash
+    | bin --no-exact hel
     | bin --prefix hel
     | ```
     |
     | Again, you'll probably want to set up a shell alias:
     |
     | ```bash
-    | alias bin='bin --prefix'
+    | alias bin='bin --no-exact'
     | ```
 
     Scenario Outline: Unique prefix matching can be disabled in .binconfig using 'exact = <value>'
@@ -122,6 +123,8 @@ Feature: Unique prefix matching
         | TRUE  |
         | on    |
         | yes   |
+        | t     |
+        | y     |
         | 1     |
 
     Scenario Outline: Unique prefix matching can be explicitly enabled in .binconfig using 'exact = <value>'
@@ -137,6 +140,8 @@ Feature: Unique prefix matching
         | FALSE |
         | off   |
         | no    |
+        | f     |
+        | n     |
         | 0     |
 
     Scenario: Any other value for 'exact' raises an error
@@ -144,7 +149,7 @@ Feature: Unique prefix matching
       And a file '{ROOT}/project/.binconfig' with content 'exact = blah'
       When I run 'bin hel'
       Then it fails with exit code 246
-      And the error is "bin: Invalid value for 'exact' in {ROOT}/project/.binconfig line 1: blah"
+      And the error is "bin: Invalid value for 'exact' in {ROOT}/project/.binconfig: blah"
 
     Scenario: Unique prefix matching can be disabled with --exact
       Given a script '{ROOT}/project/bin/hello'
@@ -156,9 +161,29 @@ Feature: Unique prefix matching
         bin hello
         """
 
-    Scenario: Unique prefix matching can be enabled with --prefix, overriding the config file
+    Scenario Outline: Unique prefix matching can be enabled with <argument>, overriding the config file
       Given a script '{ROOT}/project/bin/hello' that outputs 'Hello, World!'
       And a file '{ROOT}/project/.binconfig' with content 'exact = true'
-      When I run 'bin --prefix hel'
+      When I run 'bin <argument> hel'
       Then it is successful
       And the output is 'Hello, World!'
+
+      Examples:
+        | argument   |
+        | --prefix   |
+        | --no-exact |
+
+    Scenario: When unique prefix matching is disabled, matching subcommands are listed
+      Given a script '{ROOT}/project/bin/hello/world'
+      And a script '{ROOT}/project/bin/hello/other'
+      When I run 'bin --exact hel world'
+      # TODO: Is this the most logical behaviour? Perhaps it should filter the
+      #  results using the remaining arguments... Or just for a 'Not found'
+      #  error instead of displaying anything at all?
+      Then it is successful
+      And the output is:
+        """
+        Matching Commands
+        bin hello other
+        bin hello world
+        """
