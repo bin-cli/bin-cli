@@ -34,14 +34,6 @@ Options that can be used with a command:
 > **--prefix**
 > : Enable unique prefix matching (overrides [.binconfig](binconfig.5.html)).
 
-Options that do something with a **COMMAND**:
-
-> **--create**, **-c**
-> : Create the given script and open in your **$EDITOR** (implies **--exact**).
->
-> **--edit**, **-e**
-> : Open the given script in your **$EDITOR**.
-
 Options that do something special and don't accept a **COMMAND**:
 
 > **--completion**
@@ -66,20 +58,12 @@ Any options must be given before the command, because everything after the comma
 **bin build**
 : Run the <root>/bin/build command.
 
-**bin -c build**
-: Create the <root>/bin/build command and open it in your preferred $EDITOR.
-
-**bin -e build**
-: Open the <root>/bin/build command in your preferred $EDITOR.
-
 **bin deploy production**
 : Run the <root>/bin/deploy/production command.
 
 All of these examples are dependent on the scripts that exist in <root>/bin, as well as the contents of the [.binconfig](binconfig.5.html) file (if any).
 
 ## ENVIRONMENT
-
-Your preferred editor is determined by **`$VISUAL`** or **`$EDITOR`**. (If neither are set, it defaults to **editor**, **nano** or **vi**.)
 
 The environment variables **`$BIN_EXE`** ('bin' executable name) and **`$BIN_COMMAND`** (executable name + command name) are passed to all commands executed by Bin CLI. For maximum portability, use **`${BIN_COMMAND-$0}`**.
 

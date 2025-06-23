@@ -392,10 +392,6 @@ Feature: Tab completion
 
       Examples:
         | option               |
-        | -c                   |
-        | --create             |
-        | -e                   |
-        | --edit               |
         | --exact              |
         | --exe something      |
         | --exe=something      |
@@ -440,11 +436,7 @@ Feature: Tab completion
       And the output is:
         """
         --completion
-        --create
-        -c
         --dir
-        --edit
-        -e
         --exact
         --exe
         --help
@@ -462,9 +454,7 @@ Feature: Tab completion
       And the output is:
         """
         --completion
-        --create
         --dir
-        --edit
         --exact
         --exe
         --help
@@ -479,7 +469,6 @@ Feature: Tab completion
       Then it is successful
       And the output is:
         """
-        --edit
         --exact
         --exe
         """

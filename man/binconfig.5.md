@@ -47,11 +47,6 @@ Global settings may appear at the top of a file.
 
     **Default:** false
 
-**template =** _TEMPLATE_
-: Customise the template for scripts created by `--create`. It is passed to `echo -e`, so you can use escape sequences such as `\n` for new lines.
-
-    **Default:** `#!/usr/bin/env bash\nset -euo pipefail\n\n`
-
 ## COMMAND SETTINGS
 
 **alias =** _ALIAS_
@@ -68,7 +63,6 @@ Global settings may appear at the top of a file.
 `; Global settings`
 `dir = scripts`
 `exact = true`
-`template = #!/bin/sh\n\n`
 
 `; Settings for each command (script)`
 `[hello]`

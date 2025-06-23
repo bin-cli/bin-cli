@@ -26,8 +26,6 @@ Feature: CLI arguments
       Examples:
         | command    |
         | completion |
-        | create     |
-        | edit       |
         | help       |
         | info       |
         | version    |
@@ -41,10 +39,7 @@ Feature: CLI arguments
       Examples:
         | arg1         | arg2         |
         | --completion | --help       |
-        | --edit       | --completion |
-        | --help       | --version    |
-        | -c           | -h           |
-        | -e           | --completion |
+        | -h           | --version    |
         | --help       | -v           |
 
     Scenario: Specifying the same argument more than once doesn't cause an error

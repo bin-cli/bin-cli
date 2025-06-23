@@ -19,7 +19,6 @@ Feature: Config files
     | ; Global settings
     | dir = scripts
     | exact = true
-    | template = #!/bin/sh\n\n
     |
     | ; Settings for each command (script)
     | [hello]
@@ -32,7 +31,6 @@ Feature: Config files
     |
     | - `dir` (string) - Sets a [custom script directory](#custom-script-directory)
     | - `exact` (boolean) - Disables [unique prefix matching](#unique-prefix-matching)
-    | - `template` (string) - Sets the template for [scripts created with `--create`](#creating--editing-scripts)
     |
     | The supported per-command keys are:
     |
@@ -145,8 +143,6 @@ Feature: Config files
     | COLLAPSE: Why isn't `.binconfig` inside `bin/`?
     |
     | `.binconfig` can't be inside the `bin/` directory because the [`dir` setting](#custom-script-directory) may change the name of the `bin/` directory, creating a chicken-and-egg problem (how would we find it in the first place?).
-    |
-    | Technically it would be possible to support both locations for every setting _except_ `dir` - and I may if there is demand for it... But then we would have to decide what happens if there are two files - error, or merge them? If merged, how should we handle conflicts? Which one should `bin --edit .binconfig` open? And so on.
 
   Rule: Invalid key names are ignored
 

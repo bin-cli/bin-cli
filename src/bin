@@ -258,10 +258,8 @@ while [[ $# -gt 0 ]]; do
     case $1 in
         --complete-bash)    set_action "$1" complete-bash ;;
         --completion)       set_action "$1" completion ;;
-        --create | -c)      set_action "$1" create ;;
         --dir)              set_option_value '--dir' fixed_bin_dir "${2-}"; shift ;;
         --dir=*)            set_option_value '--dir' fixed_bin_dir "${1#*=}" ;;
-        --edit | -e)        set_action "$1" edit ;;
         --exact)            unique_prefix_matching=false ;;
         --exe)              is_custom_exe=true; set_option_value '--exe' exe "${2-}"; shift ;;
         --exe=*)            is_custom_exe=true; set_option_value '--exe' exe "${1#*=}" ;;
@@ -291,10 +289,6 @@ if [[ $action = 'help' ]]; then
     echo "  --exact               Disable unique prefix matching"
     echo "  --exe NAME            Override the executable name displayed in the command list"
     echo "  --prefix              Enable unique prefix matching (overrides .binconfig)"
-    echo
-    echo "Options that do something with a COMMAND:"
-    echo "  --create, -c          Create the given script and open in your \$EDITOR (implies '--exact')"
-    echo "  --edit, -e            Open the given script in your \$EDITOR"
     echo
     echo "Options that do something special and don't accept a COMMAND:"
     echo "  --completion          Output a tab completion script for the current shell"
@@ -358,10 +352,8 @@ if [[ $action = 'complete-bash' ]]; then
         case $1 in
             --complete-bash)    fail "Cannot tab complete '$1'" ;;
             --completion)       fail "Cannot tab complete '$1'" ;;
-            --create | -c)      true ;; # Complete as normal to help with creating subcommands
             --dir)              set_option_value '--dir' fixed_bin_dir "${2-}"; shift ;;
             --dir=*)            set_option_value '--dir' fixed_bin_dir "${1#*=}" ;;
-            --edit | -e)        true ;; # Complete as normal
             --exact)            unique_prefix_matching=false ;;
             --exe)              is_custom_exe=true; set_option_value '--exe' exe "${2-}"; shift ;;
             --exe=*)            is_custom_exe=true; set_option_value '--exe' exe "${1#*=}" ;;
@@ -385,9 +377,7 @@ if [[ $action = 'complete-bash' ]]; then
         declare option_names=(
             # '--complete-bash' # Shouldn't normally be entered by hand
             '--completion'
-            '--create' '-c'
             '--dir'
-            '--edit' '-e'
             '--exact'
             '--exe'
             '--help' '-h'
@@ -745,7 +735,6 @@ bin_dir_for() {
 # and register both the global and per-command settings.
 
 declare -a commands_listed_in_binconfig=()
-declare template='_TBC'
 map_init command_args
 map_init command_help
 
@@ -808,12 +797,6 @@ set_global_option() {
             fi
         else
             fail "Invalid value for 'exact' in $binconfig line $line: $value"
-        fi
-
-    elif [[ $key = 'template' ]]; then
-
-        if [[ $template = '_TBC' ]]; then
-            template=$value
         fi
 
     else
@@ -1151,42 +1134,16 @@ matching_commands_shared_prefix() {
 #endregion =====================================================================
 #region ======= HELPERS: RUN COMMANDS ==========================================
 
-open_in_editor() {
-    local editor file
-
-    file=$1
-
-    editor=${VISUAL-${EDITOR-}}
-
-    if [[ -z $editor ]]; then
-        if command -v editor &>/dev/null; then
-            editor='editor'
-        elif command -v nano &>/dev/null; then
-            editor='nano'
-        elif command -v vi &>/dev/null; then
-            editor='vi'
-        else
-            fail 'No editor configured - please export EDITOR or VISUAL environment variables'
-        fi
-    fi
-
-    exec "$editor" "$file"
-}
-
 run_command() {
     if [[ $action = 'complete-bash' ]]; then
         bug 'run_command() should not be reached during tab completion' # kcov-ignore-line: This should never be happen
-    elif [[ $action = 'create' ]]; then
-        fail "$1 already exists (use --edit to edit it)"
-    elif [[ $action = 'edit' ]]; then
-        open_in_editor "$1"
     else
         exec "$@"
     fi
 }
 
 run_command_if_only_one_match() {
-    local command executable root script
+    local command executable root
 
     if [[ ${#matching_commands[@]} -ne 1 ]]; then
         return
@@ -1406,53 +1363,6 @@ while [[ $# -gt $num_parameters_to_ignore ]]; do
     declare subcommand=$1
     shift
 
-    # Special case for creating/editing the .binconfig file
-    if [[ -z $full_command && $subcommand = '.binconfig' ]]; then
-        if [[ $action = 'create' ]]; then
-            if [[ -e "$root/.binconfig" ]]; then
-                fail "$root/.binconfig already exists (use --edit to edit it)"
-            fi
-
-            ( # kcov-ignore-line: Usage not detected
-                declare output_started=false
-
-                if [[ $bin_dir_from_root != 'bin' ]]; then
-                    echo "dir = $bin_dir_from_root"
-                    output_started=true
-                fi
-
-                for command in ${registered_commands+"${registered_commands[@]}"}; do
-                    if $output_started; then
-                        echo
-                    fi
-                    echo "[$command]"
-                    echo 'alias ='
-                    echo 'args ='
-                    echo 'help ='
-                    output_started=true
-                done
-
-                if ! $output_started; then
-                    echo
-                fi
-            ) >"$root/.binconfig" # kcov-ignore-line: Usage not detected
-
-            echo "Created file $root/.binconfig"
-            open_in_editor "$root/.binconfig"
-        elif [[ $action = 'edit' ]]; then
-            if [[ ! -e "$root/.binconfig" ]]; then
-                fail 'No .binconfig file found (use --create to create one)'
-            fi
-
-            bin_dir_for_binconfig=$(bin_dir_for "$root/.binconfig")
-            if [[ "$bin_dir_for_binconfig" != "$bin_dir_from_root" ]]; then
-                fail ".binconfig belongs to $bin_dir_for_binconfig/ not $bin_dir_from_root/"
-            fi
-
-            open_in_editor "$root/.binconfig"
-        fi
-    fi
-
     # Build up the entered command in canonical format
     full_command+=" $subcommand"
 
@@ -1468,34 +1378,6 @@ while [[ $# -gt $num_parameters_to_ignore ]]; do
         command_list_title='Available Subcommands'
         command_list=(${matching_commands+"${matching_commands[@]}"})
         continue
-    fi
-
-    # No exact matches - check for special actions
-    if [[ $action = 'create' ]]; then
-        if [[ $subcommand = .* ]]; then
-            fail "Command names may not start with '.'"
-        fi
-
-        if [[ $# -gt 0 ]]; then
-            current_directory="$current_directory/$subcommand"
-            continue
-        fi
-
-        mkdir -p "$current_directory"
-        declare script="$current_directory/$subcommand"
-
-        if [[ $template = '_TBC' ]]; then
-            # Using '_TBC' as the placeholder allows the user to set it to a
-            # blank string in the config file. We can't just initialise it to
-            # the following value because we want the first (deepest) .binconfig
-            # file to take precedence, not the last.
-            template='#!/usr/bin/env bash\nset -euo pipefail\n\n'
-        fi
-
-        echo -e "$template" >"$script"
-        chmod +x "$script"
-        echo "Created script $script"
-        open_in_editor "$script"
     fi
 
     # Check if there are any prefix matches
@@ -1532,7 +1414,7 @@ while [[ $# -gt $num_parameters_to_ignore ]]; do
         if [[ -n $binconfig ]]; then
             append="${append} or $binconfig"
         fi
-        if in_array "${full_command:1}" completion create edit help info version; then
+        if in_array "${full_command:1}" completion help info version; then
             append="${append}${NEW_LINE}${GREY}Perhaps you meant to run 'bin --${full_command:1}'?${RESET}"
         fi
         fail "Command '${full_command:1}' not found in $bin_dir/$append" $ERR_NOT_FOUND
