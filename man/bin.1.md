@@ -89,8 +89,6 @@ Your preferred editor is determined by **`$VISUAL`** or **`$EDITOR`**. (If neith
 
 The environment variables **`$BIN_EXE`** ('bin' executable name) and **`$BIN_COMMAND`** (executable name + command name) are passed to all commands executed by Bin CLI. For maximum portability, use **`${BIN_COMMAND-$0}`**.
 
-The environment variables **`$BIN_ROOT`** (root directory path) and **`$BIN_DIR`** (bin/ directory path) are passed to inline commands (defined in [.binconfig](binconfig.5.html)) only.
-
 ## EXIT STATUS
 
 The exit status of a command is preserved. Exit statuses that may be set by bin itself are:

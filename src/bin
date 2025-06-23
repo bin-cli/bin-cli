@@ -880,10 +880,6 @@ set_command_option() {
             register_command_args "$command" "$value"
         fi
 
-    elif [[ $key = 'command' ]]; then
-
-        register_inline_command "$command" "$value" "$binconfig line $line" "$root" "$bin_dir"
-
     elif [[ $key = 'help' ]]; then
 
         if [[ -n "$value" ]]; then
@@ -912,16 +908,12 @@ binconfig_line_is_ignored() {
 
 # Before we can run any commands, we need to make a list of them all. This
 # allows us to support unique prefix matching, detect conflicts, and so on.
-# Regular commands are implemented as executables / shell scripts. Inline
-# commands are defined in '.binconfig'.
+# Regular commands are implemented as executables / shell scripts.
 
 declare -a broken_symlinks=()
 declare -a non_executable_files=()
 declare -a registered_commands=()
-map_init command_to_bin_dir
 map_init command_to_executable
-map_init command_to_inline_script
-map_init command_to_root
 map_init executable_to_command
 map_init original_commands
 
@@ -955,24 +947,6 @@ register_executable_command() {
     map_set command_to_executable "$name" "$executable" # global
     map_set executable_to_command "$executable" "$name" # global
     map_set original_commands "$name" "$name"           # global
-}
-
-register_inline_command() {
-    local bin_dir name root script source
-
-    name=$1
-    script=$2
-    source=$3
-    root=$4
-    bin_dir=$5
-
-    prevent_duplicate_command command "$name" "$source"
-
-    registered_commands+=("$name")                     # global
-    map_set command_to_inline_script "$name" "$script" # global
-    map_set command_to_root "$name" "$root"            # global
-    map_set command_to_bin_dir "$name" "$bin_dir"      # global
-    map_set original_commands "$name" "$name"          # global
 }
 
 register_commands_in_directory() {
@@ -1142,7 +1116,7 @@ find_matching_commands() {
         fi
 
         # Ignore aliases that don't actually map to a valid command
-        if ! map_has command_to_executable "$original_command" && ! map_has command_to_inline_script "$original_command"; then
+        if ! map_has command_to_executable "$original_command"; then
             continue
         fi
 
@@ -1262,22 +1236,6 @@ run_command_if_only_one_match() {
 
     if executable=$(map_get command_to_executable "$command"); then
         run_command "$executable" "$@"
-    fi
-
-    if script=$(map_get command_to_inline_script "$command"); then
-
-        if [[ $action = 'edit' ]]; then
-            root=$(map_get command_to_root "$command")
-            open_in_editor "$root/.binconfig"
-        fi
-
-        # These variables are useful for inline commands, but aren't made available
-        # to regular commands because it is better to use "$(dirname "$0")" instead
-        export BIN_ROOT BIN_DIR
-        BIN_ROOT=$(map_get command_to_root "$command")
-        BIN_DIR=$(map_get command_to_bin_dir "$command")
-
-        run_command bash -c "$script" -- "$@"
     fi
 
     bug 'Reached the end of run_command_if_only_one_match() without running a command' # kcov-ignore-line: This should never be happen
@@ -1958,11 +1916,6 @@ for command in ${commands_listed_in_binconfig+"${commands_listed_in_binconfig[@]
 
     # Regular script
     if map_has command_to_executable "$command"; then
-        continue
-    fi
-
-    # Inline command
-    if map_has command_to_inline_script "$command"; then
         continue
     fi
 

@@ -27,9 +27,6 @@ Feature: Config files
     | alias = hi
     | args = [name]
     | help = Say "Hello, World!"
-    |
-    | [phpunit]
-    | command = "$BIN_ROOT/vendor/bin/phpunit" "%@"
     | ```
     |
     | The supported global keys are:
@@ -44,7 +41,6 @@ Feature: Config files
     | - `alias`/`aliases` (comma-separated strings) - [Aliases](#aliases)
     | - `args` (string) - [List of arguments](#help-text)
     | - `help` (string) - [Help text](#help-text)
-    | - `command` (string) - [Inline commands](#inline-commands)
 
     Scenario: Directories above .binconfig are not searched when .binconfig exists
       Given an empty file '{ROOT}/project/root/.binconfig'

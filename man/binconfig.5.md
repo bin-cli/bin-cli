@@ -67,11 +67,6 @@ Global settings may appear at the top of a file.
 **aliases =** _ALIAS1_, _ALIAS2_, ...
 : Define multiple aliases for the command at once.
 
-**command =** _DIRECTORY_
-: Define the command to execute (instead of creating a script in the bin/ directory).
-
-    The command is executed within a Bash shell (**`bash -c "$command"`**), so it may contain logic operators (**&&**, **||**), multiple commands separated by **;**, and pretty much anything else that you can fit into a single line. Multi-line commands are not supported.
-
 **help =** _DIRECTORY_
 : Add a short (one-line) description of the command. This will be displayed when you run **bin** with no parameters (or with an ambiguous prefix).
 
@@ -87,9 +82,6 @@ Global settings may appear at the top of a file.
 `[hello]`
 `alias = hi`
 `help = Say "Hello, World!"`
-
-`[phpunit]`
-`command = "$BIN_ROOT/vendor/bin/phpunit" "%@"`
 
 ## SEE ALSO
 
