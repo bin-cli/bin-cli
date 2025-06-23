@@ -10,15 +10,9 @@
 # it works with Bash installed in a non-standard location, e.g. with Homebrew.
 #
 # We require Bash, not just a standard POSIX shell like Dash[1], because we use:
-# - Arrays
-# - Regular expression matching
+# - Arrays, including associative arrays
 # - '[[' for saner 'if' conditions[2]
 # - Function-local variables (especially in recursive functions)
-#
-# While I would prefer to support all POSIX-compatible[3] shells, it's probably
-# not worth the extra effort. Supporting Bash v3 (for macOS) is already complex
-# enough (there are no associative arrays, and we have to use
-# '${array+"${array[@]}"}' everywhere instead of '${array[@]}' [4])!
 #
 # There are a number of global variables. Unfortunately there's little we can do
 # to avoid that, since we can't pass arrays/maps around by reference like in
@@ -29,14 +23,13 @@
 #
 # Since Bash doesn't support booleans, they are actually set to the strings
 # 'true' or 'false', which can be evaluated directly using 'if $var; then ...'.
-# (Some people argue against this style[5], but I haven't seen any convincing
+# (Some people argue against this style[4], but I haven't seen any convincing
 # arguments why to change it...)
 #
 # [1]: https://wiki.archlinux.org/title/Dash
 # [2]: https://stackoverflow.com/a/31366734
 # [3]: https://en.wikipedia.org/wiki/POSIX
-# [4]: https://stackoverflow.com/a/61551944
-# [5]: https://stackoverflow.com/a/21210966
+# [4]: https://stackoverflow.com/a/21210966
 
 #endregion =====================================================================
 #region ======= SHELL OPTIONS ==================================================
@@ -371,7 +364,7 @@ if [[ $action = 'complete-bash' ]]; then
         # kcov-ignore-end
 
         declare option_name
-        for option_name in ${option_names+"${option_names[@]}"}; do
+        for option_name in "${option_names[@]}"; do
             if [[ $option_name = "$1"* ]]; then
                 # 'echo' treats '-e' as an option rather than the string to output
                 printf "%s\n" "$option_name"
@@ -402,106 +395,10 @@ in_array() {
 }
 
 #endregion =====================================================================
-#region ======= HELPERS: MAPS (ASSOCIATIVE ARRAYS) =============================
-
-# Bash 3 (still the default on macOS - *sigh*!) doesn't have associative arrays,
-# so we emulate them by creating variables in the format 'map__<map>__<key>',
-# with the key being hex-encoded if necessary. This does mean all maps are
-# global - they can't be local to a function.
-
-# But when associative arrays are supported, they are much faster, so we'll use
-# them.
-
-if (( BASH_VERSINFO[0] >= 4 )) && [[ ${BIN_DEBUG_ASSOC_ARRAYS-} != true ]]; then
-    associative_arrays_supported=true
-else
-    associative_arrays_supported=false
-fi
-
-map_init() {
-    local map
-
-    map=$1
-
-    if $associative_arrays_supported; then
-        eval "declare -gA map__$map=()"
-    else
-        # Clear any existing values so maps can be reset/reused
-        eval "unset \"\${!map__${map}__@}\"" # global
-    fi
-
-    # Also create an array of raw keys so we can loop through them
-    # We'll do this even if associative arrays are supported for simplicity
-    eval "$map=()" # global
-}
-
-map_key() {
-    local char i key length map
-
-    map=$1
-    key=$2
-
-    printf '%s' "map__${map}__"
-
-    length="${#key}"
-    for ((i = 0; i < length; i++)); do
-        char="${key:i:1}"
-        case $char in
-            [a-zA-Z0-9]) printf '%s' "$char" ;;
-            # Encode all other characters in hex to make them valid variable names
-            *) printf '_%02X' "'$char" ;;
-        esac
-    done
-}
-
-map_set() {
-    local key map map_key value
-
-    map=$1
-    key=$2
-    value=$3
-
-    if $associative_arrays_supported; then
-        eval "map__${map}[\$key]=\$value"
-    else
-        # Store the values in separate variables
-        map_key=$(map_key "$map" "$key")
-        printf -v "$map_key" %s "$value" # global
-    fi
-
-    # Also add it to an array of raw keys so we can loop through them
-    eval "$map+=(\"\$key\")" # global
-}
-
-map_get() {
-    local key map map_key value
-
-    map=$1
-    key=$2
-
-    if $associative_arrays_supported; then
-        eval "value=\${map__${map}[\$key]-}"
-    else
-        map_key=$(map_key "$map" "$key")
-        value="${!map_key-}"
-    fi
-
-    if [[ -z $value ]]; then
-        return 1
-    fi
-
-    echo "$value"
-}
-
-map_has() {
-    map_get "$1" "$2" >/dev/null
-}
-
-#endregion =====================================================================
 #region ======= HELPERS: FILESYSTEM ============================================
 
 # The BIN_TEST_ROOT env var is ignored in production builds, but is used as
-# an alternative to 'chroot' (which doesn't work on macOS) in the tests
+# an alternative to 'chroot' (which doesn't work on all OS's) in the tests
 if [[ $VERSION = '1.2.3-dev' ]]; then
     readonly ROOT_DIR=${BIN_TEST_ROOT-}
 else
@@ -629,9 +526,9 @@ _canonicalize_file_path() {
 declare -a broken_symlinks=()
 declare -a non_executable_files=()
 declare -a registered_commands=()
-map_init command_to_executable
-map_init executable_to_command
-map_init original_commands
+declare -gA command_to_executable=()
+declare -gA executable_to_command=()
+declare -gA original_commands=()
 
 register_executable_command() {
     local executable name
@@ -639,10 +536,10 @@ register_executable_command() {
     name=$1
     executable=$2
 
-    registered_commands+=("$name")                      # global
-    map_set command_to_executable "$name" "$executable" # global
-    map_set executable_to_command "$executable" "$name" # global
-    map_set original_commands "$name" "$name"           # global
+    registered_commands+=("$name")             # global
+    command_to_executable[$name]="$executable" # global
+    executable_to_command[$executable]="$name" # global
+    original_commands[$name]="$name"           # global
 }
 
 register_commands_in_directory() {
@@ -669,7 +566,7 @@ register_commands_in_directory() {
                 broken_symlinks+=("$file => $target")
             fi
         elif [[ -d $file ]]; then
-            map_set executable_to_command "$realfile" "$prefix$name" # global
+            executable_to_command[$realfile]="$prefix$name" # global
             register_commands_in_directory "$file" "$prefix$name "
         elif [[ ! -x $file ]]; then
             non_executable_files+=("$file") # global
@@ -683,7 +580,7 @@ register_commands_in_directory() {
 #region ======= HELPERS: ALIASES ===============================================
 
 declare -a registered_aliases=()
-map_init alias_to_executable
+declare -gA alias_to_executable=()
 
 register_alias() {
     local alias executable
@@ -692,7 +589,7 @@ register_alias() {
     executable=$2
 
     registered_aliases+=("$alias")                     # global
-    map_set alias_to_executable "$alias" "$executable" # global
+    alias_to_executable["$alias"]="$executable" # global
 }
 
 #endregion =====================================================================
@@ -755,18 +652,18 @@ find_matching_commands() {
 
     # Find commands and aliases that match
     matching_commands=() # global
-    map_init matched_original_commands # global
+    declare -gA matched_original_commands=() # global
 
-    for command in ${registered_commands+"${registered_commands[@]}"} ${registered_aliases+"${registered_aliases[@]}"}; do
+    for command in "${registered_commands[@]}" "${registered_aliases[@]}"; do
 
         # Don't match the same command more than once, even if it has aliases that also match
-        original_command=$(map_get original_commands "$command")
-        if map_has matched_original_commands "$original_command"; then
+        original_command="${original_commands[$command]}"
+        if [[ -v matched_original_commands[$original_command] ]]; then
             continue
         fi
 
         # Ignore aliases that don't actually map to a valid command
-        if ! map_has command_to_executable "$original_command"; then
+        if [[ ! -v command_to_executable[$original_command] ]]; then
             continue
         fi
 
@@ -777,7 +674,7 @@ find_matching_commands() {
 
         # It does match, so add it to the results
         matching_commands+=("$command") # global
-        map_set matched_original_commands "$original_command" true # global
+        matched_original_commands["$original_command"]=true # global
     done
 }
 
@@ -789,7 +686,7 @@ matching_commands_shared_prefix() {
 
     shared_next_command=''
 
-    for command in ${matching_commands+"${matching_commands[@]}"}; do
+    for command in "${matching_commands[@]}"; do
         # Remove the common prefix
         remaining=${command:$prefix_length}
 
@@ -833,7 +730,7 @@ run_command_if_only_one_match() {
         return
     fi
 
-    command=$(map_get original_commands "${matching_commands[0]}")
+    command="${original_commands[${matching_commands[0]}]}"
 
     # Export the command name so it can be displayed in help messages
     # Typically with a fallback to $0 if it is unset: ${BIN_COMMAND-$0}
@@ -842,11 +739,7 @@ run_command_if_only_one_match() {
     # And this can be used to display other command names
     export BIN_EXE="$exe"
 
-    if executable=$(map_get command_to_executable "$command"); then
-        run_command "$executable" "$@"
-    fi
-
-    bug 'Reached the end of run_command_if_only_one_match() without running a command' # kcov-ignore-line: This should never be happen
+    run_command "${command_to_executable[$command]}" "$@"
 }
 
 #endregion =====================================================================
@@ -902,22 +795,22 @@ if [[ -d $bin_dir ]]; then
 fi
 
 # Map symlink aliases to their underlying commands, now we know all the commands
-# shellcheck disable=SC2154 # It doesn't recognise 'map_init' and 'map_set' as setting this variable
-for alias in ${alias_to_executable+"${alias_to_executable[@]}"}; do
-    if executable=$(map_get alias_to_executable "$alias"); then
-        command=$(map_get executable_to_command "$executable")
-        map_set original_commands "$alias" "$command"
+for alias in "${!alias_to_executable[@]}"; do
+    executable="${alias_to_executable[$alias]}"
+    if [[ -n $executable ]]; then
+        command="${executable_to_command[$executable]}"
+        original_commands[$alias]="$command"
     fi
 done
 
-for alias in ${registered_aliases+"${registered_aliases[@]}"}; do
+for alias in "${registered_aliases[@]}"; do
     # Expand aliases to cover subcommands (e.g. if 'deploy' => 'push' then 'deploy live' => 'push live')
-    target=$(map_get original_commands "$alias")
-    for command in ${registered_commands+"${registered_commands[@]}"}; do
+    target="${original_commands[$alias]}"
+    for command in "${registered_commands[@]}"; do
         if [[ "$command" = "$target "* ]]; then
             suffix=${command:${#target}}
             registered_aliases+=("$alias$suffix")
-            map_set original_commands "$alias$suffix" "$target$suffix"
+            original_commands["$alias$suffix"]="$target$suffix"
         fi
     done
 done
@@ -927,7 +820,7 @@ done
 
 # If no command is given, we will list all available commands
 declare command_list_title='Available Commands'
-declare -a command_list=(${registered_commands+"${registered_commands[@]}"})
+declare -a command_list=("${registered_commands[@]}")
 
 # Loop through each argument until we find a matching command
 declare current_directory=$bin_dir
@@ -950,7 +843,7 @@ while [[ $# -gt $num_parameters_to_ignore ]]; do
     if [[ ${#matching_commands[@]} -gt 0 ]]; then
         current_directory="$current_directory/$subcommand"
         command_list_title='Available Subcommands'
-        command_list=(${matching_commands+"${matching_commands[@]}"})
+        command_list=("${matching_commands[@]}")
         continue
     fi
 
@@ -963,7 +856,7 @@ while [[ $# -gt $num_parameters_to_ignore ]]; do
         current_directory="$current_directory/$parent"
         full_command=" $parent"
         command_list_title='Matching Commands'
-        command_list=(${matching_commands+"${matching_commands[@]}"})
+        command_list=("${matching_commands[@]}")
         continue
     fi
 
@@ -987,7 +880,7 @@ while [[ $# -gt $num_parameters_to_ignore ]]; do
 
     # Otherwise display the list of matches
     command_list_title='Matching Commands'
-    command_list=(${matching_commands+"${matching_commands[@]}"})
+    command_list=("${matching_commands[@]}")
     break
 done
 
@@ -1010,7 +903,7 @@ if [[ $action = 'complete-bash' ]]; then
     declare -a possible_results=()
     declare -a matched_commands=()
 
-    for command in ${command_list+"${command_list[@]}"}; do
+    for command in "${command_list[@]}"; do
         if ! command_matches prefix "$typed_command" "$command"; then
             continue
         fi
@@ -1021,7 +914,7 @@ if [[ $action = 'complete-bash' ]]; then
         matched_commands+=("$command")
     done
 
-    for alias in ${registered_aliases+"${registered_aliases[@]}"}; do
+    for alias in "${registered_aliases[@]}"; do
         if ! command_matches prefix "$typed_command" "$alias"; then
             continue
         fi
@@ -1029,8 +922,8 @@ if [[ $action = 'complete-bash' ]]; then
         # Only list each command once - it doesn't matter which variant is
         # typed, and Readline (by default) will only use the completion if
         # there is single match (otherwise it just lists the possible matches)
-        command=$(map_get original_commands "$alias")
-        if in_array "$command" ${matched_commands+"${matched_commands[@]}"}; then
+        command="${original_commands[$alias]}"
+        if in_array "$command" "${matched_commands[@]}"; then
             continue
         fi
 
@@ -1041,7 +934,7 @@ if [[ $action = 'complete-bash' ]]; then
     done
 
     # Output the matches and remove duplicates
-    for result in ${possible_results+"${possible_results[@]}"}; do
+    for result in "${possible_results[@]}"; do
 
         # Ignore commands that start with '_', unless the user typed the '_' themselves
         if is_hidden_command "$result" "$current_command"; then
@@ -1066,10 +959,10 @@ get_command_aliases() {
     command_alias_count=0
     command_aliases=''
 
-    original_command=$(map_get original_commands "$command")
+    original_command="${original_commands[$command]}"
 
-    for alias in ${registered_aliases+"${registered_aliases[@]}"}; do
-        target=$(map_get original_commands "$alias")
+    for alias in "${registered_aliases[@]}"; do
+        target="${original_commands[$alias]}"
         if [[ "$target" = "$original_command" ]]; then
             ((command_alias_count += 1))
             command_aliases+=", $alias"
@@ -1088,7 +981,7 @@ get_command_aliases() {
 # Remove hidden commands
 declare -a visible_commands=()
 
-for command in ${command_list+"${command_list[@]}"}; do
+for command in "${command_list[@]}"; do
     if ! is_hidden_command "$command" "${full_command:1}"; then
         visible_commands+=("$command")
     fi
@@ -1100,7 +993,7 @@ echo "$LCYAN$BOLD$UNDERLINE$command_list_title$RESET"
 # Output the list of commands
 declare command command_aliases
 
-for command in ${visible_commands+"${visible_commands[@]}"}; do
+for command in "${visible_commands[@]}"; do
     echo -n "${LWHITE}${exe} ${command}${RESET}"
 
     if aliases=$(get_command_aliases "$command"); then
@@ -1120,7 +1013,7 @@ if [[ ${#broken_symlinks[@]} -gt 0 ]]; then
     echo
     echo "${YELLOW}Warning: The following symlinks point to targets that don't exist:${RESET}"
     declare symlink
-    for symlink in ${broken_symlinks+"${broken_symlinks[@]}"}; do
+    for symlink in "${broken_symlinks[@]}"; do
         echo "$symlink"
     done
 fi
@@ -1130,7 +1023,7 @@ if [[ ${#non_executable_files[@]} -gt 0 ]]; then
     echo
     echo "${YELLOW}Warning: The following files are not executable (chmod +x):${RESET}"
     declare file
-    for file in ${non_executable_files+"${non_executable_files[@]}"}; do
+    for file in "${non_executable_files[@]}"; do
         echo "$file"
     done
 fi
