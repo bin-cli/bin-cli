@@ -50,9 +50,6 @@ Global settings may appear at the top of a file.
 **aliases =** _ALIAS1_, _ALIAS2_, ...
 : Define multiple aliases for the command at once.
 
-**help =** _DIRECTORY_
-: Add a short (one-line) description of the command. This will be displayed when you run **bin** with no parameters (or with an ambiguous prefix).
-
 ## EXAMPLE CONFIG FILE
 
 `; Global settings`
@@ -61,7 +58,6 @@ Global settings may appear at the top of a file.
 `; Settings for each command (script)`
 `[hello]`
 `alias = hi`
-`help = Say "Hello, World!"`
 
 ## SEE ALSO
 

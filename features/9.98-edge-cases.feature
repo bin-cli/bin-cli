@@ -43,7 +43,7 @@ Feature: Edge cases
     And the output is:
       """
       Available Commands
-      bin deploy    (alias: publish)
+      bin deploy (alias: publish)
       """
 
   Scenario: Directory aliases are handled correctly when inside a symlinked root
@@ -58,8 +58,8 @@ Feature: Edge cases
     And the output is:
       """
       Available Commands
-      bin deploy live       (alias: publish live)
-      bin deploy staging    (alias: publish staging)
+      bin deploy live (alias: publish live)
+      bin deploy staging (alias: publish staging)
       """
 
   Scenario Outline: The '<option><suffix>' option requires a value

@@ -22,8 +22,6 @@ Feature: Config files
     | ; Settings for each command (script)
     | [hello]
     | alias = hi
-    | args = [name]
-    | help = Say "Hello, World!"
     | ```
     |
     | The supported global keys are:
@@ -33,8 +31,6 @@ Feature: Config files
     | The supported per-command keys are:
     |
     | - `alias`/`aliases` (comma-separated strings) - [Aliases](#aliases)
-    | - `args` (string) - [List of arguments](#help-text)
-    | - `help` (string) - [Help text](#help-text)
 
     Scenario: Directories above .binconfig are not searched when .binconfig exists
       Given an empty file '{ROOT}/project/root/.binconfig'
@@ -116,26 +112,6 @@ Feature: Config files
       Then it is successful
       And the output is 'Hello, World!'
 
-    Scenario: Comments may not appear at the end of a value
-      Given a file '{ROOT}/project/.binconfig' with content:
-        """
-        [sample1]
-        help = Description ; Not a comment
-
-        [sample2]
-        help = Description # Not a comment
-        """
-      And a script '{ROOT}/project/bin/sample1'
-      And a script '{ROOT}/project/bin/sample2'
-      When I run 'bin'
-      Then it is successful
-      And the output is:
-        """
-        Available Commands
-        bin sample1    Description ; Not a comment
-        bin sample2    Description # Not a comment
-        """
-
   Rule: .binconfig can't be inside the bin/ folder
 
     | COLLAPSE: Why isn't `.binconfig` inside `bin/`?
@@ -168,7 +144,7 @@ Feature: Config files
       Given a file '{ROOT}/project/.binconfig' with content:
         """
         [my-command]
-        help = Description of command
+        alias = my-alias
         """
       And a script '{ROOT}/project/bin/sample'
       When I run 'bin'

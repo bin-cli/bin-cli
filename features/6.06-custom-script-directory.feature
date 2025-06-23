@@ -132,7 +132,7 @@ Feature: Custom script directory
         dir = scripts
 
         [hello]
-        help = Hello, World!
+        alias = bye
         """
       And a script '{ROOT}/project/scripts/hello'
       When I run 'bin --dir scripts'
@@ -140,14 +140,14 @@ Feature: Custom script directory
       And the output is:
         """
         Available Commands
-        bin hello    Hello, World!
+        bin hello (alias: bye)
         """
 
     Scenario: When --dir doesn't match .binconfig, .binconfig should be ignored
       Given a file '{ROOT}/project/.binconfig' with content:
         """
         [hello]
-        help = Hello, World!
+        alias = bye
         """
       And a script '{ROOT}/project/scripts/hello'
       When I run 'bin --dir scripts'
@@ -164,7 +164,7 @@ Feature: Custom script directory
         dir = .
 
         [hello]
-        help = Hello, World!
+        alias = bye
         """
       And a script '{ROOT}/project/scripts/hello'
       When I run 'bin --dir scripts'
@@ -172,7 +172,7 @@ Feature: Custom script directory
       And the output is:
         """
         Available Commands
-        bin hello    Hello, World!
+        bin hello (alias: bye)
         """
 
     Scenario: When --dir is used and a matching .binconfig can't be found, the 'not found' error should be adapted accordingly

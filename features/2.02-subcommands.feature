@@ -55,24 +55,3 @@ Feature: Subcommands
         bin deploy live
         bin deploy staging
         """
-
-    Scenario: Help text for subcommands can be provided in .binconfig
-      Given a script '{ROOT}/project/bin/deploy/live'
-      And a script '{ROOT}/project/bin/deploy/staging'
-      And a script '{ROOT}/project/bin/another'
-      And a file '{ROOT}/project/.binconfig' with content:
-        """
-        [deploy live]
-        help = Deploy to the production site
-
-        [deploy staging]
-        help = Deploy to the staging site
-        """
-      When I run 'bin deploy'
-      Then it is successful
-      And the output is:
-        """
-        Available Subcommands
-        bin deploy live       Deploy to the production site
-        bin deploy staging    Deploy to the staging site
-        """

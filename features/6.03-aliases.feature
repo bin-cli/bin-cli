@@ -127,7 +127,7 @@ Feature: Aliases
       And the output is:
         """
         Available Commands
-        bin deploy    (alias: publish)
+        bin deploy (alias: publish)
         """
 
     Scenario: A directory alias can be defined by a symlink
@@ -139,8 +139,8 @@ Feature: Aliases
       And the output is:
         """
         Available Commands
-        bin deploy live       (alias: publish live)
-        bin deploy staging    (alias: publish staging)
+        bin deploy live (alias: publish live)
+        bin deploy staging (alias: publish staging)
         """
 
     Scenario: Symlink aliases are combined with config aliases
@@ -158,7 +158,7 @@ Feature: Aliases
       And the output is:
         """
         Available Commands
-        bin deploy    (aliases: publish, alpha, zappa)
+        bin deploy (aliases: publish, alpha, zappa)
         """
 
     Scenario: A symlink alias must be relative not absolute
@@ -208,30 +208,8 @@ Feature: Aliases
       And the output is:
         """
         Available Commands
-        bin artisan    (alias: art)
-        bin deploy     (aliases: publish, push)
-        """
-
-    Scenario: Aliases are displayed after the help text
-      Given a script '{ROOT}/project/bin/artisan'
-      And a script '{ROOT}/project/bin/deploy'
-      And a file '{ROOT}/project/.binconfig' with content:
-        """
-        [artisan]
-        alias = art
-        help = Run Laravel Artisan with the appropriate version of PHP
-
-        [deploy]
-        alias = publish, push
-        help = Sync the code to the live server
-        """
-      When I run 'bin'
-      Then it is successful
-      And the output is:
-        """
-        Available Commands
-        bin artisan    Run Laravel Artisan with the appropriate version of PHP (alias: art)
-        bin deploy     Sync the code to the live server (aliases: publish, push)
+        bin artisan (alias: art)
+        bin deploy (aliases: publish, push)
         """
 
     Scenario: Blank aliases are ignored
@@ -286,8 +264,8 @@ Feature: Aliases
       And the output is:
         """
         Available Commands
-        bin deploy live       (alias: push live)
-        bin deploy staging    (alias: push staging)
+        bin deploy live (alias: push live)
+        bin deploy staging (alias: push staging)
         """
 
   Rule: Aliases are considered by unique prefix matching
