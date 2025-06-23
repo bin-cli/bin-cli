@@ -23,14 +23,6 @@ echo "${LCYAN}Testing the application...${RESET}"
 bin/test
 echo
 
-echo "${LCYAN}Smoke testing the DEB package builder...${RESET}"
-bin/generate/deb "$version"
-echo
-
-echo "${LCYAN}Smoke testing the RPM package builder...${RESET}"
-bin/generate/rpm "$version"
-echo
-
 echo "${LCYAN}Tagging in Git (will trigger release via GitHub Actions)...${RESET}"
 git tag "v$version"
 git push origin HEAD "v$version"
@@ -43,9 +35,3 @@ echo 'https://github.com/bin-cli/bin-cli/actions/workflows/release-github.yml'
 echo
 echo "${LYELLOW}Write the changelog and publish the release on GitHub:${RESET}"
 echo 'https://github.com/bin-cli/bin-cli/releases'
-echo
-echo "${LYELLOW}Approve the PPA release:${RESET}"
-echo 'https://github.com/bin-cli/bin-cli/actions/workflows/release-ppa.yml'
-echo
-echo "${LYELLOW}Make sure all builds are published successfully on Launchpad:${RESET}"
-echo 'https://launchpad.net/~bin-cli/+archive/ubuntu/bin-cli/+packages'

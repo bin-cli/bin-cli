@@ -42,20 +42,13 @@ require() {
 echo "${LCYAN}Checking for missing development dependencies...${RESET}"
 
 require curl
-require debchange devscripts
 require gawk
 require inotifywait inotify-tools
 require kcov
 # Removed npm because I use nvm instead, because the version of Node.js in Ubuntu 22.04 is rather old
 #require npm
 require pandoc
-require rpmbuild rpm rpm-build
 require shellcheck
-
-if $debian; then
-    require dh debhelper
-    require debuild devscripts
-fi
 
 echo
 
