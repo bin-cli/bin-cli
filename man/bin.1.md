@@ -23,12 +23,12 @@ It automatically searches in parent directories, so you can run scripts from any
 Options that can be used with a command:
 
 > **--dir** _DIR_, **--dir**=_DIR_
-> : Specify the directory name to search for (overrides [.binconfig](binconfig.5.html)).
+> : Specify the directory name to search for (absolute or relative path).
 >
 > **--exe** _NAME_, **--exe**=_NAME_
 > : Override the executable name displayed in the command list.
 
-Options that do something special and don't accept a **COMMAND**:
+Options that do something special:
 
 > **--completion**
 > : Output a tab completion script for the current shell.
@@ -55,11 +55,9 @@ Any options must be given before the command, because everything after the comma
 **bin deploy production**
 : Run the <root>/bin/deploy/production command.
 
-All of these examples are dependent on the scripts that exist in <root>/bin, as well as the contents of the [.binconfig](binconfig.5.html) file (if any).
-
 ## ENVIRONMENT
 
-The environment variables **`$BIN_EXE`** ('bin' executable name) and **`$BIN_COMMAND`** (executable name + command name) are passed to all commands executed by Bin CLI. For maximum portability, use **`${BIN_COMMAND-$0}`**.
+The environment variables **`$BIN_EXE`** ('bin' executable name) and **`$BIN_COMMAND`** (executable name + command name) are passed to commands executed by Bin CLI. For maximum portability, use **`${BIN_COMMAND-$0}`**.
 
 ## EXIT STATUS
 
@@ -93,5 +91,4 @@ This is free software released under the MIT License. There is NO warranty; not 
 
 ## SEE ALSO
 
-* [binconfig(5)](binconfig.5.html)
 * [https://github.com/bin-cli/bin-cli/tree/v$VERSION#readme](https://github.com/bin-cli/bin-cli/tree/v$VERSION#readme)

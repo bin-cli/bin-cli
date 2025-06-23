@@ -282,10 +282,10 @@ if [[ $action = 'help' ]]; then
     echo "Usage: $exe [OPTIONS] [--] [COMMAND] [ARGUMENTS...]"
     echo
     echo "Options that can be used with a command:"
-    echo "  --dir DIR             Specify the directory name to search for (overrides .binconfig)"
+    echo "  --dir DIR             Specify the directory name to search for (absolute or relative path)"
     echo "  --exe NAME            Override the executable name displayed in the command list"
     echo
-    echo "Options that do something special and don't accept a COMMAND:"
+    echo "Options that do something special:"
     echo "  --completion          Output a tab completion script for the current shell"
     echo "  --info                Display information about the current project (root, bin directory and config file location)"
     echo "  --help, -h            Display this help"
@@ -391,21 +391,6 @@ if [[ $action = 'complete-bash' ]]; then
     fi
 
 fi
-
-#endregion =====================================================================
-#region ======= HELPERS: STRINGS ===============================================
-
-trim() {
-    local string
-
-    string=$1
-
-    # https://stackoverflow.com/a/3352015
-    string="${string#"${string%%[![:space:]]*}"}"
-    string="${string%"${string##*[![:space:]]}"}"
-
-    echo "$string"
-}
 
 #endregion =====================================================================
 #region ======= HELPERS: ARRAYS ================================================
@@ -644,119 +629,6 @@ _canonicalize_file_path() {
 # kcov-ignore-end
 
 #endregion =====================================================================
-#region ======= HELPERS: CONFIG FILES ==========================================
-
-# '.binconfig' files are INI files, so we need some functions to parse them. We
-# do that in two separate phases.
-#
-# First, when we are searching for the 'bin/' directory or checking for a
-# matching '.binconfig' file, we only need to extract the global 'dir' option
-# and can ignore the rest of the file.
-
-bin_dir_for() {
-    local bin_dir_real file key line result root_real value
-
-    file=$1
-
-    line=0
-    result=''
-    while IFS='=' read -r key value; do
-        ((line += 1))
-
-        key=$(trim "$key")
-
-        if binconfig_line_is_ignored "$key"; then
-            # Skip blank lines & comments
-            :
-        elif [[ $key = 'dir' ]]; then
-            # dir=scripts
-            value=$(trim "$value")
-            result="${value%%/}"
-            break
-        fi
-    done <"$file" # kcov-ignore-line: Usage not detected
-
-    # If 'dir' is not set, default to 'bin' and skip the sanity checks
-    if [[ -z $result ]]; then
-        echo 'bin'
-        return
-    fi
-
-    # Sanity checks to ensure it will work even if the project is moved elsewhere
-    if [[ $result = /* ]]; then
-        fail "The option 'dir' cannot be an absolute path in $file line $line"
-    fi
-
-    if [[ ! -d "$root/$result" ]]; then
-        fail "The directory specified in $file line $line does not exist: $root/$result/"
-    fi
-
-    bin_dir_real=$(realpath "$root/$result")
-    root_real=$(realpath "$root")
-    if [[ "$bin_dir_real/" != "$root_real/"* ]]; then
-        fail "The option 'dir' cannot point to a directory outside $root in $file line $line"
-    fi
-
-    echo "$result"
-}
-
-# Once we have determined the correct '.binconfig' file to use, we can parse it
-# and register both the global and per-command settings.
-
-parse_binconfig() {
-    local binconfig bin_dir command key line root value
-
-    binconfig=$1
-    root=$2
-    bin_dir=$3
-
-    line=0
-
-    # shellcheck disable=SC2094 # We aren't writing to $binconfig but it thinks we might be
-    while IFS='=' read -r key value; do
-        ((line += 1))
-
-        key=$(trim "$key")
-        value=$(trim "$value")
-
-        if binconfig_line_is_ignored "$key"; then
-            : # Skip blank lines & comments
-        else
-            set_global_option "$key" "$value" "$binconfig" "$line"
-        fi
-    done <"$binconfig" # kcov-ignore-line: Usage not detected
-}
-
-set_global_option() {
-    local binconfig key line value
-
-    key=$1
-    value=$2
-    binconfig=$3
-    line=$4
-
-    if [[ $key = 'dir' ]]; then
-
-        : # Already handled in 'get_dir_from_binconfig'
-
-    else
-
-        # Unknown keys don't trigger an error for forwards compatibility
-        debug "Ignored unknown key '$key' in $binconfig line $line"
-
-    fi
-}
-
-# Like many INI parsers, we allow both '#' and ';' to denote comments - but only
-# at the start of a line. (There may also be whitespace before it - that is
-# removed by 'trim' before this function is called.) We'll also use this
-# function to skip blank lines.
-
-binconfig_line_is_ignored() {
-    [[ $1 = '' || $1 = '#'* || $1 = ';'* ]]
-}
-
-#endregion =====================================================================
 #region ======= HELPERS: REGISTER COMMANDS =====================================
 
 # Before we can run any commands, we need to make a list of them all. This
@@ -783,11 +655,10 @@ register_executable_command() {
 }
 
 register_commands_in_directory() {
-    local directory file is_root_dir name prefix realfile target
+    local directory file name prefix realfile target
 
     directory=$1
-    is_root_dir=$2
-    prefix=${3-}
+    prefix=${2-}
 
     # Loop through the directory to find commands
     for file in "$directory/"*; do
@@ -807,24 +678,12 @@ register_commands_in_directory() {
                 broken_symlinks+=("$file => $target")
             fi
         elif [[ -d $file ]]; then
-            # Ignore subdirectories if scripts are in the root directory,
-            # because it could take a long time to search a large tree, and it's
-            # unlikely someone who keeps scripts in the root would also have
-            # some in subdirectories
-            if ! $is_root_dir; then
-                map_set executable_to_command "$realfile" "$prefix$name" # global
-                register_commands_in_directory "$file" "$is_root_dir" "$prefix$name "
-            fi
+            map_set executable_to_command "$realfile" "$prefix$name" # global
+            register_commands_in_directory "$file" "$prefix$name "
         elif [[ ! -x $file ]]; then
-            if ! $is_root_dir; then
-                non_executable_files+=("$file") # global
-            fi
+            non_executable_files+=("$file") # global
         else
-            # Ignore known plain text files if scripts are in the root directory,
-            # mostly in case they're on a filesystem where all files are executable
-            if ! ($is_root_dir && [[ $name =~ \.(json|md|txt|yaml|yml)$ ]]); then
-                register_executable_command "$prefix$name" "$realfile"
-            fi
+            register_executable_command "$prefix$name" "$realfile"
         fi
     done
 }
@@ -1003,10 +862,7 @@ run_command_if_only_one_match() {
 #region ======= REGISTER COMMANDS & CONFIG FILES ===============================
 
 declare root=''
-declare binconfig=''
 declare bin_dir=''
-declare bin_dir_from_root=''
-declare is_root_dir=false
 
 # Determine paths
 if [[ -n $fixed_bin_dir ]]; then
@@ -1032,70 +888,32 @@ if [[ -n $fixed_bin_dir ]]; then
         fixed_bin_dir=''
     fi
 
-    binconfig=''
     root=$(dirname "$bin_dir")
-    bin_dir_from_root=$(basename "$bin_dir")
-
-elif root=$(findup "$PWD" -f .binconfig); then
-
-    # If there is a .binconfig file in any ancestor directory, that takes precedence
-    binconfig="${root%/}/.binconfig"
-    bin_dir_from_root=$(bin_dir_for "$binconfig")
-
-    if [[ $bin_dir_from_root = '.' ]]; then
-        bin_dir=${root%/}
-    else
-        bin_dir="${root%/}/$bin_dir_from_root"
-    fi
 
 else
 
     # Otherwise search for a bin/ directory
     if ! root=$(findup "$PWD" -d bin); then
-        fail "Could not find 'bin/' directory or '.binconfig' file starting from '$PWD'" $ERR_NOT_FOUND
+        fail "Could not find 'bin/' directory starting from '$PWD'" $ERR_NOT_FOUND
     fi
 
-    binconfig="${root%/}/.binconfig"
-    bin_dir_from_root='bin'
     bin_dir="${root%/}/bin"
 
     # Ignore common global bin/ directories (/bin, /usr/bin, etc.)
     if is_common_bin_dir "$bin_dir"; then
-        fail "Could not find 'bin/' directory or '.binconfig' file starting from '$PWD' (ignored '$bin_dir')" $ERR_NOT_FOUND
+        fail "Could not find 'bin/' directory starting from '$PWD' (ignored '$bin_dir')" $ERR_NOT_FOUND
     fi
-fi
-
-# Special case for dir=.
-if [[ $bin_dir_from_root = '.' ]]; then
-    is_root_dir=true
 fi
 
 # Find and register available commands
 if [[ -d $bin_dir ]]; then
-    register_commands_in_directory "$bin_dir" "$is_root_dir"
-fi
-
-# Parse config file (including registering aliases)
-if [[ -f $binconfig ]]; then
-    parse_binconfig "$binconfig" "$root" "$bin_dir"
+    register_commands_in_directory "$bin_dir"
 fi
 
 # Output environment info?
 if [[ $action = 'info' ]]; then
     echo "Root:    $root/"
-
-    if [[ -f $binconfig ]]; then
-        echo "Config:  $binconfig"
-    else
-        echo "Config:  $binconfig (missing)"
-    fi
-
-    if [[ -d $bin_dir ]]; then
-        echo "Bin Dir: $bin_dir/"
-    else
-        echo "Bin Dir: $bin_dir/ (missing)"
-    fi
-
+    echo "Bin Dir: $bin_dir/"
     exit
 fi
 
@@ -1169,9 +987,6 @@ while [[ $# -gt $num_parameters_to_ignore ]]; do
 
     # If there were no prefix matches, stop searching
     if [[ ${#matching_commands[@]} -eq 0 ]]; then
-        if $is_root_dir && [[ -d "$current_directory/$subcommand" ]]; then
-            fail "Subcommands are not supported with the config option 'dir = $bin_dir_from_root'"
-        fi
         if [[ $subcommand = .* && -e "$current_directory/$subcommand" ]]; then
             fail "Command names may not start with '.'"
         fi
@@ -1180,9 +995,6 @@ while [[ $# -gt $num_parameters_to_ignore ]]; do
         fi
 
         append=''
-        if [[ -n $binconfig ]]; then
-            append="${append} or $binconfig"
-        fi
         if in_array "${full_command:1}" completion help info version; then
             append="${append}${NEW_LINE}${GREY}Perhaps you meant to run 'bin --${full_command:1}'?${RESET}"
         fi

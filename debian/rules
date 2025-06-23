@@ -17,6 +17,5 @@ override_dh_auto_install:
 	install -Dm 0755 dist/bin                   debian/bin-cli/usr/bin/bin
 	install -Dm 0644 dist/bin.bash-completion   debian/bin-cli/usr/share/bash-completion/completions/bin
 	install -Dm 0644 dist/bin.1.gz              debian/bin-cli/usr/share/man/man1/bin.1.gz
-	install -Dm 0644 dist/binconfig.5.gz        debian/bin-cli/usr/share/man/man5/binconfig.5.gz
 	install -Dm 0644 dist/readme.css            debian/bin-cli/usr/share/doc/bin-cli/readme.css
 	install -Dm 0644 dist/readme.html           debian/bin-cli/usr/share/doc/bin-cli/index.html

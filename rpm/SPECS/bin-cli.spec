@@ -30,7 +30,6 @@ bin/generate/readme-html
 install -Dm 0755 dist/bin                   %{buildroot}%{_bindir}/bin
 install -Dm 0644 dist/bin.bash-completion   %{buildroot}%{_datadir}/bash-completion/completions/bin
 install -Dm 0644 dist/bin.1.gz              %{buildroot}%{_mandir}/man1/bin.1.gz
-install -Dm 0644 dist/binconfig.5.gz        %{buildroot}%{_mandir}/man5/binconfig.5.gz
 install -Dm 0644 dist/readme.css            %{buildroot}%{_docdir}/bin-cli/readme.css
 install -Dm 0644 dist/readme.html           %{buildroot}%{_docdir}/bin-cli/index.html
 
@@ -38,7 +37,6 @@ install -Dm 0644 dist/readme.html           %{buildroot}%{_docdir}/bin-cli/index
 %{_bindir}/bin
 %{_datadir}/bash-completion/completions/bin
 %{_mandir}/man1/bin.1.gz
-%{_mandir}/man5/binconfig.5.gz
 %dir %{_docdir}/bin-cli
 %doc %{_docdir}/bin-cli/readme.css
 %doc %{_docdir}/bin-cli/index.html

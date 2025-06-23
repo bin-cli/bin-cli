@@ -309,21 +309,6 @@ Feature: Tab completion
         executable
         """
 
-    Scenario: Common non-executable file types are not tab completed in the project root even if they are executable
-      Given a file '{ROOT}/project/.binconfig' with content 'dir = .'
-      And a script '{ROOT}/project/executable1.sh'
-      And a script '{ROOT}/project/executable2.json'
-      And a script '{ROOT}/project/executable3.md'
-      And a script '{ROOT}/project/executable4.txt'
-      And a script '{ROOT}/project/executable5.yaml'
-      And a script '{ROOT}/project/executable6.yml'
-      When I tab complete 'bin '
-      Then it is successful
-      And the output is:
-        """
-        executable1.sh
-        """
-
     Scenario Outline: Common bin directories are ignored when tab completing
       Given a script '{ROOT}<bin>/hello'
       And the working directory is '{ROOT}<workdir>'
@@ -338,25 +323,6 @@ Feature: Tab completion
         | /snap/bin      | /snap/example          |
         | /usr/local/bin | /usr/local/bin/example |
         | /home/user/bin | /home/user/example     |
-
-    Scenario Outline: Common bin directories are not ignored when tab completing if there is a .binconfig directory in the parent directory
-      Given a script '{ROOT}<bin>/hello'
-      And an empty file '{ROOT}<config>'
-      And the working directory is '{ROOT}<workdir>'
-      When I tab complete 'bin h'
-      Then it is successful
-      And the output is:
-        """
-        hello
-        """
-
-      Examples:
-        | bin            | config                | workdir                |
-        | /bin           | /.binconfig           | /example               |
-        | /usr/bin       | /usr/.binconfig       | /usr/example           |
-        | /snap/bin      | /snap/.binconfig      | /snap/example          |
-        | /usr/local/bin | /usr/local/.binconfig | /usr/local/bin/example |
-        | /home/user/bin | /home/user/.binconfig | /home/user/example     |
 
   Rule: Options are supported in tab completion
 

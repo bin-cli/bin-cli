@@ -52,6 +52,5 @@ jobs:
           files: |
             /tmp/dist-deb/bin
             /tmp/dist-deb/bin.1.gz
-            /tmp/dist-deb/binconfig.5.gz
             /tmp/dist-deb/bin-cli.deb
             /tmp/dist-rpm/bin-cli.rpm

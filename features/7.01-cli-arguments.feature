@@ -19,7 +19,7 @@ Feature: CLI arguments
       Then it fails with exit code 127
       And the error is:
         """
-        bin: Command '<command>' not found in {ROOT}/project/bin/ or {ROOT}/project/.binconfig
+        bin: Command '<command>' not found in {ROOT}/project/bin/
         Perhaps you meant to run 'bin --<command>'?
         """
 
@@ -80,29 +80,15 @@ Feature: CLI arguments
       And the output is:
         """
         Root:    {ROOT}/project/
-        Config:  {ROOT}/project/.binconfig (missing)
         Bin Dir: {ROOT}/project/bin/
-        """
-
-    Scenario: Project information is displayed when using --info with a .binconfig file
-      Given an empty file '{ROOT}/project/.binconfig'
-      When I run 'bin --info'
-      Then it is successful
-      And the output is:
-        """
-        Root:    {ROOT}/project/
-        Config:  {ROOT}/project/.binconfig
-        Bin Dir: {ROOT}/project/bin/ (missing)
         """
 
     Scenario: Project information is displayed when using --info with a custom directory
       Given an empty directory '{ROOT}/project/scripts'
-      And a file '{ROOT}/project/.binconfig' with content 'dir = scripts'
-      When I run 'bin --info'
+      When I run 'bin --dir scripts --info'
       Then it is successful
       And the output is:
         """
         Root:    {ROOT}/project/
-        Config:  {ROOT}/project/.binconfig
         Bin Dir: {ROOT}/project/scripts/
         """

@@ -151,55 +151,16 @@ Feature: Automatic exclusions
       Then it fails with exit code 126
       And the error is "bin: '{ROOT}/project/bin/not-executable' is not executable (chmod +x)"
 
-  Rule: Text file types are ignored when using dir=.
-
-    | A number of common non-executable file types (`*.json`, `*.md`, `*.txt`, `*.yaml`, `*.yml`) are also excluded when using `dir = .`, even if they are executable, to reduce the noise when all files are executable (e.g. on FAT32 filesystems).
-
-    Scenario: Non-executable files are not listed in the project root
-      Given a file '{ROOT}/project/.binconfig' with content 'dir = .'
-      And a script '{ROOT}/project/executable'
-      And an empty file '{ROOT}/project/not-executable'
-      When I run 'bin'
-      Then it is successful
-      And the output is:
-        """
-        Available Commands
-        bin executable
-        """
-
-    Scenario: Common non-executable file types are not listed in the project root even if they are executable
-      Given a file '{ROOT}/project/.binconfig' with content 'dir = .'
-      And a script '{ROOT}/project/executable1.sh'
-      And a script '{ROOT}/project/executable2.json'
-      And a script '{ROOT}/project/executable3.md'
-      And a script '{ROOT}/project/executable4.txt'
-      And a script '{ROOT}/project/executable5.yaml'
-      And a script '{ROOT}/project/executable6.yml'
-      When I run 'bin'
-      Then it is successful
-      And the output is:
-        """
-        Available Commands
-        bin executable1.sh
-        """
-
-    Scenario: Common non-executable file types cannot be executed in the project root
-      Given a file '{ROOT}/project/.binconfig' with content 'dir = .'
-      And a script '{ROOT}/project/executable.json'
-      When I run 'bin executable'
-      Then it fails with exit code 127
-      And the error is "bin: Command 'executable' not found in {ROOT}/project/ or {ROOT}/project/.binconfig"
-
   Rule: Common bin directories are ignored
 
-    | The directories `/bin`, `/snap/bin`, `/usr/bin`, `/usr/local/bin`, `$HOME/bin` and `$HOME/.local/bin` are ignored when searching parent directories, unless there is a corresponding `.binconfig` file, because they are common locations for global executables (typically in `$PATH`).
+    | The directories `/bin`, `/snap/bin`, `/usr/bin`, `/usr/local/bin`, `$HOME/bin` and `$HOME/.local/bin` are ignored when searching parent directories, because they are common locations for global executables (typically in `$PATH`).
 
     Scenario Outline: Common bin directories are ignored when searching parent directories
       Given a script '{ROOT}<bin>/hello'
       And the working directory is '{ROOT}<workdir>'
       When I run 'bin hello'
       Then it fails with exit code 127
-      And the error is "bin: Could not find 'bin/' directory or '.binconfig' file starting from '{ROOT}<workdir>' (ignored '{ROOT}<bin>')"
+      And the error is "bin: Could not find 'bin/' directory starting from '{ROOT}<workdir>' (ignored '{ROOT}<bin>')"
 
       Examples:
         | bin                   | workdir                   |
@@ -209,19 +170,3 @@ Feature: Automatic exclusions
         | /usr/local/bin        | /usr/local/bin/example    |
         | /home/user/bin        | /home/user/example        |
         | /home/user/.local/bin | /home/user/.local/example |
-
-    Scenario Outline: Common bin directories are not ignored if there is a .binconfig directory in the parent directory
-      Given a script '{ROOT}<bin>/hello' that outputs 'Hello, World!'
-      And an empty file '{ROOT}<config>'
-      And the working directory is '{ROOT}<workdir>'
-      When I run 'bin hello'
-      Then it is successful
-      And the output is 'Hello, World!'
-
-      Examples:
-        | bin            | config                | workdir            |
-        | /bin           | /.binconfig           | /example           |
-        | /usr/bin       | /usr/.binconfig       | /usr/example       |
-        | /snap/bin      | /snap/.binconfig      | /snap/example      |
-        | /usr/local/bin | /usr/local/.binconfig | /usr/local/example |
-        | /home/user/bin | /home/user/.binconfig | /home/user/example |

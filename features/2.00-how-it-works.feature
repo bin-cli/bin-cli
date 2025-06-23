@@ -90,7 +90,7 @@ Feature: How It Works
       And the working directory is '{ROOT}/project/root'
       When I run 'bin other'
       Then it fails with exit code 127
-      And the error is "bin: Command 'other' not found in {ROOT}/project/bin/ or {ROOT}/project/.binconfig"
+      And the error is "bin: Command 'other' not found in {ROOT}/project/bin/"
 
 
   Rule: Security warning
@@ -119,4 +119,4 @@ Feature: How It Works
     Scenario: If no bin/ directory is found, an error is displayed
       When I run 'bin'
       Then it fails with exit code 127
-      And the error is "bin: Could not find 'bin/' directory or '.binconfig' file starting from '{ROOT}/project'"
+      And the error is "bin: Could not find 'bin/' directory starting from '{ROOT}/project'"
