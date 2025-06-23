@@ -9,8 +9,3 @@ updates:
     directory: /
     schedule:
       interval: quarterly
-
-  - package-ecosystem: docker
-    directory: /
-    schedule:
-      interval: quarterly
