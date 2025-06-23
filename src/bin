@@ -265,7 +265,6 @@ done
 # These actions don't require us to parse any config files or register commands.
 
 if [[ $action = 'help' ]]; then
-    # Also update the man page - src/bin.1.md
     echo "Usage: $exe [OPTIONS] [--] [COMMAND] [ARGUMENTS...]"
     echo
     echo "Options that can be used with a command:"

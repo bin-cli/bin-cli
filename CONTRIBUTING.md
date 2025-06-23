@@ -92,16 +92,6 @@ In the `.feature` files, each line of Markdown must be prefixed with `|` - this 
 
 The [CLI Reference](README.md#cli-reference) is taken directly from the `bin --help` output, which is part of the [source code](src/bin). Please see [Contributing Code Changes](#contributing-code-changes), above.
 
-### Man Page
-
-The [man page](https://bin-cli.github.io/bin-cli/bin.1.html) is generated from the Markdown file in the [man/](man/) folder using [Pandoc](https://pandoc.org/). To test it, run:
-
-```bash
-bin/man
-```
-
-To test the HTML versions, run `bin/generate/man` then open the HTML files generated in `dist/`.
-
 ### Wiki
 
 [The wiki](https://github.com/bin-cli/bin-cli/wiki) is used for tangential tips and thoughts. Editing is restricted, both to prevent spam and because it contains my personal views rather than factual information. Feel free to open an [Issue](https://github.com/bin-cli/bin-cli/issues) if you think anything could be improved.

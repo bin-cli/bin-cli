@@ -47,7 +47,6 @@ require inotifywait inotify-tools
 require kcov
 # Removed npm because I use nvm instead, because the version of Node.js in Ubuntu 22.04 is rather old
 #require npm
-require pandoc
 require shellcheck
 
 echo

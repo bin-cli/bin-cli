@@ -27,14 +27,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Install Pandoc
-        run: sudo apt-get update && sudo apt-get install -y pandoc
-
       - name: Build Bin CLI
         run: bin/build "${GITHUB_REF_NAME/v}"
-
-      - name: Build man page
-        run: bin/generate/man "${GITHUB_REF_NAME/v}"
 
       - name: Create GitHub Draft Release
         uses: crowbarmaster/GH-Automatic-Releases@d01f8167e06547c06e2a94267e378e7ca513e3ec # v1.6.0
