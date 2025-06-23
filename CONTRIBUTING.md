@@ -40,7 +40,7 @@ bin/tdd
 
 To test the changes interactively, run `bin/dev`, which will both build and run the development version.
 
-Update the [README](README.md) and `--help` output as needed.
+Update the `--help` output, [README](README.md) and [CHANGELOG](CHANGELOG.md) as appropriate.
 
 To submit your changes as a pull request, [fork the repository on GitHub](https://github.com/bin-cli/bin-cli/fork) then run:
 
