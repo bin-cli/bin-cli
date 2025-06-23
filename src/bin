@@ -262,7 +262,6 @@ while [[ $# -gt 0 ]]; do
         --exe)              is_custom_exe=true; set_option_value '--exe' exe "${2-}"; shift ;;
         --exe=*)            is_custom_exe=true; set_option_value '--exe' exe "${1#*=}" ;;
         --help | -h)        set_action "$1" help ;;
-        --info)             set_action "$1" info ;;
         --version | -v)     set_action "$1" version ;;
         --)                 shift; break ;;
         -*)                 fail "Invalid option '$1'" ;;
@@ -287,7 +286,6 @@ if [[ $action = 'help' ]]; then
     echo
     echo "Options that do something special:"
     echo "  --completion          Output a tab completion script for the current shell"
-    echo "  --info                Display information about the current project (root, bin directory and config file location)"
     echo "  --help, -h            Display this help"
     echo "  --version, -v         Display the current version number"
     echo
@@ -352,7 +350,6 @@ if [[ $action = 'complete-bash' ]]; then
             --exe)              is_custom_exe=true; set_option_value '--exe' exe "${2-}"; shift ;;
             --exe=*)            is_custom_exe=true; set_option_value '--exe' exe "${1#*=}" ;;
             --help | -h)        fail "Cannot tab complete '$1'" ;;
-            --info)             fail "Cannot tab complete '$1'" ;;
             --version | -v)     fail "Cannot tab complete '$1'" ;;
             --)                 can_have_more_options=false; shift; break ;;
             -*)                 fail "Invalid option '$1'" ;;
@@ -373,7 +370,6 @@ if [[ $action = 'complete-bash' ]]; then
             '--dir'
             '--exe'
             '--help' '-h'
-            '--info'
             '--version' '-v'
             '--'
         )
@@ -910,13 +906,6 @@ if [[ -d $bin_dir ]]; then
     register_commands_in_directory "$bin_dir"
 fi
 
-# Output environment info?
-if [[ $action = 'info' ]]; then
-    echo "Root:    $root/"
-    echo "Bin Dir: $bin_dir/"
-    exit
-fi
-
 # Map symlink aliases to their underlying commands, now we know all the commands
 # shellcheck disable=SC2154 # It doesn't recognise 'map_init' and 'map_set' as setting this variable
 for alias in ${alias_to_executable+"${alias_to_executable[@]}"}; do
@@ -995,7 +984,7 @@ while [[ $# -gt $num_parameters_to_ignore ]]; do
         fi
 
         append=''
-        if in_array "${full_command:1}" completion help info version; then
+        if in_array "${full_command:1}" completion help version; then
             append="${append}${NEW_LINE}${GREY}Perhaps you meant to run 'bin --${full_command:1}'?${RESET}"
         fi
         fail "Command '${full_command:1}' not found in $bin_dir/$append" $ERR_NOT_FOUND

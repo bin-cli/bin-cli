@@ -27,7 +27,6 @@ Feature: CLI arguments
         | command    |
         | completion |
         | help       |
-        | info       |
         | version    |
 
     Scenario Outline: The <arg1> and <arg2> arguments are incompatible
@@ -70,25 +69,3 @@ Feature: CLI arguments
       When I run 'bin -v'
       Then it is successful
       And the output is 'Bin CLI v1.2.3-dev'
-
-  Rule: There is an info command
-
-    Scenario: Project information is displayed when using --info with a bin/ directory
-      Given an empty directory '{ROOT}/project/bin'
-      When I run 'bin --info'
-      Then it is successful
-      And the output is:
-        """
-        Root:    {ROOT}/project/
-        Bin Dir: {ROOT}/project/bin/
-        """
-
-    Scenario: Project information is displayed when using --info with a custom directory
-      Given an empty directory '{ROOT}/project/scripts'
-      When I run 'bin --dir scripts --info'
-      Then it is successful
-      And the output is:
-        """
-        Root:    {ROOT}/project/
-        Bin Dir: {ROOT}/project/scripts/
-        """

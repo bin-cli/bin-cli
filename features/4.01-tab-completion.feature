@@ -368,7 +368,6 @@ Feature: Tab completion
         | --completion    |
         | -h              |
         | --help          |
-        | --info          |
         | --invalid       |
         | -v              |
         | --version       |
@@ -383,7 +382,6 @@ Feature: Tab completion
         --exe
         --help
         -h
-        --info
         --version
         -v
         --
@@ -398,7 +396,6 @@ Feature: Tab completion
         --dir
         --exe
         --help
-        --info
         --version
         --
         """

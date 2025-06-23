@@ -33,9 +33,6 @@ Options that do something special:
 > **--completion**
 > : Output a tab completion script for the current shell.
 >
-> **--info**
-> : Display information about the current project (root, bin directory and config file location).
->
 > **--help**, **-h**
 > : Display the help text.
 >
