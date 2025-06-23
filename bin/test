@@ -13,7 +13,7 @@ LCYAN=$'\e[96m'
 result=0
 
 # Build
-bin/generate/bin || result=$?
+bin/build || result=$?
 
 # Run tests
 if [[ $result -eq 0 ]]; then
