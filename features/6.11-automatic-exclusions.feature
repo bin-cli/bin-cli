@@ -180,7 +180,7 @@ Feature: Automatic exclusions
       And the output is:
         """
         Available Commands
-        bin executable1
+        bin executable1.sh
         """
 
     Scenario: Common non-executable file types cannot be executed in the project root

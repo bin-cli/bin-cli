@@ -342,7 +342,7 @@ Feature: Tab completion
       Then it is successful
       And the output is:
         """
-        executable1
+        executable1.sh
         """
 
     Scenario Outline: Common bin directories are ignored when tab completing
