@@ -250,10 +250,8 @@ set_option_value() {
 # to clobber anything after the command name - we need to keep them intact to
 # pass to the command.
 
-declare fallback=''
 declare fixed_bin_dir=''
 declare is_custom_exe=false
-declare shim=false
 declare unique_prefix_matching='' # may be boolean or empty
 
 while [[ $# -gt 0 ]]; do
@@ -267,12 +265,9 @@ while [[ $# -gt 0 ]]; do
         --exact)            unique_prefix_matching=false ;;
         --exe)              is_custom_exe=true; set_option_value '--exe' exe "${2-}"; shift ;;
         --exe=*)            is_custom_exe=true; set_option_value '--exe' exe "${1#*=}" ;;
-        --fallback)         set_option_value '--fallback' fallback "${2-}"; shift ;;
-        --fallback=*)       set_option_value '--fallback' fallback "${1#*=}" ;;
         --help | -h)        set_action "$1" help ;;
         --info)             set_action "$1" info ;;
         --prefix)           unique_prefix_matching=true ;;
-        --shim)             shim=true ;;
         --version | -v)     set_action "$1" version ;;
         --)                 shift; break ;;
         -*)                 fail "Invalid option '$1'" ;;
@@ -295,9 +290,7 @@ if [[ $action = 'help' ]]; then
     echo "  --dir DIR             Specify the directory name to search for (overrides .binconfig)"
     echo "  --exact               Disable unique prefix matching"
     echo "  --exe NAME            Override the executable name displayed in the command list"
-    echo "  --fallback COMMAND    If the command is not found, run the given global command (implies '--exact')"
     echo "  --prefix              Enable unique prefix matching (overrides .binconfig)"
-    echo "  --shim                If the command is not found, run the global command with the same name (implies '--exact')"
     echo
     echo "Options that do something with a COMMAND:"
     echo "  --create, -c          Create the given script and open in your \$EDITOR (implies '--exact')"
@@ -372,12 +365,9 @@ if [[ $action = 'complete-bash' ]]; then
             --exact)            unique_prefix_matching=false ;;
             --exe)              is_custom_exe=true; set_option_value '--exe' exe "${2-}"; shift ;;
             --exe=*)            is_custom_exe=true; set_option_value '--exe' exe "${1#*=}" ;;
-            --fallback)         set_option_value '--fallback' fallback "${2-}"; shift ;;
-            --fallback=*)       set_option_value '--fallback' fallback "${1#*=}" ;;
             --help | -h)        fail "Cannot tab complete '$1'" ;;
             --info)             fail "Cannot tab complete '$1'" ;;
             --prefix)           unique_prefix_matching=true ;;
-            --shim)             shim=true ;;
             --version | -v)     fail "Cannot tab complete '$1'" ;;
             --)                 can_have_more_options=false; shift; break ;;
             -*)                 fail "Invalid option '$1'" ;;
@@ -400,11 +390,9 @@ if [[ $action = 'complete-bash' ]]; then
             '--edit' '-e'
             '--exact'
             '--exe'
-            '--fallback'
             '--help' '-h'
             '--info'
             '--prefix'
-            '--shim'
             '--version' '-v'
             '--'
         )
@@ -1508,12 +1496,6 @@ while [[ $# -gt $num_parameters_to_ignore ]]; do
         chmod +x "$script"
         echo "Created script $script"
         open_in_editor "$script"
-    elif $shim; then
-        # shellcheck disable=SC2086 # We want word splitting here
-        run_command ${full_command:1} "$@"
-    elif [[ -n $fallback ]]; then
-        # shellcheck disable=SC2086 # We want word splitting here (the fallback command may contain arguments)
-        run_command $fallback "$@"
     fi
 
     # Check if there are any prefix matches

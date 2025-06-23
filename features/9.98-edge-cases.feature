@@ -73,8 +73,6 @@ Feature: Edge cases
       | --dir      | =      |
       | --exe      |        |
       | --exe      | =      |
-      | --fallback |        |
-      | --fallback | =      |
 
     Scenario: Associative arrays are emulated in Bash <4
       # On its own this test doesn't really prove anything, but this gets the

@@ -399,10 +399,7 @@ Feature: Tab completion
         | --exact              |
         | --exe something      |
         | --exe=something      |
-        | --fallback something |
-        | --fallback=something |
         | --prefix             |
-        | --shim               |
         | --                   |
 
     Scenario Outline: Tab completion works after '<option>' and changes the directory
@@ -450,12 +447,10 @@ Feature: Tab completion
         -e
         --exact
         --exe
-        --fallback
         --help
         -h
         --info
         --prefix
-        --shim
         --version
         -v
         --
@@ -472,11 +467,9 @@ Feature: Tab completion
         --edit
         --exact
         --exe
-        --fallback
         --help
         --info
         --prefix
-        --shim
         --version
         --
         """
