@@ -144,11 +144,6 @@ fail() {
 # When debugging, it is useful to be able to log things and dump variables to
 # display on screen.
 #
-# Originally I had "debug" statements throughout the code and a "--debug" option
-# to display the log to users, but as the script grew, that got harder to
-# maintain and much harder to read - so now I just add debug statements
-# temporarily when debugging.
-#
 # We can't output debug data to either stdout (&1) or stderr (&2), because that
 # would cause earlier tests to fail, so we write it to debug.txt instead. That
 # is displayed on screen by the 'bin/test' script, so we include ANSI codes to
