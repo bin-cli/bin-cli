@@ -754,12 +754,9 @@ bin_dir_for() {
 }
 
 # Once we have determined the correct '.binconfig' file to use, we can parse it
-# and register both the global and per-command settings. This may be called more
-# than once if we are using 'merge = true'.
+# and register both the global and per-command settings.
 
 declare -a commands_listed_in_binconfig=()
-declare merge_is_optional=false
-declare merge_with_parent=false
 declare template='_TBC'
 map_init command_args
 map_init command_help
@@ -823,22 +820,6 @@ set_global_option() {
             fi
         else
             fail "Invalid value for 'exact' in $binconfig line $line: $value"
-        fi
-
-    elif [[ $key = 'merge' ]]; then
-
-        value_lowercase=$(lowercase "$value")
-
-        if in_array "$value_lowercase" 'false' 'no' 'off' '0'; then
-            merge_with_parent=false # global
-        elif in_array "$value_lowercase" 'true' 'yes' 'on' '1'; then
-            merge_with_parent=true # global
-            merge_is_optional=false # global
-        elif [[ $value_lowercase = 'optional' ]]; then
-            merge_with_parent=true # global
-            merge_is_optional=true # global
-        else
-            fail "Invalid value for 'merge' in $binconfig line $line: $value"
         fi
 
     elif [[ $key = 'template' ]]; then
@@ -1283,179 +1264,119 @@ get_command_help() {
 #endregion =====================================================================
 #region ======= REGISTER COMMANDS & CONFIG FILES ===============================
 
-declare main_bin_dir=''
-declare main_bin_dir_from_root=''
-declare main_binconfig=''
-declare main_is_root_dir=false
-declare main_root=''
-declare merging=false
-declare start_directory=$PWD
+declare root=''
+declare binconfig=''
+declare bin_dir=''
+declare bin_dir_from_root=''
+declare is_root_dir=false
 
-while true; do
+# Determine paths
+if [[ -n $fixed_bin_dir ]]; then
 
-    declare root=''
-    declare binconfig=''
-    declare bin_dir=''
-    declare bin_dir_from_root=''
-    declare is_root_dir=false
+    # Look for given directory given by '--dir', which can either be an absolute
+    # path, which is searched directly, or a directory name, which is found
+    # by searching upwards from the current working directory as normal.
 
-    # Determine paths
-    if [[ -n $fixed_bin_dir ]]; then
-
-        # Look for given directory given by '--dir', which can either be an absolute
-        # path, which is searched directly, or a directory name, which is found
-        # by searching upwards from the current working directory as normal.
-
-        if [[ $fixed_bin_dir = /* ]]; then
-            # Absolute path
-            if [[ ! -d $fixed_bin_dir ]]; then
-                fail "Specified directory '$fixed_bin_dir/' is missing"
-            fi
-
-            bin_dir=$fixed_bin_dir
-        else
-            # Directory name
-            if ! dir_parent=$(findup "$start_directory" -d "$fixed_bin_dir"); then
-                fail "Could not find '$fixed_bin_dir/' directory starting from '$start_directory'" $ERR_NOT_FOUND
-            fi
-
-            bin_dir="$dir_parent/$fixed_bin_dir"
-            fixed_bin_dir=''
+    if [[ $fixed_bin_dir = /* ]]; then
+        # Absolute path
+        if [[ ! -d $fixed_bin_dir ]]; then
+            fail "Specified directory '$fixed_bin_dir/' is missing"
         fi
 
-        # Look for a matching .binconfig file
-        # If there isn't one, assume the parent directory is the project root
-        binconfig=''
-        root=$(dirname "$bin_dir")
-        bin_dir_from_root=$(basename "$bin_dir")
-
-        if binconfig_dir=$(findup "$bin_dir" -f .binconfig); then
-            binconfig_file="$binconfig_dir/.binconfig"
-            dir_in_binconfig=$(bin_dir_for "$binconfig_file")
-            required_dir=$(relative_path "$binconfig_dir" "$bin_dir")
-
-            if [[ "$dir_in_binconfig" = "$required_dir" ]]; then
-                binconfig=$binconfig_file
-                root=$binconfig_dir
-                bin_dir_from_root=$required_dir
-            fi
-        fi
-
-    elif root=$(findup "$start_directory" -f .binconfig); then
-
-        # If there is a .binconfig file in any ancestor directory, that takes precedence
-        binconfig="${root%/}/.binconfig"
-        bin_dir_from_root=$(bin_dir_for "$binconfig")
-
-        if [[ $bin_dir_from_root = '.' ]]; then
-            bin_dir=${root%/}
-        else
-            bin_dir="${root%/}/$bin_dir_from_root"
-        fi
-
+        bin_dir=$fixed_bin_dir
     else
-
-        # Otherwise search for a bin/ directory
-        if ! root=$(findup "$start_directory" -d bin); then
-            if $merge_is_optional; then
-                break
-            elif $merging; then
-                # This returns a generic (i.e. configuration) error because merge=true should only be used if the parent exists
-                fail "Could not find 'bin/' directory or '.binconfig' file starting from '$start_directory' (merge=true)" $ERR_GENERIC
-            else
-                # Whereas this returns a 'not found' error because it has probably just been run from a directory with no scripts
-                fail "Could not find 'bin/' directory or '.binconfig' file starting from '$start_directory'" $ERR_NOT_FOUND
-            fi
+        # Directory name
+        if ! dir_parent=$(findup "$PWD" -d "$fixed_bin_dir"); then
+            fail "Could not find '$fixed_bin_dir/' directory starting from '$PWD'" $ERR_NOT_FOUND
         fi
 
-        binconfig="${root%/}/.binconfig"
-        bin_dir_from_root='bin'
-        bin_dir="${root%/}/bin"
+        bin_dir="$dir_parent/$fixed_bin_dir"
+        fixed_bin_dir=''
+    fi
 
-        # Ignore common global bin/ directories (/bin, /usr/bin, etc.)
-        if is_common_bin_dir "$bin_dir"; then
-            if $merge_is_optional; then
-                break
-            elif $merging; then
-                # This returns a generic (i.e. configuration) error because merge=true should only be used if the parent exists
-                fail "Could not find 'bin/' directory or '.binconfig' file starting from '$start_directory' (merge=true) (ignored '$bin_dir')" $ERR_GENERIC
-            else
-                # Whereas this returns a 'not found' error because it has probably just been run from a directory with no scripts
-                fail "Could not find 'bin/' directory or '.binconfig' file starting from '$start_directory' (ignored '$bin_dir')" $ERR_NOT_FOUND
-            fi
+    # Look for a matching .binconfig file
+    # If there isn't one, assume the parent directory is the project root
+    binconfig=''
+    root=$(dirname "$bin_dir")
+    bin_dir_from_root=$(basename "$bin_dir")
+
+    if binconfig_dir=$(findup "$bin_dir" -f .binconfig); then
+        binconfig_file="$binconfig_dir/.binconfig"
+        dir_in_binconfig=$(bin_dir_for "$binconfig_file")
+        required_dir=$(relative_path "$binconfig_dir" "$bin_dir")
+
+        if [[ "$dir_in_binconfig" = "$required_dir" ]]; then
+            binconfig=$binconfig_file
+            root=$binconfig_dir
+            bin_dir_from_root=$required_dir
         fi
     fi
 
-    # Special case for dir=.
+elif root=$(findup "$PWD" -f .binconfig); then
+
+    # If there is a .binconfig file in any ancestor directory, that takes precedence
+    binconfig="${root%/}/.binconfig"
+    bin_dir_from_root=$(bin_dir_for "$binconfig")
+
     if [[ $bin_dir_from_root = '.' ]]; then
-        is_root_dir=true
+        bin_dir=${root%/}
+    else
+        bin_dir="${root%/}/$bin_dir_from_root"
     fi
 
-    # Find and register available commands
-    if [[ -d $bin_dir ]]; then
-        register_commands_in_directory "$bin_dir" "$is_root_dir"
+else
+
+    # Otherwise search for a bin/ directory
+    if ! root=$(findup "$PWD" -d bin); then
+        fail "Could not find 'bin/' directory or '.binconfig' file starting from '$PWD'" $ERR_NOT_FOUND
     fi
 
-    # Parse config file (including registering aliases)
-    if [[ -f $binconfig ]]; then
-        parse_binconfig "$binconfig" "$root" "$bin_dir"
+    binconfig="${root%/}/.binconfig"
+    bin_dir_from_root='bin'
+    bin_dir="${root%/}/bin"
+
+    # Ignore common global bin/ directories (/bin, /usr/bin, etc.)
+    if is_common_bin_dir "$bin_dir"; then
+        fail "Could not find 'bin/' directory or '.binconfig' file starting from '$PWD' (ignored '$bin_dir')" $ERR_NOT_FOUND
     fi
+fi
 
-    # Set default values, if not given at the command line or in the config file
-    if [[ -z $unique_prefix_matching ]]; then
-        unique_prefix_matching=true
-    fi
+# Special case for dir=.
+if [[ $bin_dir_from_root = '.' ]]; then
+    is_root_dir=true
+fi
 
-    # Remember the lowest level for --create
-    if [[ -z $main_root ]]; then
-        main_binconfig=$binconfig
-        main_bin_dir=$bin_dir
-        main_bin_dir_from_root=$bin_dir_from_root
-        main_is_root_dir=$is_root_dir
-        main_root=$root
-    fi
+# Find and register available commands
+if [[ -d $bin_dir ]]; then
+    register_commands_in_directory "$bin_dir" "$is_root_dir"
+fi
 
-    # Output environment info?
-    if [[ $action = 'info' ]]; then
-        if $merging; then
-            echo
-        fi
+# Parse config file (including registering aliases)
+if [[ -f $binconfig ]]; then
+    parse_binconfig "$binconfig" "$root" "$bin_dir"
+fi
 
-        echo "Root:    $root/"
+# Set default values, if not given at the command line or in the config file
+if [[ -z $unique_prefix_matching ]]; then
+    unique_prefix_matching=true
+fi
 
-        if [[ -f $binconfig ]]; then
-            echo "Config:  $binconfig"
-        else
-            echo "Config:  $binconfig (missing)"
-        fi
-
-        if [[ -d $bin_dir ]]; then
-            echo "Bin Dir: $bin_dir/"
-        else
-            echo "Bin Dir: $bin_dir/ (missing)"
-        fi
-
-        if ! $merge_with_parent; then
-            echo "Merge:   false"
-        elif $merge_is_optional; then
-            echo "Merge:   optional"
-        else
-            echo "Merge:   true"
-        fi
-    fi
-
-    # Merge with parent?
-    if ! $merge_with_parent; then
-        break
-    fi
-
-    merge_with_parent=false
-    merging=true
-    start_directory=$(dirname "$root")
-
-done
-
+# Output environment info?
 if [[ $action = 'info' ]]; then
+    echo "Root:    $root/"
+
+    if [[ -f $binconfig ]]; then
+        echo "Config:  $binconfig"
+    else
+        echo "Config:  $binconfig (missing)"
+    fi
+
+    if [[ -d $bin_dir ]]; then
+        echo "Bin Dir: $bin_dir/"
+    else
+        echo "Bin Dir: $bin_dir/ (missing)"
+    fi
+
     exit
 fi
 
@@ -1492,7 +1413,7 @@ declare command_list_title='Available Commands'
 declare -a command_list=(${registered_commands+"${registered_commands[@]}"})
 
 # Loop through each argument until we find a matching command
-declare current_directory=$main_bin_dir
+declare current_directory=$bin_dir
 declare full_command=''
 
 while [[ $# -gt $num_parameters_to_ignore ]]; do
@@ -1502,15 +1423,15 @@ while [[ $# -gt $num_parameters_to_ignore ]]; do
     # Special case for creating/editing the .binconfig file
     if [[ -z $full_command && $subcommand = '.binconfig' ]]; then
         if [[ $action = 'create' ]]; then
-            if [[ -e "$main_root/.binconfig" ]]; then
-                fail "$main_root/.binconfig already exists (use --edit to edit it)"
+            if [[ -e "$root/.binconfig" ]]; then
+                fail "$root/.binconfig already exists (use --edit to edit it)"
             fi
 
             ( # kcov-ignore-line: Usage not detected
                 declare output_started=false
 
-                if [[ $main_bin_dir_from_root != 'bin' ]]; then
-                    echo "dir = $main_bin_dir_from_root"
+                if [[ $bin_dir_from_root != 'bin' ]]; then
+                    echo "dir = $bin_dir_from_root"
                     output_started=true
                 fi
 
@@ -1528,21 +1449,21 @@ while [[ $# -gt $num_parameters_to_ignore ]]; do
                 if ! $output_started; then
                     echo
                 fi
-            ) >"$main_root/.binconfig" # kcov-ignore-line: Usage not detected
+            ) >"$root/.binconfig" # kcov-ignore-line: Usage not detected
 
-            echo "Created file $main_root/.binconfig"
-            open_in_editor "$main_root/.binconfig"
+            echo "Created file $root/.binconfig"
+            open_in_editor "$root/.binconfig"
         elif [[ $action = 'edit' ]]; then
-            if [[ ! -e "$main_root/.binconfig" ]]; then
+            if [[ ! -e "$root/.binconfig" ]]; then
                 fail 'No .binconfig file found (use --create to create one)'
             fi
 
-            bin_dir_for_binconfig=$(bin_dir_for "$main_root/.binconfig")
-            if [[ "$bin_dir_for_binconfig" != "$main_bin_dir_from_root" ]]; then
-                fail ".binconfig belongs to $bin_dir_for_binconfig/ not $main_bin_dir_from_root/"
+            bin_dir_for_binconfig=$(bin_dir_for "$root/.binconfig")
+            if [[ "$bin_dir_for_binconfig" != "$bin_dir_from_root" ]]; then
+                fail ".binconfig belongs to $bin_dir_for_binconfig/ not $bin_dir_from_root/"
             fi
 
-            open_in_editor "$main_root/.binconfig"
+            open_in_editor "$root/.binconfig"
         fi
     fi
 
@@ -1621,8 +1542,8 @@ while [[ $# -gt $num_parameters_to_ignore ]]; do
 
     # If there were no prefix matches, stop searching
     if [[ ${#matching_commands[@]} -eq 0 ]]; then
-        if $main_is_root_dir && [[ -d "$current_directory/$subcommand" ]]; then
-            fail "Subcommands are not supported with the config option 'dir = $main_bin_dir_from_root'"
+        if $is_root_dir && [[ -d "$current_directory/$subcommand" ]]; then
+            fail "Subcommands are not supported with the config option 'dir = $bin_dir_from_root'"
         fi
         if [[ $subcommand = .* && -e "$current_directory/$subcommand" ]]; then
             fail "Command names may not start with '.'"
@@ -1632,13 +1553,13 @@ while [[ $# -gt $num_parameters_to_ignore ]]; do
         fi
 
         append=''
-        if [[ -n $main_binconfig ]]; then
-            append="${append} or $main_binconfig"
+        if [[ -n $binconfig ]]; then
+            append="${append} or $binconfig"
         fi
         if in_array "${full_command:1}" completion create edit help info version; then
             append="${append}${NEW_LINE}${GREY}Perhaps you meant to run 'bin --${full_command:1}'?${RESET}"
         fi
-        fail "Command '${full_command:1}' not found in $main_bin_dir/$append" $ERR_NOT_FOUND
+        fail "Command '${full_command:1}' not found in $bin_dir/$append" $ERR_NOT_FOUND
     fi
 
     # Otherwise display the list of matches

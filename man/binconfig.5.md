@@ -47,13 +47,6 @@ Global settings may appear at the top of a file.
 
     **Default:** false
 
-**merge = true**|**optional**
-: Merge the list of commands with a parent project.
-
-    If set to optional, no error will be raised if the parent project is missing. This may be useful in subprojects that have separate repositories, so you can't guarantee they will be cloned together.
-
-    **Default:** false
-
 **template =** _TEMPLATE_
 : Customise the template for scripts created by `--create`. It is passed to `echo -e`, so you can use escape sequences such as `\n` for new lines.
 
@@ -75,7 +68,6 @@ Global settings may appear at the top of a file.
 `; Global settings`
 `dir = scripts`
 `exact = true`
-`merge = true`
 `template = #!/bin/sh\n\n`
 
 `; Settings for each command (script)`
