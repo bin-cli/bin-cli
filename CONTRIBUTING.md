@@ -32,10 +32,10 @@ To run the tests locally, you will need:
 
 The `bin/setup` script will install most of these for you (except nvm/Node.js) on Ubuntu.
 
-Run the `bin/watch` command to automatically build and test the changes:
+Run `bin/tdd` to automatically build and test the changes:
 
 ```bash
-bin/watch
+bin/tdd
 ```
 
 To test the changes interactively, run `bin/dev`, which will both build and run the development version.
