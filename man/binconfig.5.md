@@ -42,22 +42,10 @@ Global settings may appear at the top of a file.
 
     **Default:** bin
 
-## COMMAND SETTINGS
-
-**alias =** _ALIAS_
-: Define an alias for the command. The alias can be used in place of the command name to execute the command. This can be repeated multiple times to define multiple aliases.
-
-**aliases =** _ALIAS1_, _ALIAS2_, ...
-: Define multiple aliases for the command at once.
-
 ## EXAMPLE CONFIG FILE
 
 `; Global settings`
 `dir = scripts`
-
-`; Settings for each command (script)`
-`[hello]`
-`alias = hi`
 
 ## SEE ALSO
 

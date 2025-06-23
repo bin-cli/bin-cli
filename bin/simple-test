@@ -37,4 +37,3 @@ run-test() {
 }
 
 run-test "$bin hi World" "Hello, World!"
-run-test "$bin hi-symlink World" "Hello, World!"

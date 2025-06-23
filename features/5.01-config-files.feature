@@ -18,19 +18,11 @@ Feature: Config files
     | ```ini
     | ; Global settings
     | dir = scripts
-    |
-    | ; Settings for each command (script)
-    | [hello]
-    | alias = hi
     | ```
     |
-    | The supported global keys are:
+    | The supported keys are:
     |
     | - `dir` (string) - Sets a [custom script directory](#custom-script-directory)
-    |
-    | The supported per-command keys are:
-    |
-    | - `alias`/`aliases` (comma-separated strings) - [Aliases](#aliases)
 
     Scenario: Directories above .binconfig are not searched when .binconfig exists
       Given an empty file '{ROOT}/project/root/.binconfig'
@@ -129,31 +121,10 @@ Feature: Config files
     Scenario: Unknown keys are ignored for forwards compatibility
       Given a file '{ROOT}/project/.binconfig' with content:
         """
-        ignored = global
+        ignored = value
         dir = scripts
-
-        [command]
-        ignored = command
         """
       And a script '{ROOT}/project/scripts/hello' that outputs 'Hello, World!'
       When I run 'bin hello'
       Then it is successful
       And the output is 'Hello, World!'
-
-    Scenario: A warning is displayed if .binconfig contains a command that doesn't exist
-      Given a file '{ROOT}/project/.binconfig' with content:
-        """
-        [my-command]
-        alias = my-alias
-        """
-      And a script '{ROOT}/project/bin/sample'
-      When I run 'bin'
-      Then it is successful
-      And the output is:
-        """
-        Available Commands
-        bin sample
-
-        Warning: The following commands listed in .binconfig do not exist:
-        [my-command]
-        """

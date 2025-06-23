@@ -562,20 +562,6 @@ is_common_bin_dir() {
         "$HOME/bin"
 }
 
-relative_path() {
-    local child parent
-
-    parent=$1
-    child=$2
-
-    if [[ "$parent" = "$child" ]]; then
-        echo '.'
-    else
-        # We don't need to support the case where $child is not inside $parent
-        echo "${child#"${parent}/"}"
-    fi
-}
-
 #endregion =====================================================================
 #region ======= HELPERS: CROSS-PLATFORM 'realpath' =============================
 
@@ -682,9 +668,6 @@ bin_dir_for() {
         if binconfig_line_is_ignored "$key"; then
             # Skip blank lines & comments
             :
-        elif [[ $key =~ ^\[(.+)]$ ]]; then
-            # [command]
-            break
         elif [[ $key = 'dir' ]]; then
             # dir=scripts
             value=$(trim "$value")
@@ -720,8 +703,6 @@ bin_dir_for() {
 # Once we have determined the correct '.binconfig' file to use, we can parse it
 # and register both the global and per-command settings.
 
-declare -a commands_listed_in_binconfig=()
-
 parse_binconfig() {
     local binconfig bin_dir command key line root value
 
@@ -729,7 +710,6 @@ parse_binconfig() {
     root=$2
     bin_dir=$3
 
-    command=''
     line=0
 
     # shellcheck disable=SC2094 # We aren't writing to $binconfig but it thinks we might be
@@ -741,11 +721,6 @@ parse_binconfig() {
 
         if binconfig_line_is_ignored "$key"; then
             : # Skip blank lines & comments
-        elif [[ $key =~ ^\[(.+)]$ ]]; then
-            command=${BASH_REMATCH[1]}
-            commands_listed_in_binconfig+=("$command") # global
-        elif [[ -n $command ]]; then
-            set_command_option "$command" "$key" "$value" "$binconfig" "$line" "$root" "$bin_dir"
         else
             set_global_option "$key" "$value" "$binconfig" "$line"
         fi
@@ -763,33 +738,6 @@ set_global_option() {
     if [[ $key = 'dir' ]]; then
 
         : # Already handled in 'get_dir_from_binconfig'
-
-    else
-
-        # Unknown keys don't trigger an error for forwards compatibility
-        debug "Ignored unknown key '$key' in $binconfig line $line"
-
-    fi
-}
-
-set_command_option() {
-    local binconfig bin_dir command key line root value
-
-    command=$1
-    key=$2
-    value=$3
-    binconfig=$4
-    line=$5
-    root=$6
-    bin_dir=$7
-
-    if [[ $key = 'alias' || $key = 'aliases' ]]; then
-
-        IFS=',' read -ra line_aliases <<<"$value"
-        for alias in ${line_aliases+"${line_aliases[@]}"}; do
-            alias=$(trim "$alias")
-            register_command_alias "$alias" "$command" "$binconfig line $line"
-        done
 
     else
 
@@ -822,31 +770,11 @@ map_init command_to_executable
 map_init executable_to_command
 map_init original_commands
 
-prevent_duplicate_command() {
-    local name source type
-
-    type=$1
-    name=$2
-    source=$3
-
-    for command in ${registered_commands+"${registered_commands[@]}"}; do
-        if command_matches exact "$name" "$command" ||
-            # We need to check this both ways around, because they could be defined in either order
-            command_matches subcommands "$name" "$command" ||
-            command_matches subcommands "$command" "$name"
-        then
-            fail "The $type '$name' defined in $source conflicts with an existing command"
-        fi
-    done
-}
-
 register_executable_command() {
     local executable name
 
     name=$1
     executable=$2
-
-    prevent_duplicate_command command "$name" "$executable"
 
     registered_commands+=("$name")                      # global
     map_set command_to_executable "$name" "$executable" # global
@@ -874,7 +802,7 @@ register_commands_in_directory() {
                 fail "The symlink '$file' must use a relative path, not absolute ('$target')"
             fi
             if [[ -e $file ]]; then
-                register_symlink_alias "$prefix$name" "$realfile" "$file"
+                register_alias "$prefix$name" "$realfile"
             else
                 broken_symlinks+=("$file => $target")
             fi
@@ -905,46 +833,16 @@ register_commands_in_directory() {
 #region ======= HELPERS: ALIASES ===============================================
 
 declare -a registered_aliases=()
-map_init alias_sources
 map_init alias_to_executable
 
-prevent_duplicate_alias() {
-    local existing name source
-
-    name=$1
-    source=$2
-
-    if existing=$(map_get alias_sources "$name"); then
-        fail "The alias '$name' defined in $source conflicts with the alias defined in $existing"
-    fi
-}
-
-register_command_alias() {
-    local alias command source
-
-    alias=$1
-    command=$2
-    source=$3
-
-    prevent_duplicate_alias "$alias" "$source"
-
-    registered_aliases+=("$alias")                # global
-    map_set original_commands "$alias" "$command" # global
-    map_set alias_sources "$alias" "$source"      # global
-}
-
-register_symlink_alias() {
-    local alias executable source
+register_alias() {
+    local alias executable
 
     alias=$1
     executable=$2
-    source=$3
-
-    prevent_duplicate_alias "$alias" "$source"
 
     registered_aliases+=("$alias")                     # global
     map_set alias_to_executable "$alias" "$executable" # global
-    map_set alias_sources "$alias" "$source"           # global
 }
 
 #endregion =====================================================================
@@ -1004,7 +902,6 @@ find_matching_commands() {
 
     type=$1
     target=$2
-    stop_after_first=${3-false}
 
     # Find commands and aliases that match
     matching_commands=() # global
@@ -1031,23 +928,7 @@ find_matching_commands() {
         # It does match, so add it to the results
         matching_commands+=("$command") # global
         map_set matched_original_commands "$original_command" true # global
-
-        # For 'has_matching_commands', we only need to know if there is at least one match, so stop early
-        if $stop_after_first; then
-            break
-        fi
     done
-}
-
-has_matching_commands() {
-    local alias command target type
-
-    type=$1
-    target=$2
-
-    find_matching_commands "$type" "$target" true
-
-    [[ ${#matching_commands[@]} -gt 0 ]]
 }
 
 matching_commands_shared_prefix() {
@@ -1151,23 +1032,9 @@ if [[ -n $fixed_bin_dir ]]; then
         fixed_bin_dir=''
     fi
 
-    # Look for a matching .binconfig file
-    # If there isn't one, assume the parent directory is the project root
     binconfig=''
     root=$(dirname "$bin_dir")
     bin_dir_from_root=$(basename "$bin_dir")
-
-    if binconfig_dir=$(findup "$bin_dir" -f .binconfig); then
-        binconfig_file="$binconfig_dir/.binconfig"
-        dir_in_binconfig=$(bin_dir_for "$binconfig_file")
-        required_dir=$(relative_path "$binconfig_dir" "$bin_dir")
-
-        if [[ "$dir_in_binconfig" = "$required_dir" ]]; then
-            binconfig=$binconfig_file
-            root=$binconfig_dir
-            bin_dir_from_root=$required_dir
-        fi
-    fi
 
 elif root=$(findup "$PWD" -f .binconfig); then
 
@@ -1242,10 +1109,6 @@ for alias in ${alias_to_executable+"${alias_to_executable[@]}"}; do
 done
 
 for alias in ${registered_aliases+"${registered_aliases[@]}"}; do
-    # Check for conflicts
-    source=$(map_get alias_sources "$alias")
-    prevent_duplicate_command alias "$alias" "$source"
-
     # Expand aliases to cover subcommands (e.g. if 'deploy' => 'push' then 'deploy live' => 'push live')
     target=$(map_get original_commands "$alias")
     for command in ${registered_commands+"${registered_commands[@]}"}; do
@@ -1473,33 +1336,6 @@ if [[ ${#non_executable_files[@]} -gt 0 ]]; then
     declare file
     for file in ${non_executable_files+"${non_executable_files[@]}"}; do
         echo "$file"
-    done
-fi
-
-# Warnings: Commands listed in .binconfig that do not exist
-missing_commands=()
-
-for command in ${commands_listed_in_binconfig+"${commands_listed_in_binconfig[@]}"}; do
-
-    # Regular script
-    if map_has command_to_executable "$command"; then
-        continue
-    fi
-
-    # Directory
-    if has_matching_commands subcommands "$command"; then
-        continue
-    fi
-
-    missing_commands+=("$command")
-done
-
-if [[ ${#missing_commands[@]} -gt 0 ]]; then
-    echo
-    echo "${YELLOW}Warning: The following commands listed in .binconfig do not exist:${RESET}"
-    declare command
-    for command in ${missing_commands+"${missing_commands[@]}"}; do
-        echo "[$command]"
     done
 fi
 

@@ -126,55 +126,6 @@ Feature: Custom script directory
       Then it fails with exit code 127
       And the error is "bin: Could not find 'scripts/' directory starting from '{ROOT}/project'"
 
-    Scenario: When --dir matches .binconfig, .binconfig should be parsed as normal
-      Given a file '{ROOT}/project/.binconfig' with content:
-        """
-        dir = scripts
-
-        [hello]
-        alias = bye
-        """
-      And a script '{ROOT}/project/scripts/hello'
-      When I run 'bin --dir scripts'
-      Then it is successful
-      And the output is:
-        """
-        Available Commands
-        bin hello (alias: bye)
-        """
-
-    Scenario: When --dir doesn't match .binconfig, .binconfig should be ignored
-      Given a file '{ROOT}/project/.binconfig' with content:
-        """
-        [hello]
-        alias = bye
-        """
-      And a script '{ROOT}/project/scripts/hello'
-      When I run 'bin --dir scripts'
-      Then it is successful
-      And the output is:
-        """
-        Available Commands
-        bin hello
-        """
-
-    Scenario: .binconfig may be in the same directory when using --dir
-      Given a file '{ROOT}/project/scripts/.binconfig' with content:
-        """
-        dir = .
-
-        [hello]
-        alias = bye
-        """
-      And a script '{ROOT}/project/scripts/hello'
-      When I run 'bin --dir scripts'
-      Then it is successful
-      And the output is:
-        """
-        Available Commands
-        bin hello (alias: bye)
-        """
-
     Scenario: When --dir is used and a matching .binconfig can't be found, the 'not found' error should be adapted accordingly
       Given a script '{ROOT}/project/scripts/hello'
       And the working directory is '{ROOT}/project/root'

@@ -28,13 +28,10 @@ Feature: Environment Variables To Use in Scripts
       Then it is successful
       And the output is 'bin sample'
 
+    # TODO: Does this still make sense when using symlink aliases? Perhaps not...
     Scenario: The command name passed is the original command, not the alias
       Given a script '{ROOT}/project/bin/sample' that outputs '$BIN_COMMAND'
-      And a file '{ROOT}/project/.binconfig' with content:
-        """
-        [sample]
-        alias = alias
-        """
+      And a symlink '{ROOT}/project/bin/alias' pointing to 'sample'
       When I run 'bin alias'
       Then it is successful
       And the output is 'bin sample'

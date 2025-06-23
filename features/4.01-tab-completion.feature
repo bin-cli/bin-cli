@@ -115,15 +115,9 @@ Feature: Tab completion
 
     Scenario: Tab completion works for aliases
       Given a script '{ROOT}/project/bin/deploy'
-      And a script '{ROOT}/project/bin/another'
-      And a file '{ROOT}/project/.binconfig' with content:
-        """
-        [artisan]
-        alias = art
-
-        [deploy]
-        alias = publish
-        """
+      And a script '{ROOT}/project/bin/artisan'
+      And a symlink '{ROOT}/project/bin/publish' pointing to 'deploy'
+      And a symlink '{ROOT}/project/bin/art' pointing to 'artisan'
       When I tab complete 'bin p'
       Then it is successful
       And the output is:
@@ -133,11 +127,7 @@ Feature: Tab completion
 
     Scenario: If both the command and the alias match, only the command is listed in tab completion
       Given a script '{ROOT}/project/bin/deploy'
-      And a file '{ROOT}/project/.binconfig' with content:
-        """
-        [deploy]
-        alias = publish
-        """
+      And a symlink '{ROOT}/project/bin/publish' pointing to 'deploy'
       When I tab complete 'bin '
       Then it is successful
       And the output is:
@@ -147,12 +137,8 @@ Feature: Tab completion
 
     Scenario: If multiple aliases for the same command match, only one is returned in tab completion
       Given a script '{ROOT}/project/bin/deploy'
-      And a file '{ROOT}/project/.binconfig' with content:
-        """
-        [deploy]
-        alias = publish
-        alias = push
-        """
+      And a symlink '{ROOT}/project/bin/publish' pointing to 'deploy'
+      And a symlink '{ROOT}/project/bin/push' pointing to 'deploy'
       When I tab complete 'bin p'
       Then it is successful
       And the output is:
