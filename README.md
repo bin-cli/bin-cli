@@ -71,12 +71,6 @@ bin deploy
 bin hello
 </pre>
 
-<details><summary><em>Can I add descriptions to the commands?</em></summary><blockquote>
-
-Yes - see [Help text](#help-text), below.
-
-</blockquote></details>
-
 ### Subcommands
 
 If you have multiple related commands, you may want to group them together and make subcommands. To do that, just create a subdirectory:
@@ -213,39 +207,42 @@ To any of the following files:
 - `~/.bash_completion`
 - `~/.bashrc`
 
-<details><summary><em>How to use tab completion with custom aliases?</em></summary><blockquote>
+<details>
+<summary><em>How to use tab completion with a custom alias?</em></summary>
 
-If you are using a simple [shell alias](#aliasing-the-bin-command), e.g. `alias b=bin`, update the filename to match and add `--exe <name>`:
+> If you are using a simple [shell alias](#aliasing-the-bin-command), e.g. `alias b=bin`, update the filename to match and add `--exe <name>`:
+>
+> ```bash
+> # e.g. in /usr/share/bash-completion/completions/b
+> command -v bin &>/dev/null && eval "$(bin --completion --exe b)"
+> ```
+>
+> If you are using an alias with a [custom script directory](#custom-script-directory), e.g. `alias scr='bin --dir scripts'`, add the same parameter here:
+>
+> ```bash
+> # e.g. in /usr/share/bash-completion/completions/scr
+> command -v bin &>/dev/null && eval "$(bin --completion --exe scr --dir scripts)"
+> ```
+>
+> If you have multiple aliases, just create a file for each one (or put them all together in `~/.bash_completion` or `~/.bashrc`).
 
-```bash
-# e.g. in /usr/share/bash-completion/completions/b
-command -v bin &>/dev/null && eval "$(bin --completion --exe b)"
-```
+</details>
 
-If you are using an alias with a [custom script directory](#custom-script-directory), e.g. `alias scr='bin --dir scripts'`, add the same parameter here:
+<details>
+<summary><em>Why use <code>eval</code>?</em></summary>
 
-```bash
-# e.g. in /usr/share/bash-completion/completions/scr
-command -v bin &>/dev/null && eval "$(bin --completion --exe scr --dir scripts)"
-```
+> Using `eval` makes it more future-proof - in case I need to change how tab completion works in the future.
+>
+> If you prefer, you can manually run `bin --completion` and paste the output into the file instead.
 
-If you have multiple aliases, just create a file for each one (or put them all together in `~/.bash_completion` or `~/.bashrc`).
+</details>
 
-</blockquote></details>
+<details>
+<summary><em>What about other shells (Zsh, Fish, etc)?</em></summary>
 
-<details><summary><em>Why use <code>eval</code>?</em></summary><blockquote>
+> Only Bash is supported at this time. I will add other shells if there is [demand for it](https://github.com/bin-cli/bin-cli/issues/12), or gladly accept [pull requests](https://github.com/bin-cli/bin-cli/pulls).
 
-Using `eval` makes it more future-proof - in case I need to change how tab completion works in the future.
-
-If you prefer, you can manually run `bin --completion` and paste the output into the file instead.
-
-</blockquote></details>
-
-<details><summary><em>What about other shells (Zsh, Fish, etc)?</em></summary><blockquote>
-
-Only Bash is supported at this time. I will add other shells if there is [demand for it](https://github.com/bin-cli/bin-cli/issues/12), or gladly accept [pull requests](https://github.com/bin-cli/bin-cli/pulls).
-
-</blockquote></details>
+</details>
 
 ### Upgrading
 
@@ -271,6 +268,15 @@ And make them executable:
 chmod +x bin/*
 ```
 
+Which creates this directory structure:
+
+```
+repo/
+├── bin/
+│   └── sample
+└── ...
+```
+
 That's all there is to it. Now you can run them:
 
 ```bash
@@ -278,18 +284,11 @@ bin sample
 ```
 
 <details>
-<summary><em>Can I change the directory name?</em></summary>
+<summary><em>Does the directory name need to be <code>bin/</code>?</em></summary>
 
-> Yes - see [custom script directory](#custom-script-directory), below.
-
-</details>
-
-<details>
-<summary><em>Does the <code>bin/</code> directory have to exist?</em></summary>
-
-> No - if you define all commands [inline in the config file](#inline-commands), you can omit the `bin/` directory.
+> You can define an alias using a custom name - see [custom script directory](#custom-script-directory), below.
 >
-> You can also put the scripts [in the root directory](#custom-script-directory) - but then [subcommands](#subcommands) won't be supported.
+> But you can't configure a different directory name on a per-project basis (except by writing your own wrapper function).
 
 </details>
 
@@ -308,9 +307,10 @@ Which creates this directory structure (symlink targets indicated by `->`):
 
 ```
 repo/
-└── bin/
-    ├── deploy
-    └── publish -> deploy
+├── bin/
+│   ├── deploy
+│   └── publish -> deploy
+└── ...
 ```
 
 This means `bin publish` is an alias for `bin deploy`, and running either would execute the `bin/deploy` script.
@@ -326,38 +326,42 @@ bin artisan <em>(alias: art)</em>
 bin deploy <em>(aliases: publish, push)</em>
 </pre>
 
-<details><summary><em>Can I define aliases for commands that have subcommands (i.e. directories)?</em></summary><blockquote>
+<details>
+<summary><em>Can I define aliases for commands that have subcommands (i.e. directories)?</em></summary>
 
-Yes - for example, given a script `bin/deploy/live` and this directory structure:
+> Yes - for example, given this directory structure:
+>
+> ```
+> repo/
+> ├── bin/
+> │   ├── deploy
+> │   │   └── live
+> │   └── push -> deploy
+> └── ...
+> ```
+>
+> `bin push live` would be an alias for `bin deploy live`, and so on.
 
-```
-repo/
-└── bin/
-    ├── deploy
-    │   └── live
-    └── push -> deploy
-```
+</details>
 
-`bin push live` would be an alias for `bin deploy live`, and so on.
+<details>
+<summary><em>How do aliases affect unique prefix matching?</em></summary>
 
-</blockquote></details>
+> Aliases are checked when looking for unique prefixes. In this example:
+>
+> ```
+> repo/
+> ├── bin/
+> │   ├── deploy
+> │   ├── publish -> deploy
+> │   └── push -> deploy
+> └── ...
+> ```
+>
+> - `bin pub` would match `bin publish`, which is an alias for `bin deploy`, which runs the `bin/deploy` script
+> - `bin pu` would match both `bin publish` and `bin push` - but since both are aliases for `bin deploy`, that would be treated as a unique prefix and would therefore also run `bin/deploy`
 
-<details><summary><em>How do aliases affect unique prefix matching?</em></summary><blockquote>
-
-Aliases are checked when looking for unique prefixes. In this example:
-
-```
-repo/
-└── bin/
-    ├── deploy
-    ├── publish -> deploy
-    └── push -> deploy
-```
-
-- `bin pub` would match `bin publish`, which is an alias for `bin deploy`, which runs the `bin/deploy` script
-- `bin pu` would match both `bin publish` and `bin push` - but since both are aliases for `bin deploy`, that would be treated as a unique prefix and would therefore also run `bin/deploy`
-
-</blockquote></details>
+</details>
 
 ### Custom Script Directory
 
@@ -371,6 +375,18 @@ This is mostly useful to support repositories you don't control. You will probab
 
 ```bash
 alias scr='bin --exe scr --dir scripts'
+```
+
+Or perhaps a wrapper function:
+
+```bash
+bin() {
+    if [[ $PWD == /path/to/repo* ]]; then
+        command bin --dir scripts "$@"
+    else
+        command bin "$@"
+    fi
+}
 ```
 
 You can also use an absolute path - for example, you could put your all generic development tools in `~/.local/bin/dev/` and run them as `dev <script>`:
@@ -419,21 +435,22 @@ b hello
 
 You can skip it (i.e. use `alias b='bin'`) if you prefer it to say `bin`.
 
-<details><summary><em>Alternatively, you can use a symlink</em></summary><blockquote>
+<details>
+<summary><em>Alternatively, you can use a symlink</em></summary>
 
-System-wide installation:
+> System-wide installation:
+>
+> ```bash
+> $ sudo ln -s bin /usr/local/bin/b
+> ```
+>
+> Per-user installation:
+>
+> ```bash
+> $ ln -s bin ~/.local/bin/b
+> ```
 
-```bash
-$ sudo ln -s bin /usr/local/bin/b
-```
-
-Per-user installation:
-
-```bash
-$ ln -s bin ~/.local/bin/b
-```
-
-</blockquote></details>
+</details>
 
 ### Automatic Exclusions
 
@@ -441,7 +458,7 @@ Scripts starting with `_` (underscore) are excluded from listings, but can still
 
 Files starting with `.` (dot / period) are always ignored and cannot be executed with Bin.
 
-Files that are not executable (not `chmod +x`) are listed as warnings in the command listing, and will error if you try to run them. The exception is when using `dir = .`, where they are just ignored.
+Files that are not executable (not `chmod +x`) are listed as warnings in the command listing, and will error if you try to run them.
 
 The directories `/bin`, `/snap/bin`, `/usr/bin`, `/usr/local/bin`, `$HOME/bin` and `$HOME/.local/bin` are ignored when searching parent directories, because they are common locations for global executables (typically in `$PATH`).
 
