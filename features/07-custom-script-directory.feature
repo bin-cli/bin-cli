@@ -2,20 +2,6 @@ Feature: Custom script directory
 
   Rule: The script directory can be set at the command line
 
-    | ### Custom Script Directory
-    |
-    | You can override the directory name at the command line:
-    |
-    | ```bash
-    | $ bin --dir scripts
-    | ```
-    |
-    | This is mostly useful to support repositories you don't control. You will probably want to use an alias such as:
-    |
-    | ```bash
-    | alias scr='bin --exe scr --dir scripts'
-    | ```
-
     Scenario: The script directory can be configured with --dir
       Given a script '{ROOT}/project/scripts/hello' that outputs 'Hello, World!'
       When I run 'bin --dir scripts hello'
@@ -41,12 +27,6 @@ Feature: Custom script directory
       And the error is "bin: Command 'other' not found in {ROOT}/project/scripts/"
 
   Rule: The script directory can be set to an absolute path at the command line
-
-    | You can also use an absolute path - for example, you could put your all generic development tools in `~/.local/bin/dev/` and run them as `dev <script>`:
-    |
-    | ```bash
-    | alias dev="bin --exe dev --dir $HOME/.local/bin/dev"
-    | ```
 
     Scenario: The script directory given by --dir can be an absolute path
       Given a script '{ROOT}/project/scripts/dev/hello' that outputs 'Hello, World!'

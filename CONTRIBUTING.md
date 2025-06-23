@@ -40,6 +40,8 @@ bin/tdd
 
 To test the changes interactively, run `bin/dev`, which will both build and run the development version.
 
+Update the [README](README.md) and `--help` output as needed.
+
 To submit your changes as a pull request, [fork the repository on GitHub](https://github.com/bin-cli/bin-cli/fork) then run:
 
 ```bash
@@ -57,18 +59,6 @@ git push -u myfork HEAD
 Browse to the repository fork on GitHub (`https://github.com/YOUR_USERNAME/bin-cli/tree/YOUR_BRANCH`) and click "Compare & pull request". Finally, check/update the details and click "Create pull request".
 
 ## Contributing Documentation Changes
-
-### README
-
-The [`README.md`](README.md) file is automatically generated, so please do not edit it directly. Instead, please edit the `.md` and `.feature` files in the [`features/`](features/) directory and submit that as a pull request.
-
-In the `.feature` files, each line of Markdown must be prefixed with `|` - this ensures headings, which start with `#`, are not treated as comments.
-
-`README.md` will be [updated automatically](.github/workflows/update-readme.yml) by GitHub Actions. Alternatively, you can manually regenerate it by running `bin/generate/readme`. You will need either [nvm](https://github.com/nvm-sh/nvm) (recommended) or a suitable version of [Node.js](https://nodejs.org/) installed.
-
-### CLI Reference / Help Text
-
-The [CLI Reference](README.md#cli-reference) is taken directly from the `bin --help` output, which is part of the [source code](src/bin). Please see [Contributing Code Changes](#contributing-code-changes), above.
 
 ### Wiki
 

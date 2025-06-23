@@ -2,22 +2,6 @@ Feature: Tab completion
 
   Rule: Tab completion works
 
-    | ### Tab Completion
-    |
-    | To enable tab completion in Bash, add this:
-    |
-    | ```bash
-    | command -v bin &>/dev/null && eval "$(bin --completion)"
-    | ```
-    |
-    | To any of the following files:
-    |
-    | - `/usr/share/bash-completion/completions/bin` (recommended for system-wide installs)
-    | - `/etc/bash_completion.d/bin`
-    | - `~/.local/share/bash-completion/completions/bin` (recommended for per-user installs)
-    | - `~/.bash_completion`
-    | - `~/.bashrc`
-
     Scenario: A tab completion script is available for Bash
       When I run 'bin --completion'
       Then it is successful
@@ -148,24 +132,6 @@ Feature: Tab completion
 
   Rule: Tab completion works with custom (Bash) aliases
 
-    | COLLAPSE: How to use tab completion with custom aliases?
-    |
-    | If you are using a simple [shell alias](#aliasing-the-bin-command), e.g. `alias b=bin`, update the filename to match and add `--exe <name>`:
-    |
-    | ```bash
-    | # e.g. in /usr/share/bash-completion/completions/b
-    | command -v bin &>/dev/null && eval "$(bin --completion --exe b)"
-    | ```
-    |
-    | If you are using an alias with a [custom script directory](#custom-script-directory), e.g. `alias scr='bin --dir scripts'`, add the same parameter here:
-    |
-    | ```bash
-    | # e.g. in /usr/share/bash-completion/completions/scr
-    | command -v bin &>/dev/null && eval "$(bin --completion --exe scr --dir scripts)"
-    | ```
-    |
-    | If you have multiple aliases, just create a file for each one (or put them all together in `~/.bash_completion` or `~/.bashrc`).
-
     Scenario: The executable name for tab completion can be overridden with --exe
       When I run 'bin --completion --exe b'
       Then it is successful
@@ -191,14 +157,6 @@ Feature: Tab completion
         """
         right
         """
-
-  Rule: The completion script needs to be run through 'eval'
-
-    | COLLAPSE: Why use `eval`?
-    |
-    | Using `eval` makes it more future-proof - in case I need to change how tab completion works in the future.
-    |
-    | If you prefer, you can manually run `bin --completion` and paste the output into the file instead.
 
   Rule: Various files are excluded from tab completion
 
@@ -412,9 +370,3 @@ Feature: Tab completion
       When I tab complete 'bin -- -'
       Then it is successful
       And there is no output
-
-  Rule: Other shells are not currently supported
-
-    | COLLAPSE: What about other shells (Zsh, Fish, etc)?
-    |
-    | Only Bash is supported at this time. I will add other shells if there is [demand for it](https://github.com/bin-cli/bin-cli/issues/12), or gladly accept [pull requests](https://github.com/bin-cli/bin-cli/pulls).

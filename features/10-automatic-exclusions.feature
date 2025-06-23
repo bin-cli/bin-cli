@@ -2,10 +2,6 @@ Feature: Automatic exclusions
 
   Rule: Certain files and directories are automatically excluded
 
-    | ### Automatic Exclusions
-    |
-    | Scripts starting with `_` (underscore) are excluded from listings, but can still be executed. This can be used for hidden tools and helper scripts that are not intended to be executed directly. (Or you could use a separate [`libexec` directory](https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch04s07.html) in the project root if you prefer.)
-
     Scenario: Scripts starting with '_' are excluded from listings
       Given a script '{ROOT}/project/bin/visible'
       And a script '{ROOT}/project/bin/_hidden'
@@ -102,8 +98,6 @@ Feature: Automatic exclusions
 
   Rule: Files starting with '.' are ignored
 
-    | Files starting with `.` (dot / period) are always ignored and cannot be executed with Bin.
-
     Scenario: Scripts starting with '.' are excluded from listings
       Given a script '{ROOT}/project/bin/visible'
       And a script '{ROOT}/project/bin/.hidden'
@@ -129,8 +123,6 @@ Feature: Automatic exclusions
 
   Rule: Files that are not executable are listed as warnings
 
-    | Files that are not executable (not `chmod +x`) are listed as warnings in the command listing, and will error if you try to run them. The exception is when using `dir = .`, where they are just ignored.
-
     Scenario: Files that are not executable are listed as warnings
       Given a script '{ROOT}/project/bin/executable'
       And an empty file '{ROOT}/project/bin/not-executable'
@@ -152,8 +144,6 @@ Feature: Automatic exclusions
       And the error is "bin: '{ROOT}/project/bin/not-executable' is not executable (chmod +x)"
 
   Rule: Common bin directories are ignored
-
-    | The directories `/bin`, `/snap/bin`, `/usr/bin`, `/usr/local/bin`, `$HOME/bin` and `$HOME/.local/bin` are ignored when searching parent directories, because they are common locations for global executables (typically in `$PATH`).
 
     Scenario Outline: Common bin directories are ignored when searching parent directories
       Given a script '{ROOT}<bin>/hello'

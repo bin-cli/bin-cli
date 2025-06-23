@@ -2,28 +2,6 @@ Feature: Unique prefix matching
 
   Rule: Any unique prefix is enough to run a command
 
-    | ### Unique Prefix Matching
-    |
-    | Any unique prefix is enough to run a command - so if `bin/hello` is the only script starting with `h`, all of these will work too:
-    |
-    | ```bash
-    | $ bin hell
-    | $ bin hel
-    | $ bin he
-    | $ bin h
-    | ```
-    |
-    | This also works with subcommands - e.g. `bin dep prod` might run `bin/deploy/production`.
-    |
-    | If you type a prefix that isn't unique, Bin will display a list of matches instead:
-    |
-    | <pre>
-    | $ bin hel
-    | <strong>Matching Commands</strong>
-    | bin hello
-    | bin help
-    | </pre>
-
     Scenario: When entering a unique prefix, the matching command is executed
       Given a script '{ROOT}/project/bin/hello' that outputs 'Hello, World!'
       When I run 'bin h'

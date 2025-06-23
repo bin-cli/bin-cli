@@ -2,50 +2,6 @@ Feature: How It Works
 
   Rule: Commands can be executed
 
-    | ## How It Works
-    |
-    | A project just needs a `bin/` folder and some executable scripts - for example:
-    |
-    | ```
-    | repo/
-    | ├── bin/
-    | │   ├── build
-    | │   ├── deploy
-    | │   └── hello
-    | └── ...
-    | ```
-    |
-    | The scripts can be written in [any language](https://github.com/bin-cli/bin-cli/wiki/Hello%2C-World),
-    | or can even be compiled binaries, as long as they are executable (`chmod +x`). Here is a very simple
-    | `bin/hello` shell script:
-    |
-    | ```bash
-    | #!/bin/sh
-    | echo "Hello, ${1:-World}!"
-    | ```
-    |
-    | To execute it, run:
-    |
-    | ```
-    | $ bin hello
-    | Hello, World!
-    | ```
-    |
-    | Now you may be thinking why not just run it directly, like this:
-    |
-    | ```
-    | $ bin/hello
-    | ```
-    |
-    | And that would do the same thing - but Bin will also search in parent directories, so you can use it from anywhere in the project:
-    |
-    | ```bash
-    | $ cd app/Http/Controllers/
-    | $ bin/hello                # Doesn't work :-(
-    | $ ../../../bin/hello       # Works, but is rather tedious to type :-/
-    | $ bin hello                # Still works :-)
-    | ```
-
     Scenario: A script that is in the bin/ directory can be run without parameters
       Given a script '{ROOT}/project/bin/hello' that outputs "Hello, ${1:-World}! [$#]"
       When I run 'bin hello'
@@ -91,14 +47,6 @@ Feature: How It Works
       When I run 'bin other'
       Then it fails with exit code 127
       And the error is "bin: Command 'other' not found in {ROOT}/project/bin/"
-
-
-  Rule: Security warning
-
-    | > [!WARNING]
-    | > Bin CLI executes arbitrary commands/scripts in the current working directory
-    | > (or the directory specified by `--dir`) - the same as if you executed them
-    | > directly. You should not run commands from untrusted sources.
 
   Rule: Commands can be executed when in a subdirectory
 
