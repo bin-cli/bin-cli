@@ -18,7 +18,6 @@ Feature: Config files
     | ```ini
     | ; Global settings
     | dir = scripts
-    | exact = true
     |
     | ; Settings for each command (script)
     | [hello]
@@ -30,7 +29,6 @@ Feature: Config files
     | The supported global keys are:
     |
     | - `dir` (string) - Sets a [custom script directory](#custom-script-directory)
-    | - `exact` (boolean) - Disables [unique prefix matching](#unique-prefix-matching)
     |
     | The supported per-command keys are:
     |

@@ -171,14 +171,7 @@ Feature: Tab completion
     | command -v bin &>/dev/null && eval "$(bin --completion --exe b)"
     | ```
     |
-    | If you have globally disabled [unique prefix matching](#unique-prefix-matching), e.g. `alias bin='bin --exact'`, add the same parameter here:
-    |
-    | ```bash
-    | # e.g. in /usr/share/bash-completion/completions/bin
-    | command -v bin &>/dev/null && eval "$(bin --completion --exact)"
-    | ```
-    |
-    | Similarly, if you are using an alias with a [custom script directory](#custom-script-directory), e.g. `alias scr='bin --dir scripts'`, add the same parameter here:
+    | If you are using an alias with a [custom script directory](#custom-script-directory), e.g. `alias scr='bin --dir scripts'`, add the same parameter here:
     |
     | ```bash
     | # e.g. in /usr/share/bash-completion/completions/scr
@@ -392,10 +385,8 @@ Feature: Tab completion
 
       Examples:
         | option               |
-        | --exact              |
         | --exe something      |
         | --exe=something      |
-        | --prefix             |
         | --                   |
 
     Scenario Outline: Tab completion works after '<option>' and changes the directory
@@ -437,12 +428,10 @@ Feature: Tab completion
         """
         --completion
         --dir
-        --exact
         --exe
         --help
         -h
         --info
-        --prefix
         --version
         -v
         --
@@ -455,11 +444,9 @@ Feature: Tab completion
         """
         --completion
         --dir
-        --exact
         --exe
         --help
         --info
-        --prefix
         --version
         --
         """
@@ -469,7 +456,6 @@ Feature: Tab completion
       Then it is successful
       And the output is:
         """
-        --exact
         --exe
         """
 

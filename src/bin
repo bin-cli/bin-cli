@@ -252,7 +252,6 @@ set_option_value() {
 
 declare fixed_bin_dir=''
 declare is_custom_exe=false
-declare unique_prefix_matching='' # may be boolean or empty
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -260,12 +259,10 @@ while [[ $# -gt 0 ]]; do
         --completion)       set_action "$1" completion ;;
         --dir)              set_option_value '--dir' fixed_bin_dir "${2-}"; shift ;;
         --dir=*)            set_option_value '--dir' fixed_bin_dir "${1#*=}" ;;
-        --exact)            unique_prefix_matching=false ;;
         --exe)              is_custom_exe=true; set_option_value '--exe' exe "${2-}"; shift ;;
         --exe=*)            is_custom_exe=true; set_option_value '--exe' exe "${1#*=}" ;;
         --help | -h)        set_action "$1" help ;;
         --info)             set_action "$1" info ;;
-        --prefix)           unique_prefix_matching=true ;;
         --version | -v)     set_action "$1" version ;;
         --)                 shift; break ;;
         -*)                 fail "Invalid option '$1'" ;;
@@ -286,9 +283,7 @@ if [[ $action = 'help' ]]; then
     echo
     echo "Options that can be used with a command:"
     echo "  --dir DIR             Specify the directory name to search for (overrides .binconfig)"
-    echo "  --exact               Disable unique prefix matching"
     echo "  --exe NAME            Override the executable name displayed in the command list"
-    echo "  --prefix              Enable unique prefix matching (overrides .binconfig)"
     echo
     echo "Options that do something special and don't accept a COMMAND:"
     echo "  --completion          Output a tab completion script for the current shell"
@@ -354,12 +349,10 @@ if [[ $action = 'complete-bash' ]]; then
             --completion)       fail "Cannot tab complete '$1'" ;;
             --dir)              set_option_value '--dir' fixed_bin_dir "${2-}"; shift ;;
             --dir=*)            set_option_value '--dir' fixed_bin_dir "${1#*=}" ;;
-            --exact)            unique_prefix_matching=false ;;
             --exe)              is_custom_exe=true; set_option_value '--exe' exe "${2-}"; shift ;;
             --exe=*)            is_custom_exe=true; set_option_value '--exe' exe "${1#*=}" ;;
             --help | -h)        fail "Cannot tab complete '$1'" ;;
             --info)             fail "Cannot tab complete '$1'" ;;
-            --prefix)           unique_prefix_matching=true ;;
             --version | -v)     fail "Cannot tab complete '$1'" ;;
             --)                 can_have_more_options=false; shift; break ;;
             -*)                 fail "Invalid option '$1'" ;;
@@ -378,11 +371,9 @@ if [[ $action = 'complete-bash' ]]; then
             # '--complete-bash' # Shouldn't normally be entered by hand
             '--completion'
             '--dir'
-            '--exact'
             '--exe'
             '--help' '-h'
             '--info'
-            '--prefix'
             '--version' '-v'
             '--'
         )
@@ -403,11 +394,6 @@ fi
 
 #endregion =====================================================================
 #region ======= HELPERS: STRINGS ===============================================
-
-lowercase() {
-    # Can't use ${value,,} because it doesn't work in Bash 3 (macOS)
-    echo "$1" | tr '[:upper:]' '[:lower:]'
-}
 
 trim() {
     local string
@@ -769,7 +755,7 @@ parse_binconfig() {
 }
 
 set_global_option() {
-    local binconfig key line value value_lowercase
+    local binconfig key line value
 
     key=$1
     value=$2
@@ -780,25 +766,6 @@ set_global_option() {
 
         : # Already handled in 'get_dir_from_binconfig'
 
-    elif [[ $key = 'exact' ]]; then
-
-        # exact = true
-        # exact = false (default)
-        value_lowercase=$(lowercase "$value")
-
-        if in_array "$value_lowercase" 'false' 'no' 'off' '0'; then
-            # The first processed (i.e. deepest) .binconfig file takes precedence here
-            if [[ -z $unique_prefix_matching ]]; then
-                unique_prefix_matching=true
-            fi
-        elif in_array "$value_lowercase" 'true' 'yes' 'on' '1'; then
-            if [[ -z $unique_prefix_matching ]]; then
-                unique_prefix_matching=false
-            fi
-        else
-            fail "Invalid value for 'exact' in $binconfig line $line: $value"
-        fi
-
     else
 
         # Unknown keys don't trigger an error for forwards compatibility
@@ -808,7 +775,7 @@ set_global_option() {
 }
 
 set_command_option() {
-    local binconfig bin_dir command key line root value value_lowercase
+    local binconfig bin_dir command key line root value
 
     command=$1
     key=$2
@@ -1299,11 +1266,6 @@ if [[ -f $binconfig ]]; then
     parse_binconfig "$binconfig" "$root" "$bin_dir"
 fi
 
-# Set default values, if not given at the command line or in the config file
-if [[ -z $unique_prefix_matching ]]; then
-    unique_prefix_matching=true
-fi
-
 # Output environment info?
 if [[ $action = 'info' ]]; then
     echo "Root:    $root/"
@@ -1381,10 +1343,9 @@ while [[ $# -gt $num_parameters_to_ignore ]]; do
     fi
 
     # Check if there are any prefix matches
-    # We need to check even with --exact so we can list them
     find_matching_commands prefix "${full_command:1}"
 
-    if $unique_prefix_matching && parent=$(matching_commands_shared_prefix "${full_command:1}"); then
+    if parent=$(matching_commands_shared_prefix "${full_command:1}"); then
         # If all matching commands have the same parent command, pretend
         # the user typed the full parent command, then continue parsing
         current_directory="$current_directory/$parent"
@@ -1394,9 +1355,7 @@ while [[ $# -gt $num_parameters_to_ignore ]]; do
         continue
     fi
 
-    if $unique_prefix_matching; then
-        run_command_if_only_one_match "$@"
-    fi
+    run_command_if_only_one_match "$@"
 
     # If there were no prefix matches, stop searching
     if [[ ${#matching_commands[@]} -eq 0 ]]; then

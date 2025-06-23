@@ -42,11 +42,6 @@ Global settings may appear at the top of a file.
 
     **Default:** bin
 
-**exact = true**
-: Disable unique prefix matching.
-
-    **Default:** false
-
 ## COMMAND SETTINGS
 
 **alias =** _ALIAS_
@@ -62,7 +57,6 @@ Global settings may appear at the top of a file.
 
 `; Global settings`
 `dir = scripts`
-`exact = true`
 
 `; Settings for each command (script)`
 `[hello]`

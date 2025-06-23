@@ -25,14 +25,8 @@ Options that can be used with a command:
 > **--dir** _DIR_, **--dir**=_DIR_
 > : Specify the directory name to search for (overrides [.binconfig](binconfig.5.html)).
 >
-> **--exact**
-> : Disable unique prefix matching.
->
 > **--exe** _NAME_, **--exe**=_NAME_
 > : Override the executable name displayed in the command list.
->
-> **--prefix**
-> : Enable unique prefix matching (overrides [.binconfig](binconfig.5.html)).
 
 Options that do something special and don't accept a **COMMAND**:
 

@@ -47,7 +47,7 @@ Feature: Automatic exclusions
     Scenario: Subcommands starting with '_' are excluded from listings of partial matches
       Given a script '{ROOT}/project/bin/sub/visible'
       And a script '{ROOT}/project/bin/sub/_hidden'
-      When I run 'bin --exact s'
+      When I run 'bin s'
       Then it is successful
       And the output is:
         """
