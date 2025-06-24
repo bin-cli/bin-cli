@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] (Major)
 
+### Changed
+
+Scripts starting with underscore (`_`) are no longer ignored ([#66])
+
 ### Removed
 
 The following were removed ([#66]) in an effort to speed things up ([#61]), simplify/minimise ongoing maintenance, and focus on the core features that matter:

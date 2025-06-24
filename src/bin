@@ -624,25 +624,6 @@ command_matches() {
     return 0
 }
 
-is_hidden_command() {
-    local command prefix_length target
-
-    command=$1
-    target=${2-}
-
-    # We can't just match on $command, because it may be the parent command that
-    # has already been typed that is hidden, so subcommands should be shown
-    prefix_length=${#target}
-
-    if [[ $prefix_length -eq 0 ]]; then
-        command=" $command"
-    else
-        command="${command:$prefix_length}"
-    fi
-
-    [[ $command = *' _'* ]]
-}
-
 find_matching_commands() {
     local alias command target type
 
@@ -934,12 +915,6 @@ if [[ $action = 'complete-bash' ]]; then
 
     # Output the matches and remove duplicates
     for result in "${possible_results[@]}"; do
-
-        # Ignore commands that start with '_', unless the user typed the '_' themselves
-        if is_hidden_command "$result" "$current_command"; then
-            continue
-        fi
-
         echo "$result"
     done | sort | uniq
 
@@ -977,22 +952,13 @@ get_command_aliases() {
     fi
 }
 
-# Remove hidden commands
-declare -a visible_commands=()
-
-for command in "${command_list[@]}"; do
-    if ! is_hidden_command "$command" "${full_command:1}"; then
-        visible_commands+=("$command")
-    fi
-done
-
 # Output the title
 echo "$LCYAN$BOLD$UNDERLINE$command_list_title$RESET"
 
 # Output the list of commands
 declare command command_aliases
 
-for command in "${visible_commands[@]}"; do
+for command in "${command_list[@]}"; do
     echo -n "${LWHITE}${exe} ${command}${RESET}"
 
     if aliases=$(get_command_aliases "$command"); then
@@ -1003,7 +969,7 @@ for command in "${visible_commands[@]}"; do
     echo
 done | sort
 
-if [[ ${#visible_commands[@]} -eq 0 ]]; then
+if [[ ${#command_list[@]} -eq 0 ]]; then
     echo "${GREY}None found${RESET}"
 fi
 

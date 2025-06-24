@@ -454,8 +454,6 @@ You can skip it (i.e. use `alias b='bin'`) if you prefer it to say `bin`.
 
 ### Automatic Exclusions
 
-Scripts starting with `_` (underscore) are excluded from listings, but can still be executed. This can be used for hidden tools and helper scripts that are not intended to be executed directly. (Or you could use a separate [`libexec` directory](https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch04s07.html) in the project root if you prefer.)
-
 Files starting with `.` (dot / period) are always ignored and cannot be executed with Bin.
 
 Files that are not executable (not `chmod +x`) are listed as warnings in the command listing, and will error if you try to run them.
