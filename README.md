@@ -4,7 +4,7 @@ Bin CLI is a simple task runner, designed to be used in code repositories, with 
 
 It automatically [searches in parent directories](#how-it-works), so you can run scripts from anywhere in the project tree. It also supports [aliases](#aliases), [unique prefix matching](#unique-prefix-matching) and [tab completion](#tab-completion), reducing the amount you need to type.
 
-It is implemented as a self-contained Bash script, small enough to bundle with your dotfiles or projects if you want to.  It only requires Bash 4+ and a small number of [coreutils](https://www.gnu.org/software/coreutils/manual/) commands, so it should work on almost any Unix-like system (Linux, macOS with Homebrew, etc.). On Windows, it can be used via [WSL](https://learn.microsoft.com/en-us/windows/wsl/about), [Git Bash](https://gitforwindows.org/), [Cygwin](https://www.cygwin.com/) or [MSYS2](https://www.msys2.org/).
+It is implemented as a self-contained Bash script, small enough to bundle with your dotfiles or projects if you want to.  It only requires Bash 4+ and a small number of [coreutils](https://www.gnu.org/software/coreutils/manual/) commands, so it should work on almost any Unix-like system (Linux, macOS with Homebrew, etc.). On Windows, it can be used on [WSL](https://learn.microsoft.com/en-us/windows/wsl/about), [Git Bash](https://gitforwindows.org/), [Cygwin](https://www.cygwin.com/) or [MSYS2](https://www.msys2.org/).
 
 Collaborators / contributors who choose not to install Bin can run the scripts directly, so you can enjoy the benefits without adding a hard dependency or extra barrier to entry.
 
@@ -16,11 +16,10 @@ A project just needs a `bin/` folder and some executable scripts - for example:
 
 ```
 repo/
-├── bin/
-│   ├── build
-│   ├── deploy
-│   └── hello
-└── ...
+└── bin/
+    ├── build
+    ├── deploy
+    └── hello
 ```
 
 The scripts can be written in [any language](https://github.com/bin-cli/bin-cli/wiki/Hello%2C-World),
@@ -171,22 +170,8 @@ rm ~/.local/bin/bin
 > ```
 >
 > At least one of `curl` or `wget` are usually installed, or can easily be
-> installed, so that covers 99.99% of cases... But just for completeness - you
-> can also use any other HTTP client - e.g. [HTTPie](https://httpie.io/docs/cli):
->
-> ```bash
-> sudo http get https://github.com/bin-cli/bin-cli/releases/latest/download/bin -do /usr/local/bin/bin
-> http get https://github.com/bin-cli/bin-cli/releases/latest/download/bin -do ~/.local/bin/bin
-> ```
->
-> Or [Node.js](https://docs.npmjs.com/cli/commands/npx):
->
-> ```bash
-> sudo npx download-cli https://github.com/bin-cli/bin-cli/releases/latest/download/bin -o /usr/local/bin/
-> npx download-cli https://github.com/bin-cli/bin-cli/releases/latest/download/bin -o ~/.local/bin/
-> ```
->
-> Or just click [this link](https://github.com/bin-cli/bin-cli/releases/latest/download/bin)
+> installed, so that covers 99.99% of cases... Or you can click
+> [this link](https://github.com/bin-cli/bin-cli/releases/latest/download/bin)
 > to download it using your browser.
 
 </details>
@@ -272,9 +257,8 @@ Which creates this directory structure:
 
 ```
 repo/
-├── bin/
-│   └── sample
-└── ...
+└── bin/
+    └── sample
 ```
 
 That's all there is to it. Now you can run them:
@@ -307,10 +291,9 @@ Which creates this directory structure (symlink targets indicated by `->`):
 
 ```
 repo/
-├── bin/
-│   ├── deploy
-│   └── publish -> deploy
-└── ...
+└── bin/
+    ├── deploy
+    └── publish -> deploy
 ```
 
 This means `bin publish` is an alias for `bin deploy`, and running either would execute the `bin/deploy` script.
@@ -333,11 +316,10 @@ bin deploy <em>(aliases: publish, push)</em>
 >
 > ```
 > repo/
-> ├── bin/
-> │   ├── deploy
-> │   │   └── live
-> │   └── push -> deploy
-> └── ...
+> └── bin/
+>     ├── deploy
+>     │   └── live
+>     └── push -> deploy
 > ```
 >
 > `bin push live` would be an alias for `bin deploy live`, and so on.
@@ -351,11 +333,10 @@ bin deploy <em>(aliases: publish, push)</em>
 >
 > ```
 > repo/
-> ├── bin/
-> │   ├── deploy
-> │   ├── publish -> deploy
-> │   └── push -> deploy
-> └── ...
+> └── bin/
+>     ├── deploy
+>     ├── publish -> deploy
+>     └── push -> deploy
 > ```
 >
 > - `bin pub` would match `bin publish`, which is an alias for `bin deploy`, which runs the `bin/deploy` script
