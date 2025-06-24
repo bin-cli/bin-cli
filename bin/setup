@@ -7,14 +7,6 @@ LCYAN=$'\e[96m'
 
 to_install=()
 
-debian=false
-redhat=false
-if [[ -f /etc/debian-release ]]; then
-    debian=true
-elif [[ -f /etc/redhat-release ]]; then
-    redhat=true
-fi
-
 sudo=
 if [[ $UID -gt 0 ]]; then
     sudo='sudo'
@@ -22,8 +14,7 @@ fi
 
 require() {
     local command=$1
-    local apt_package=${2-$command}
-    local rpm_package=${3-$apt_package}
+    local package=${2-$command}
 
     printf '%-13s' "$command"
 
@@ -31,11 +22,7 @@ require() {
         echo 'Already installed'
     else
         echo 'Missing'
-        if $redhat; then
-            to_install+=("$rpm_package")
-        else
-            to_install+=("$apt_package")
-        fi
+        to_install+=("$package")
     fi
 }
 
@@ -53,12 +40,8 @@ echo
 
 if [[ ${#to_install[@]} -gt 0 ]]; then
     echo "${LCYAN}Installing missing dependencies...${RESET}"
-    if $redhat; then
-        $sudo dnf install -y "${to_install[@]}"
-    else
-        $sudo apt-get update
-        echo
-        $sudo apt-get -y install "${to_install[@]}"
-    fi
+    $sudo apt-get update
+    echo
+    $sudo apt-get -y install "${to_install[@]}"
     echo
 fi
