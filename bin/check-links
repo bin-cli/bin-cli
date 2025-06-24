@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [[ ${1-} = '--help' || ${1-} = '-h' ]]; then
+    echo "Usage: ${BIN_COMMAND-$0} [FILE]..."
+    echo
+    echo 'Check links in the given Markdown files. By default, checks *.md in the repository root.'
+    exit
+fi
+
 source "$(dirname "$0")/../lib/init-node.sh"
 
 if [[ $# -gt 0 ]]; then

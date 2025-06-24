@@ -2,6 +2,13 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+if [[ ${1-} = '--help' || ${1-} = '-h' ]]; then
+    echo "Usage: ${BIN_COMMAND-$0}"
+    echo
+    echo "Run some very basic smoke tests, for when Node.js isn't available."
+    exit
+fi
+
 # Build
 bin/build
 

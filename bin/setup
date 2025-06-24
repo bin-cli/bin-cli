@@ -2,6 +2,13 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+if [[ ${1-} = '--help' || ${1-} = '-h' ]]; then
+    echo "Usage: ${BIN_COMMAND-$0}"
+    echo
+    echo 'Install dependencies using APT (Ubuntu/Debian)'
+    exit
+fi
+
 RESET=$'\e[0m'
 LCYAN=$'\e[96m'
 

@@ -6,7 +6,7 @@ default_version='1.2.3-dev'
 version=${1-$default_version}
 
 if [[ $version = '--help' || $version = '-h' ]]; then
-    echo "Usage: ${BIN_COMMAND-$0} [version=$default_version]"
+    echo "Usage: ${BIN_COMMAND-$0} [VERSION=$default_version]"
     exit
 fi
 

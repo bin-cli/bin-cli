@@ -10,7 +10,7 @@ LCYAN=$'\e[96m'
 version=${1-}
 
 if [[ -z $version || $version = '--help' || $version = '-h' ]]; then
-    echo "Usage: ${BIN_COMMAND-$0} <version>"
+    echo "Usage: ${BIN_COMMAND-$0} <VERSION>"
     exit
 fi
 
