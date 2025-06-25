@@ -433,6 +433,11 @@ is_common_bin_dir() {
 
 # kcov-ignore-start: Not every code path is covered by our tests
 realpath() {
+    if type -P realpath &>/dev/null; then
+        command realpath "$@"
+        return
+    fi
+
     local resolved
     resolved=$(resolve_symlinks "$1")
     canonicalize_path "$resolved"
