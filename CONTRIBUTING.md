@@ -37,12 +37,12 @@ Make changes to `src/bin`, and update the tests in `features/*.feature` to match
 
 To run the tests locally, you will need:
 
-- Either [nvm] (recommended) or a recent version of [Node.js] (tests are powered by [Cucumber.js])
+- A recent version of [Node.js] (tests are powered by [Cucumber.js])
 - [kcov]
 - [ShellCheck]
 - [awk]
 
-If you are using Ubuntu/Debian, the `bin/setup` script will install most of these for you (except nvm/Node.js).
+If you are using Ubuntu 24.04 or Debian 12, the `bin/setup` script will install most of these for you (except nvm/Node.js).
 
 Run `bin/tdd` to automatically run the test suite each time you make a change, or manually run `bin/test` if you prefer.
 

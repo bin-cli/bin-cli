@@ -12,7 +12,8 @@ fi
 RESET=$'\e[0m'
 LCYAN=$'\e[96m'
 
-to_install=()
+install_kcov=false
+packages_to_install=()
 
 sudo=
 if [[ $UID -gt 0 ]]; then
@@ -29,7 +30,12 @@ require() {
         echo 'Already installed'
     else
         echo 'Missing'
-        to_install+=("$package")
+        if [[ $command = 'kcov' ]]; then
+            install_kcov=true
+        else
+            # kcov is not available in Ubuntu 24.04 or Debian 12 (see #43)
+            packages_to_install+=("$package")
+        fi
     fi
 }
 
@@ -39,16 +45,28 @@ require curl
 require gawk
 require inotifywait inotify-tools
 require kcov
-# Removed npm because I use nvm instead, because the version of Node.js in Ubuntu 22.04 is rather old
-#require npm
+require npm
 require shellcheck
 
-echo
-
-if [[ ${#to_install[@]} -gt 0 ]]; then
-    echo "${LCYAN}Installing missing dependencies...${RESET}"
+if [[ ${#packages_to_install[@]} -gt 0 ]]; then
+    echo
+    echo "${LCYAN}Installing missing APT packages...${RESET}"
     $sudo apt-get update
     echo
-    $sudo apt-get -y install "${to_install[@]}"
+    $sudo apt-get -y install "${packages_to_install[@]}"
+fi
+
+# kcov is not in APT in Ubuntu 24.04 or Debian 12 - see https://github.com/bin-cli/bin-cli/issues/43
+if $install_kcov; then
     echo
+    echo "${LCYAN}Installing kcov...${RESET}"
+    wget -O /tmp/kcov.deb https://launchpad.net/ubuntu/+archive/primary/+files/kcov_38+dfsg-1_amd64.deb
+    sudo dpkg -i /tmp/kcov.deb
+    rm -f /tmp/kcov.deb
+fi
+
+if [[ ! -d node_modules ]]; then
+    echo
+    echo "${LCYAN}Installing Node modules...${RESET}"
+    npm ci
 fi
