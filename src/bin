@@ -4,7 +4,7 @@
 # https://github.com/bin-cli/bin-cli   MIT License                             #
 ################################################################################
 
-#region ======= GENERAL NOTES ==================================================
+#===== GENERAL NOTES ===========================================================
 
 # We use '/usr/bin/env bash' rather than '/bin/bash' in the shebang so
 # it works with Bash installed in a non-standard location, e.g. with Homebrew.
@@ -31,12 +31,10 @@
 # [3]: https://en.wikipedia.org/wiki/POSIX
 # [4]: https://stackoverflow.com/a/21210966
 
-#endregion =====================================================================
-#region ======= SHELL OPTIONS ==================================================
+#======= SHELL OPTIONS =========================================================
 
 # This has been called[1] the "unofficial bash strict mode". There are some
-# downsides and edge cases[2][3], but I generally find it helpful. I may look at
-# some of the expanded versions[4][5] at some point.
+# downsides and edge cases[2][3], but I generally find it helpful.
 #
 # Specifically:
 # - 'errexit', causes the script to exit if a subcommand fails (with some
@@ -49,8 +47,6 @@
 # [1]: http://redsymbol.net/articles/unofficial-bash-strict-mode/
 # [2]: https://mywiki.wooledge.org/BashFAQ/105
 # [3]: https://news.ycombinator.com/item?id=11313928
-# [4]: https://github.com/olivergondza/bash-strict-mode/blob/master/strict-mode.sh
-# [5]: https://github.com/sellout/bash-strict-mode/blob/main/bin/strict-mode.bash
 
 set -euo pipefail
 
@@ -60,18 +56,16 @@ set -euo pipefail
 
 shopt -s nullglob
 
-#endregion =====================================================================
-#region ======= VERSION ========================================================
+#===== VERSION =================================================================
 
 # The version number is set by 'bin/build', which is called by 'bin/release'.
-# If no version number is provided - including when running the tests - it defaults
-# to '1.2.3-dev'. We'll use a slightly different version here so we can tell if
-# something goes wrong with the build script.
+# If no version number is provided - including when running the tests - it
+# defaults to '1.2.3-dev'. We'll use a slightly different version here so we can
+# tell if something goes wrong with the build script.
 
 readonly VERSION='1.2.3-source' # DO NOT CHANGE
 
-#endregion =====================================================================
-#region ======= HELPERS: OUTPUT & ERROR HANDLING  ==============================
+#===== HELPERS: OUTPUT & ERROR HANDLING  =======================================
 
 if [[ -t 1 ]]; then
     # Terminal connected - use ANSI codes
@@ -182,8 +176,7 @@ bug() {
     # kcov-ignore-end
 }
 
-#endregion =====================================================================
-#region ======= PARSE ARGUMENTS ================================================
+#===== PARSE ARGUMENTS =========================================================
 
 # We need to parse the arguments given on the command line to determine the
 # action we should take, as well as various settings.
@@ -259,10 +252,14 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
-#endregion =====================================================================
-#region ======= SIMPLE ACTIONS: HELP / VERSION / COMPLETION SCRIPT =============
+#===== SIMPLE ACTIONS: VERSION / HELP / COMPLETION SCRIPT ======================
 
 # These actions don't require us to parse any config files or register commands.
+
+if [[ $action = 'version' ]]; then
+    echo "Bin CLI v$VERSION"
+    exit
+fi
 
 if [[ $action = 'help' ]]; then
     echo "Usage: $exe [OPTIONS] [--] [COMMAND] [ARGUMENTS...]"
@@ -282,11 +279,6 @@ if [[ $action = 'help' ]]; then
     exit
 fi
 
-if [[ $action = 'version' ]]; then
-    echo "Bin CLI v$VERSION"
-    exit
-fi
-
 # This doesn't do the tab completion - it just outputs the script to be 'eval'ed
 # in the shell to enable tab completion.
 if [[ $action = 'completion' ]]; then
@@ -301,8 +293,7 @@ if [[ $action = 'completion' ]]; then
     exit
 fi
 
-#endregion =====================================================================
-#region ======= PREPARE FOR TAB COMPLETION (IF NEEDED) =========================
+#===== PREPARE FOR TAB COMPLETION (IF NEEDED) ==================================
 
 declare -i num_parameters_to_ignore=0
 
@@ -315,6 +306,8 @@ if [[ $action = 'complete-bash' ]]; then
     declare args=${COMP_LINE:0:$COMP_POINT}
 
     # shellcheck disable=SC2086 # We want this to be split into separate arguments
+    # Note: This doesn't handle quotes properly - but I couldn't come up with anything better!
+    # ('eval' works if quotes are balanced but errors if not, and is potentially unsafe)
     set -- $args
 
     # Remove the command name (since that would be in $0 not $1)
@@ -375,8 +368,7 @@ if [[ $action = 'complete-bash' ]]; then
 
 fi
 
-#endregion =====================================================================
-#region ======= HELPERS: ARRAYS ================================================
+#===== HELPERS: ARRAYS =========================================================
 
 in_array() {
     local needle value
@@ -393,8 +385,7 @@ in_array() {
     return 1
 }
 
-#endregion =====================================================================
-#region ======= HELPERS: FILESYSTEM ============================================
+#===== HELPERS: FILESYSTEM =====================================================
 
 # The BIN_TEST_ROOT env var is ignored in production builds, but is used as
 # an alternative to 'chroot' (which doesn't work on all OS's) in the tests
@@ -434,8 +425,7 @@ is_common_bin_dir() {
         "$HOME/bin"
 }
 
-#endregion =====================================================================
-#region ======= HELPERS: CROSS-PLATFORM 'realpath' =============================
+#===== HELPERS: CROSS-PLATFORM 'realpath' ======================================
 
 # Based on: https://github.com/mkropat/sh-realpath/blob/65512368b8155b176b67122aa395ac580d9acc5b/realpath.sh
 # Copyright (c) 2014 Michael Kropat - MIT License
@@ -515,8 +505,7 @@ _canonicalize_file_path() {
 }
 # kcov-ignore-end
 
-#endregion =====================================================================
-#region ======= HELPERS: REGISTER COMMANDS =====================================
+#===== HELPERS: REGISTER COMMANDS ==============================================
 
 # Before we can run any commands, we need to make a list of them all. This
 # allows us to support unique prefix matching, detect conflicts, and so on.
@@ -575,8 +564,7 @@ register_commands_in_directory() {
     done
 }
 
-#endregion =====================================================================
-#region ======= HELPERS: ALIASES ===============================================
+#===== HELPERS: ALIASES ========================================================
 
 declare -a registered_aliases=()
 declare -gA alias_to_executable=()
@@ -591,8 +579,7 @@ register_alias() {
     alias_to_executable["$alias"]="$executable" # global
 }
 
-#endregion =====================================================================
-#region ======= HELPERS: SEARCH FOR COMMANDS ===================================
+#===== HELPERS: SEARCH FOR COMMANDS ============================================
 
 declare -a matching_commands=()
 
@@ -692,8 +679,7 @@ matching_commands_shared_prefix() {
     fi
 }
 
-#endregion =====================================================================
-#region ======= HELPERS: RUN COMMANDS ==========================================
+#===== HELPERS: RUN COMMANDS ===================================================
 
 run_command() {
     if [[ $action = 'complete-bash' ]]; then
@@ -722,8 +708,7 @@ run_command_if_only_one_match() {
     run_command "${command_to_executable[$command]}" "$@"
 }
 
-#endregion =====================================================================
-#region ======= REGISTER COMMANDS & CONFIG FILES ===============================
+#===== REGISTER COMMANDS & CONFIG FILES ========================================
 
 declare root=''
 declare bin_dir=''
@@ -795,8 +780,7 @@ for alias in "${registered_aliases[@]}"; do
     done
 done
 
-#endregion =====================================================================
-#region ======= PARSE PARAMETERS AND FIND/RUN THE COMMAND ======================
+#===== PARSE PARAMETERS AND FIND/RUN THE COMMAND ===============================
 
 # If no command is given, we will list all available commands
 declare command_list_title='Available Commands'
@@ -864,8 +848,7 @@ while [[ $# -gt $num_parameters_to_ignore ]]; do
     break
 done
 
-#endregion =====================================================================
-#region ======= TAB COMPLETION OUTPUT ==========================================
+#===== TAB COMPLETION OUTPUT ===================================================
 
 if [[ $action = 'complete-bash' ]]; then
 
@@ -921,8 +904,7 @@ if [[ $action = 'complete-bash' ]]; then
     exit
 fi
 
-#endregion =====================================================================
-#region ======= LIST COMMANDS ==================================================
+#===== LIST COMMANDS ===========================================================
 
 # Helper to get the aliases for a command
 get_command_aliases() {
@@ -993,4 +975,3 @@ if [[ ${#non_executable_files[@]} -gt 0 ]]; then
     done
 fi
 
-#endregion =====================================================================
