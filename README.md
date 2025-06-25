@@ -231,7 +231,9 @@ To any of the following files:
 
 ### Upgrading
 
-To upgrade to the latest version at any time, just repeat the same `wget` command as above. If you want to be notified when a new version is released, watch [this repo](https://github.com/bin-cli/bin-cli) (select Watch > Custom > Releases, or Watch > All Activity if you prefer).
+To upgrade to the latest version at any time, just repeat the same `wget` command as above.
+
+If you want to be notified when a new version is released, watch [this repo](https://github.com/bin-cli/bin-cli) (select Watch > Custom > Releases, or Watch > All Activity if you prefer).
 
 ## Per-Project Setup
 
