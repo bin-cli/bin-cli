@@ -580,7 +580,7 @@ register_alias() {
     alias=$1
     executable=$2
 
-    registered_aliases+=("$alias")                     # global
+    registered_aliases+=("$alias") # global
     alias_to_executable["$alias"]="$executable" # global
 }
 
