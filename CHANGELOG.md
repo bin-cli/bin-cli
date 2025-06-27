@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-The following were removed ([#66]) in an effort to speed things up ([#61]), simplify/minimise ongoing maintenance, and focus on the core features that matter:
+The following low-value features were removed in an effort to speed things up ([#61]), simplify/minimise ongoing maintenance, and focus on the core features that matter ([#66]):
 
 - Aliases defined in config files (`alias = ...`, `aliases = ...`) (but symlink aliases are still supported)
 - Create (`--create`, `-c`) and edit (`--edit`, `-e`) actions
@@ -21,10 +21,10 @@ The following were removed ([#66]) in an effort to speed things up ([#61]), simp
 - Directory merging (`merge = true`, `merge = optional`)
 - Exact command matching (`--exact`, `exact = true`) - unique prefix matching is now always enabled
 - Fallbacks (`--fallback`) and shims (`--shim`)
+- Hidden script extensions (`command.sh` -> `bin command`)
 - Info action (`--info`)
 - Inline commands (`command = ...`)
 - Man pages (`man bin`, `man binconfig`)
-- Scripts with hidden extensions (`command.sh` -> `bin command`)
 - Warnings about broken symlinks and non-executable files
 
 In addition, the `.deb` and `.rpm` packages will no longer be built, including the Ubuntu PPA.
