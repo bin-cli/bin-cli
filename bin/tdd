@@ -11,6 +11,13 @@ fi
 
 while true; do
 
+    # Output some blank space because Tmux doesn't insert any into the
+    # scrollback buffer, making it hard to see where the new run started
+    printf '%*s' "$(tput lines)" '' | tr ' ' '\n'
+    printf '%*s\n' "$(tput cols)" '' | tr ' ' '='
+    echo " $(date)"
+    printf '%*s\n' "$(tput cols)" '' | tr ' ' '='
+
     # Clear the screen
     clear
 
