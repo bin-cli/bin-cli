@@ -4,66 +4,14 @@
 # https://github.com/bin-cli/bin-cli   MIT License                             #
 ################################################################################
 
-#===== GENERAL NOTES ===========================================================
-
-# We use '/usr/bin/env bash' rather than '/bin/bash' in the shebang so
-# it works with Bash installed in a non-standard location, e.g. with Homebrew.
-#
-# We require Bash, not just a standard POSIX shell like Dash[1], because we use:
-# - Arrays, including associative arrays
-# - '[[' for saner 'if' conditions[2]
-# - Function-local variables (especially in recursive functions)
-#
-# There are a number of global variables. Unfortunately there's little we can do
-# to avoid that, since we can't pass arrays/maps around by reference like in
-# other languages, and Bash doesn't have anything equivalent to classes/objects.
-# I have marked each assignment to a global variable (inside a function) with
-# the comment '# global'. Every other variable set in a function should be
-# marked 'local'.
-#
-# Since Bash doesn't support booleans, they are actually set to the strings
-# 'true' or 'false', which can be evaluated directly using 'if $var; then ...'.
-# (Some people argue against this style[4], but I haven't seen any convincing
-# arguments why to change it...)
-#
-# [1]: https://wiki.archlinux.org/title/Dash
-# [2]: https://stackoverflow.com/a/31366734
-# [3]: https://en.wikipedia.org/wiki/POSIX
-# [4]: https://stackoverflow.com/a/21210966
-
 #======= SHELL OPTIONS =========================================================
 
-# This has been called[1] the "unofficial bash strict mode". There are some
-# downsides and edge cases[2][3], but I generally find it helpful.
-#
-# Specifically:
-# - 'errexit', causes the script to exit if a subcommand fails (with some
-#   unfortunate exceptions[2])
-# - 'nounset', triggers an error when reading an unset variable (good for
-#   catching typos and logic errors)
-# - 'pipefail' triggers an error if any command in a pipeline fails, rather
-#   than just the last command in the pipeline
-#
-# [1]: http://redsymbol.net/articles/unofficial-bash-strict-mode/
-# [2]: https://mywiki.wooledge.org/BashFAQ/105
-# [3]: https://news.ycombinator.com/item?id=11313928
-
 set -euo pipefail
-
-# 'nullglob' causes wildcard patterns that don't match any files to return no
-# results, rather than returning the input string and requiring an extra manual
-# check to see if if matched anything or not.
-
 shopt -s nullglob
 
 #===== VERSION =================================================================
 
-# The version number is set by 'bin/build', which is called by 'bin/release'.
-# If no version number is provided - including when running the tests - it
-# defaults to '1.2.3-dev'. We'll use a slightly different version here so we can
-# tell if something goes wrong with the build script.
-
-readonly VERSION='1.2.3-source' # DO NOT CHANGE
+readonly VERSION='1.2.3-source' # DO NOT CHANGE (see bin/build)
 
 #===== HELPERS: OUTPUT & ERROR HANDLING  =======================================
 
@@ -73,8 +21,8 @@ if [[ -t 1 ]]; then
     readonly RESET=$'\e[0m'
     readonly BOLD=$'\e[1m'
     readonly UNDERLINE=$'\e[4m'
-    readonly YELLOW=$'\e[33m'
     readonly GREY=$'\e[90m'
+    readonly LBLUE=$'\e[94m'
     readonly LCYAN=$'\e[96m'
     readonly LWHITE=$'\e[97m'
     # kcov-ignore-end
@@ -83,27 +31,18 @@ else
     readonly RESET=''
     readonly BOLD=''
     readonly UNDERLINE=''
-    readonly YELLOW=''
     readonly GREY=''
+    readonly LBLUE=''
     readonly LCYAN=''
     readonly LWHITE=''
 fi
 
 readonly NEW_LINE=$'\n'
 
-# We use standard Linux (Unix? POSIX?) exit codes when scripts can't be executed
-# (permission denied) or can't be found. For everything else, we use a code that
-# is unlikely to be returned by the scripts themselves. I chose 246 because it's
-# "bin" written on a telephone keypad, as well as being sufficiently high enough
-# to be unusual. (Codes above 127 typically represent "killed by signal N+127",
-# but there are only 64 signals, and code 246 would represent signal 119.)
-
 readonly ERR_NOT_EXECUTABLE=126
 readonly ERR_NOT_FOUND=127
 readonly ERR_GENERIC=246
 
-# Define a function to be called when the script needs to exit with an error
-# message & code, so we can do so consistently.
 declare exe=${0##*/}
 
 fail() {
@@ -112,61 +51,37 @@ fail() {
     message=$1
     code=${2-$ERR_GENERIC}
 
-    # If we are performing tab completion, we don't want to output anything as
-    # it would clobber the prompt. We'll also return a success code, since the
-    # tab completion successfully returned nothing (although I don't know if
-    # that makes any practical difference)
+    # If we are performing tab completion, we don't want to output anything as it would clobber the prompt
+    # We'll also return a success code, though I don't know if that makes any practical difference
     if [[ ${action-} = 'complete-bash' ]]; then
         debug "$message"
         exit
     fi
 
-    # Otherwise, we will prefix the error message with the executable name -
-    # usually 'bin' (but it may be overridden with '--exe', or by just renaming
-    # / symlinking the script)
     echo "$exe: $message" >&2
     exit "$code"
 }
 
-# When debugging, it is useful to be able to log things and dump variables to
-# display on screen.
-#
-# We can't output debug data to either stdout (&1) or stderr (&2), because that
-# would cause earlier tests to fail, so we write it to debug.txt instead. That
-# is displayed on screen by the 'bin/test' script, so we include ANSI codes to
-# make it a little easier to read.
-
-readonly DEBUG_GREY=$'\e[90m'
-readonly DEBUG_RESET=$'\e[0m'
+# Use BIN_DEBUG=1 to output debugging information to stderr, or BIN_DEBUG_LOG to output it to a file
+if [[ -n ${BIN_DEBUG-} && -z ${BIN_DEBUG_LOG-} ]]; then
+    BIN_DEBUG_LOG='/dev/stderr' # kcov-ignore-line: Not tested
+fi
 
 debug() {
-    # kcov-ignore-start: Debug statements are only added when needed
-    if [[ -n ${BIN_DEBUG_LOG-} ]]; then
-        local line
-        line=$(debug_line)
-        echo "$@" "${DEBUG_GREY}[line $line]${DEBUG_RESET}" >>"$BIN_DEBUG_LOG"
+    if [[ -z ${BIN_DEBUG_LOG-} ]]; then
+        return # kcov-ignore-line: Not tested
     fi
-    # kcov-ignore-end
-}
 
-# We'll also output the line number, since that can be helpful when there is
-# more than one debug statement, and the line numbers of the call stack,
-# because why not! But we don't want them to get in the way, so we'll display
-# them in a light grey colour.
-#
-# $BASH_LINENO is an array containing the line numbers from the stack trace.
-# We remove the first (call to this function) and last (always line 0),
-# convert it to a space-separated string, then replace the spaces by commas
-# to get a string like 'line 132, 41, 1722'.
+    local line
+    line=$(debug_line)
+    echo "$@" "[line $line]" >>"$BIN_DEBUG_LOG"
+}
 
 debug_line() {
     local lines
     lines=${BASH_LINENO[*]:1:${#BASH_LINENO[@]}-2}
     echo "${lines// /, }"
 }
-
-# If we somehow reach a place in the code that shouldn't be possible, abort and
-# display the line number to help with debugging.
 
 bug() {
     # kcov-ignore-start: This should never be needed!
@@ -178,15 +93,10 @@ bug() {
 
 #===== PARSE ARGUMENTS =========================================================
 
-# We need to parse the arguments given on the command line to determine the
-# action we should take, as well as various settings.
-#
-# Actions are mutually independent, so we'll return an error if the user
-# specifies more than one. (The alternative would be silently using the last
-# option given - but I think that is more confusing.)
-
 declare action_argument=''
 declare action=''
+declare fixed_bin_dir=''
+declare is_custom_exe=false
 
 set_action() {
     # Ignore repeated arguments, e.g. '-e -e'
@@ -202,8 +112,6 @@ set_action() {
     action=$2 # global
 }
 
-# Some options have required arguments - error if none is given.
-
 set_option_value() {
     local option variable value
 
@@ -217,22 +125,6 @@ set_option_value() {
 
     eval "$variable=\$value" # global
 }
-
-# Now we can loop through the arguments and parse them. We stop once we reach
-# one that doesn't start with a '-' - i.e. the command name. We'll also allow
-# '--' to explicitly stop parsing, just for consistency with other programs -
-# though I don't recommend making a command whose name starts with '-'.
-#
-# We allow both '--param value' and '--param=value' formats for long options.
-# We don't allow combining short options - it's more complex to implement, and
-# not worth it because all the short options are mutually exclusive.
-#
-# We can't use 'getopt', 'getopts', etc. to help with this because we don't want
-# to clobber anything after the command name - we need to keep them intact to
-# pass to the command.
-
-declare fixed_bin_dir=''
-declare is_custom_exe=false
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -253,8 +145,6 @@ while [[ $# -gt 0 ]]; do
 done
 
 #===== SIMPLE ACTIONS: VERSION / HELP / COMPLETION SCRIPT ======================
-
-# These actions don't require us to parse any config files or register commands.
 
 if [[ $action = 'version' ]]; then
     echo "Bin CLI v$VERSION"
@@ -385,7 +275,107 @@ in_array() {
     return 1
 }
 
-#===== HELPERS: FILESYSTEM =====================================================
+#===== HELPERS: SEARCH FOR COMMANDS & ALIASES ==================================
+
+declare -A aliases=()
+declare -A matching_commands=()
+
+find_matching_commands() {
+    local alias command directory file target typed_command
+
+    directory=$1
+    typed_command=${2-}
+
+    matching_commands=() # global
+
+    # Don't allow hidden files to be executed
+    if [[ $typed_command == .* ]]; then
+        fail "Command names may not start with '.'"
+    fi
+
+    # If there is an exact match, return only that
+    if [[ -n $typed_command && -e "$directory/$typed_command" ]]; then
+        matching_commands["$typed_command"]="$directory/$typed_command" # global
+        return
+    fi
+
+    # Otherwise return all prefix matches that are executable
+    for file in "$directory/$typed_command"*; do
+        if [[ ! -x $file ]]; then
+            debug "$file is not executable"
+            continue
+        fi
+
+        command=${file##*\/}
+
+        # Detect aliases (but only for symlinks pointing to other commands in the same directory)
+        if [[ -L $file ]]; then
+            target=$(readlink "$file")
+            if [[ $target == /* ]]; then
+                fail "The symlink '$file' must use a relative path not absolute ('$target')"
+            fi
+            if [[ $target != */* ]]; then
+                aliases[$target]="${aliases[$target]-}, $command"
+                continue
+            fi
+        fi
+
+        matching_commands["$command"]="$file" # global
+    done
+
+    # Aliases that don't point to a matching command must be treated as commands
+    for target in "${!aliases[@]}"; do
+        if [[ -z ${matching_commands[$target]-} ]]; then
+            alias="${aliases[$target]:2}"
+            # If multiple aliases point to the same command, we only need to return the first one
+            alias=${alias%%, *}
+            matching_commands[$alias]="$directory/$alias"
+        fi
+    done
+}
+
+#===== HELPERS: LIST COMMANDS ==================================================
+
+list_commands() {
+    local command_aliases directory parents title
+
+    title=$1
+    directory=$2
+    parents=${3-}
+
+    # Output the title
+    echo "${LCYAN}${BOLD}${UNDERLINE}${title}${RESET}"
+
+    # Output the list of commands
+    local command
+
+    if [[ ${#matching_commands[@]} -eq 0 ]]; then
+        echo "${GREY}None found${RESET}"
+        return
+    fi
+
+    for command in "${!matching_commands[@]}"; do
+        printf "%s%s%s %q%s" "$LWHITE" "$exe" "$parents" "$command" "$RESET"
+
+        if [[ -d "${matching_commands[$command]}" ]]; then
+            echo -n " ${LBLUE}...${RESET}"
+        fi
+
+        command_aliases=${aliases[$command]-}
+        if [[ -n $command_aliases ]]; then
+            if [[ ${command_aliases:2} == *', '* ]]; then
+                echo -n " ${GREY}(aliases: ${command_aliases:2})${RESET}"
+            else
+                echo -n " ${GREY}(alias: ${command_aliases:2})${RESET}"
+            fi
+        fi
+
+        # New line
+        echo
+    done | sort
+}
+
+#===== LOCATE THE BIN/ DIRECTORY ===============================================
 
 # The BIN_TEST_ROOT env var is ignored in production builds, but is used as
 # an alternative to 'chroot' (which doesn't work on all OS's) in the tests
@@ -415,309 +405,6 @@ findup() (
     done
 )
 
-is_common_bin_dir() {
-    in_array "$1" \
-        "$ROOT_DIR/bin" \
-        "$ROOT_DIR/usr/bin" \
-        "$ROOT_DIR/usr/local/bin" \
-        "$ROOT_DIR/snap/bin" \
-        "$HOME/.local/bin" \
-        "$HOME/bin"
-}
-
-#===== HELPERS: CROSS-PLATFORM 'realpath' ======================================
-
-# Based on: https://github.com/mkropat/sh-realpath/blob/65512368b8155b176b67122aa395ac580d9acc5b/realpath.sh
-# Copyright (c) 2014 Michael Kropat - MIT License
-# Modified to work with 'set -e', and to follow our code conventions
-
-# kcov-ignore-start: Not every code path is covered by our tests
-realpath() {
-    if type -P realpath &>/dev/null; then
-        command realpath "$@"
-        return
-    fi
-
-    local resolved
-    resolved=$(resolve_symlinks "$1")
-    canonicalize_path "$resolved"
-}
-
-resolve_symlinks() {
-    _resolve_symlinks "$1"
-}
-
-_resolve_symlinks() {
-    _assert_no_path_cycles "$@" || return
-
-    local dir_context new_context path
-
-    if path=$(readlink -- "$1"); then
-        dir_context=$(dirname -- "$1")
-        new_context=$(_prepend_dir_context_if_necessary "$dir_context" "$path")
-        _resolve_symlinks "$new_context" "$@"
-    else
-        echo "$1"
-    fi
-}
-
-_prepend_dir_context_if_necessary() {
-    if [[ $1 = '.' ]]; then
-        echo "$2"
-    else
-        _prepend_path_if_relative "$1" "$2"
-    fi
-}
-
-_prepend_path_if_relative() {
-    case "$2" in
-        /*) echo "$2" ;;
-        *) echo "$1/$2" ;;
-    esac
-}
-
-_assert_no_path_cycles() {
-    local target path
-
-    target=$1
-    shift
-
-    for path in "$@"; do
-        if [[ "$path" = "$target" ]]; then
-            return 1
-        fi
-    done
-}
-
-canonicalize_path() {
-    if [[ -d $1 ]]; then
-        _canonicalize_dir_path "$1"
-    else
-        _canonicalize_file_path "$1"
-    fi
-}
-
-_canonicalize_dir_path() {
-    (cd "$1" 2>/dev/null && pwd -P)
-}
-
-_canonicalize_file_path() {
-    local dir file
-    dir=$(dirname -- "$1")
-    file=$(basename -- "$1")
-
-    (cd "$dir" 2>/dev/null && dir2=$(pwd -P) && echo "$dir2/$file")
-}
-# kcov-ignore-end
-
-#===== HELPERS: REGISTER COMMANDS ==============================================
-
-# Before we can run any commands, we need to make a list of them all. This
-# allows us to support unique prefix matching, detect conflicts, and so on.
-# Regular commands are implemented as executables / shell scripts.
-
-declare -a broken_symlinks=()
-declare -a non_executable_files=()
-declare -a registered_commands=()
-declare -gA command_to_executable=()
-declare -gA executable_to_command=()
-declare -gA original_commands=()
-
-register_executable_command() {
-    local executable name
-
-    name=$1
-    executable=$2
-
-    registered_commands+=("$name")             # global
-    command_to_executable[$name]="$executable" # global
-    executable_to_command[$executable]="$name" # global
-    original_commands[$name]="$name"           # global
-}
-
-register_commands_in_directory() {
-    local directory file name prefix realfile target
-
-    directory=$1
-    prefix=${2-}
-
-    # Loop through the directory to find commands
-    for file in "$directory/"*; do
-        name=${file##*/}  # Remove path
-        name=${name// /-} # Spaces to dashes
-
-        realfile=$(realpath "$file") || true
-
-        if [[ -L $file ]]; then
-            target=$(readlink "$file")
-            if [[ $target = /* ]]; then
-                fail "The symlink '$file' must use a relative path, not absolute ('$target')"
-            fi
-            if [[ -e $file ]]; then
-                register_alias "$prefix$name" "$realfile"
-            else
-                broken_symlinks+=("$file => $target")
-            fi
-        elif [[ -d $file ]]; then
-            executable_to_command[$realfile]="$prefix$name" # global
-            register_commands_in_directory "$file" "$prefix$name "
-        elif [[ ! -x $file ]]; then
-            non_executable_files+=("$file") # global
-        else
-            register_executable_command "$prefix$name" "$realfile"
-        fi
-    done
-}
-
-#===== HELPERS: ALIASES ========================================================
-
-declare -a registered_aliases=()
-declare -gA alias_to_executable=()
-
-register_alias() {
-    local alias executable
-
-    alias=$1
-    executable=$2
-
-    registered_aliases+=("$alias") # global
-    alias_to_executable["$alias"]="$executable" # global
-}
-
-#===== HELPERS: SEARCH FOR COMMANDS ============================================
-
-declare -a matching_commands=()
-
-command_matches() {
-    local command found target type
-
-    type=$1
-    target=$2
-    command=$3
-
-    # Check for a match of the given type
-    found=false
-
-    if [[ $type = exact ]]; then
-        [[ "$command" = "$target" ]] && found=true
-    elif [[ $type = subcommands ]]; then
-        [[ "$command" = "$target "* ]] && found=true
-    elif [[ $type = prefix ]]; then
-        [[ "$command" = "$target"* ]] && found=true
-    else
-        bug "Invalid \$type '$type' passed to command_matches()" # kcov-ignore-line: This should never be happen
-    fi
-
-    # If it doesn't match, return false
-    if ! $found; then
-        return 1
-    fi
-
-    return 0
-}
-
-find_matching_commands() {
-    local alias command target type
-
-    type=$1
-    target=$2
-
-    # Find commands and aliases that match
-    matching_commands=() # global
-    declare -gA matched_original_commands=() # global
-
-    for command in "${registered_commands[@]}" "${registered_aliases[@]}"; do
-
-        # Don't match the same command more than once, even if it has aliases that also match
-        original_command="${original_commands[$command]}"
-        if [[ -v matched_original_commands[$original_command] ]]; then
-            continue
-        fi
-
-        # Ignore aliases that don't actually map to a valid command
-        if [[ ! -v command_to_executable[$original_command] ]]; then
-            continue
-        fi
-
-        # Check if the command actually matches (after the above checks because this is more expensive)
-        if ! command_matches "$type" "$target" "$command"; then
-            continue
-        fi
-
-        # It does match, so add it to the results
-        matching_commands+=("$command") # global
-        matched_original_commands["$original_command"]=true # global
-    done
-}
-
-matching_commands_shared_prefix() {
-    local command next_command prefix prefix_length remaining shared_next_command
-
-    prefix=$1
-    prefix_length=${#prefix}
-
-    shared_next_command=''
-
-    for command in "${matching_commands[@]}"; do
-        # Remove the common prefix
-        remaining=${command:$prefix_length}
-
-        if [[ ! $remaining = *' '* ]]; then
-            continue
-        fi
-
-        next_command=${remaining/ */}
-
-        if [[ -z $shared_next_command ]]; then
-            shared_next_command=$next_command
-        elif [[ "$next_command" != "$shared_next_command" ]]; then
-            # Not unique
-            return 1
-        fi
-    done
-
-    if [[ -n $shared_next_command ]]; then
-        echo "$prefix$shared_next_command"
-    else
-        # No subcommands found
-        return 1
-    fi
-}
-
-#===== HELPERS: RUN COMMANDS ===================================================
-
-run_command() {
-    if [[ $action = 'complete-bash' ]]; then
-        bug 'run_command() should not be reached during tab completion' # kcov-ignore-line: This should never be happen
-    else
-        exec "$@"
-    fi
-}
-
-run_command_if_only_one_match() {
-    local command executable root
-
-    if [[ ${#matching_commands[@]} -ne 1 ]]; then
-        return
-    fi
-
-    command="${original_commands[${matching_commands[0]}]}"
-
-    # Export the command name so it can be displayed in help messages
-    # Typically with a fallback to $0 if it is unset: ${BIN_COMMAND-$0}
-    export BIN_COMMAND="$exe $command"
-
-    # And this can be used to display other command names
-    export BIN_EXE="$exe"
-
-    run_command "${command_to_executable[$command]}" "$@"
-}
-
-#===== REGISTER COMMANDS & CONFIG FILES ========================================
-
-declare root=''
-declare bin_dir=''
-
 # Determine paths
 if [[ -n $fixed_bin_dir ]]; then
 
@@ -734,249 +421,113 @@ if [[ -n $fixed_bin_dir ]]; then
         bin_dir=$fixed_bin_dir
     else
         # Directory name
-        if ! dir_parent=$(findup "$PWD" -d "$fixed_bin_dir"); then
+        if ! bin_dir_parent=$(findup "$PWD" -d "$fixed_bin_dir"); then
             fail "Could not find '$fixed_bin_dir/' directory starting from '$PWD'" $ERR_NOT_FOUND
         fi
 
-        bin_dir="$dir_parent/$fixed_bin_dir"
-        fixed_bin_dir=''
+        bin_dir="${bin_dir_parent%/}/$fixed_bin_dir"
     fi
-
-    root=$(dirname "$bin_dir")
 
 else
 
     # Otherwise search for a bin/ directory
-    if ! root=$(findup "$PWD" -d bin); then
+    if ! bin_dir_parent=$(findup "$PWD" -d bin); then
         fail "Could not find 'bin/' directory starting from '$PWD'" $ERR_NOT_FOUND
     fi
 
-    bin_dir="${root%/}/bin"
+    bin_dir="${bin_dir_parent%/}/bin"
 
     # Ignore common global bin/ directories (/bin, /usr/bin, etc.)
-    if is_common_bin_dir "$bin_dir"; then
+    if in_array "$bin_dir" \
+       "$ROOT_DIR/bin" \
+       "$ROOT_DIR/usr/bin" \
+       "$ROOT_DIR/usr/local/bin" \
+       "$ROOT_DIR/snap/bin" \
+       "$HOME/.local/bin" \
+       "$HOME/bin"
+    then
         fail "Could not find 'bin/' directory starting from '$PWD' (ignored '$bin_dir')" $ERR_NOT_FOUND
     fi
 fi
 
-# Find and register available commands
-if [[ -d $bin_dir ]]; then
-    register_commands_in_directory "$bin_dir"
-fi
-
-# Map symlink aliases to their underlying commands, now we know all the commands
-for alias in "${!alias_to_executable[@]}"; do
-    executable="${alias_to_executable[$alias]}"
-    if [[ -n $executable ]]; then
-        command="${executable_to_command[$executable]}"
-        original_commands[$alias]="$command"
-    fi
-done
-
-for alias in "${registered_aliases[@]}"; do
-    # Expand aliases to cover subcommands (e.g. if 'deploy' => 'push' then 'deploy live' => 'push live')
-    target="${original_commands[$alias]}"
-    for command in "${registered_commands[@]}"; do
-        if [[ "$command" = "$target "* ]]; then
-            suffix=${command:${#target}}
-            registered_aliases+=("$alias$suffix")
-            original_commands["$alias$suffix"]="$target$suffix"
-        fi
-    done
-done
-
 #===== PARSE PARAMETERS AND FIND/RUN THE COMMAND ===============================
 
-# If no command is given, we will list all available commands
-declare command_list_title='Available Commands'
-declare -a command_list=("${registered_commands[@]}")
-
-# Loop through each argument until we find a matching command
 declare current_directory=$bin_dir
 declare full_command=''
+declare matching_command=''
 
 while [[ $# -gt $num_parameters_to_ignore ]]; do
-    declare subcommand=$1
+    declare typed_command=$1
     shift
 
-    # Build up the entered command in canonical format
-    full_command+=" $subcommand"
+    find_matching_commands "$current_directory" "$typed_command"
 
-    # Check if there's an exact match - run it if so
-    find_matching_commands exact "${full_command:1}"
-    run_command_if_only_one_match "$@"
-
-    # Check if there are any subcommands - move on to the next argument if so
-    find_matching_commands subcommands "${full_command:1}"
-
-    if [[ ${#matching_commands[@]} -gt 0 ]]; then
-        current_directory="$current_directory/$subcommand"
-        command_list_title='Available Subcommands'
-        command_list=("${matching_commands[@]}")
-        continue
-    fi
-
-    # Check if there are any prefix matches
-    find_matching_commands prefix "${full_command:1}"
-
-    if parent=$(matching_commands_shared_prefix "${full_command:1}"); then
-        # If all matching commands have the same parent command, pretend
-        # the user typed the full parent command, then continue parsing
-        current_directory="$current_directory/$parent"
-        full_command=" $parent"
-        command_list_title='Matching Commands'
-        command_list=("${matching_commands[@]}")
-        continue
-    fi
-
-    run_command_if_only_one_match "$@"
-
-    # If there were no prefix matches, stop searching
+    # Not found
     if [[ ${#matching_commands[@]} -eq 0 ]]; then
-        if [[ $subcommand = .* && -e "$current_directory/$subcommand" ]]; then
-            fail "Command names may not start with '.'"
-        fi
-        if [[ -f "$current_directory/$subcommand" && ! -x "$current_directory/$subcommand" ]]; then
-            fail "'$current_directory/$subcommand' is not executable (chmod +x)" $ERR_NOT_EXECUTABLE
-        fi
+        full_command="$full_command $typed_command"
 
-        append=''
+        help_text=''
         if in_array "${full_command:1}" completion help version; then
-            append="${append}${NEW_LINE}${GREY}Perhaps you meant to run 'bin --${full_command:1}'?${RESET}"
+            help_text="${NEW_LINE}${GREY}Perhaps you meant to run 'bin --${full_command:1}'?${RESET}"
         fi
-        fail "Command '${full_command:1}' not found in $bin_dir/$append" $ERR_NOT_FOUND
+        fail "Command '${full_command:1}' not found in $bin_dir/$help_text" $ERR_NOT_FOUND
     fi
 
-    # Otherwise display the list of matches
-    command_list_title='Matching Commands'
-    command_list=("${matching_commands[@]}")
-    break
+    # Exact or unique prefix match
+    if [[ ${#matching_commands[@]} -eq 1 ]]; then
+        for matching_command in "${!matching_commands[@]}"; do
+            target="${matching_commands[$matching_command]}" # Only runs once
+        done
+        full_command=$(printf "%s %q" "$full_command" "$matching_command")
+
+        # Directory - continue the loop looking for subcommands
+        if [[ -d $target ]]; then
+            current_directory=$target
+            continue
+        fi
+
+        # If we're doing tab completion, we haven't reached the cursor yet
+        if [[ $action = 'complete-bash' ]]; then
+            fail "Cannot complete command arguments"
+        fi
+
+        # Non-executable file - give an error that's slightly more helpful than the Bash default
+        if [[ ! -x "$target" ]]; then
+            fail "'$target' is not executable (chmod +x)" $ERR_NOT_EXECUTABLE
+        fi
+
+        # Executable file - so execute it
+        export BIN_COMMAND="${exe}${full_command}"
+        export BIN_EXE="$exe"
+        exec "$target" "$@"
+    fi
+
+    # Non-unique prefix match - display the results
+    if [[ $action = 'complete-bash' ]]; then
+        fail "Cannot complete due to non-unique parent command"
+    fi
+
+    list_commands "Matching Commands" "$current_directory" "$full_command"
+    exit
 done
 
-#===== TAB COMPLETION OUTPUT ===================================================
+#===== DISPLAY MATCHING COMMANDS ===============================================
 
+# Tab completion - suggest everything matching the last argument - or every (sub)command if it's empty
 if [[ $action = 'complete-bash' ]]; then
+    find_matching_commands "$current_directory" "${1-}"
 
-    # Work out the full prefix we're looking for
-    declare parent_command=''
-    if [[ -n $full_command ]]; then
-        parent_command="${full_command:1} "
-    fi
-
-    declare current_command=${1-}
-    declare typed_command="$parent_command$current_command"
-
-    # Look for commands and aliases that match, and collect the first parameter for each
-    declare alias command match
-    declare -a possible_results=()
-    declare -a matched_commands=()
-
-    for command in "${command_list[@]}"; do
-        if ! command_matches prefix "$typed_command" "$command"; then
-            continue
-        fi
-
-        match=${command#"$parent_command"} # Remove everything before the current argument
-        match=${match/ */} # Remove everything after the current argument (i.e. subcommands)
-        possible_results+=("$match")
-        matched_commands+=("$command")
+    for command in "${!matching_commands[@]}"; do
+        echo "$command"
     done
-
-    for alias in "${registered_aliases[@]}"; do
-        if ! command_matches prefix "$typed_command" "$alias"; then
-            continue
-        fi
-
-        # Only list each command once - it doesn't matter which variant is
-        # typed, and Readline (by default) will only use the completion if
-        # there is single match (otherwise it just lists the possible matches)
-        command="${original_commands[$alias]}"
-        if in_array "$command" "${matched_commands[@]}"; then
-            continue
-        fi
-
-        match=${alias#"$parent_command"} # Remove everything before the current argument
-        match=${match/ */} # Remove everything after the current argument (i.e. subcommands)
-        possible_results+=("$match")
-        matched_commands+=("$command")
-    done
-
-    # Output the matches and remove duplicates
-    for result in "${possible_results[@]}"; do
-        echo "$result"
-    done | sort | uniq
 
     exit
 fi
 
-#===== LIST COMMANDS ===========================================================
-
-# Helper to get the aliases for a command
-get_command_aliases() {
-    local alias command command_alias_count command_aliases original_command target
-
-    command=$1
-
-    command_alias_count=0
-    command_aliases=''
-
-    original_command="${original_commands[$command]}"
-
-    for alias in "${registered_aliases[@]}"; do
-        target="${original_commands[$alias]}"
-        if [[ "$target" = "$original_command" ]]; then
-            ((command_alias_count += 1))
-            command_aliases+=", $alias"
-        fi
-    done
-
-    if [[ $command_alias_count -eq 1 ]]; then
-        echo "alias: ${command_aliases:2}"
-    elif [[ $command_alias_count -gt 1 ]]; then
-        echo "aliases: ${command_aliases:2}"
-    else
-        return 1
-    fi
-}
-
-# Output the title
-echo "$LCYAN$BOLD$UNDERLINE$command_list_title$RESET"
-
-# Output the list of commands
-declare command command_aliases
-
-for command in "${command_list[@]}"; do
-    echo -n "${LWHITE}${exe} ${command}${RESET}"
-
-    if aliases=$(get_command_aliases "$command"); then
-        echo -n " ${GREY}(${aliases})${RESET}"
-    fi
-
-    # New line
-    echo
-done | sort
-
-if [[ ${#command_list[@]} -eq 0 ]]; then
-    echo "${GREY}None found${RESET}"
+# Ran out of parameters - list all (sub)commands
+find_matching_commands "$current_directory"
+if [[ -n $full_command ]]; then
+    list_commands "Available Subcommands" "$current_directory" "$full_command"
+else
+    list_commands "Available Commands" "$current_directory"
 fi
-
-# Warnings: Broken symlinks
-if [[ ${#broken_symlinks[@]} -gt 0 ]]; then
-    echo
-    echo "${YELLOW}Warning: The following symlinks point to targets that don't exist:${RESET}"
-    declare symlink
-    for symlink in "${broken_symlinks[@]}"; do
-        echo "$symlink"
-    done
-fi
-
-# Warnings: Non-executable files
-if [[ ${#non_executable_files[@]} -gt 0 ]]; then
-    echo
-    echo "${YELLOW}Warning: The following files are not executable (chmod +x):${RESET}"
-    declare file
-    for file in "${non_executable_files[@]}"; do
-        echo "$file"
-    done
-fi
-

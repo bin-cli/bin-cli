@@ -8,7 +8,7 @@ Feature: Subcommands
       Then it is successful
       And the output is 'Copying to production...'
 
-    Scenario: Subcommands are listed when Bin is run without parameters
+    Scenario: Subcommands are not listed when Bin is run without parameters
       Given a script '{ROOT}/project/bin/deploy/live'
       And a script '{ROOT}/project/bin/deploy/staging'
       And a script '{ROOT}/project/bin/another'
@@ -18,8 +18,7 @@ Feature: Subcommands
         """
         Available Commands
         bin another
-        bin deploy live
-        bin deploy staging
+        bin deploy ...
         """
 
     Scenario: Subcommands are listed when Bin is run with the directory name

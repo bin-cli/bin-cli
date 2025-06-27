@@ -29,7 +29,8 @@ Feature: Unique prefix matching
       And the output is 'Copying to production...'
 
     Scenario: Unique prefix matching works correctly with a single script in the directory
-        # There is a risk that it is executed too soon because "d" is a unique prefix
+      # In the old implementation, there was a risk that was executed too soon because "d" is a unique prefix
+      # In the new implementation, this is unlikely, but I've kept the test anyway
       Given a script '{ROOT}/project/bin/deploy/live' that outputs "Deploy: $1"
       When I run 'bin d l --force'
       Then it is successful
@@ -39,12 +40,13 @@ Feature: Unique prefix matching
       Given a script '{ROOT}/project/bin/deploy/live'
       And a script '{ROOT}/project/bin/deploy/staging'
       And a script '{ROOT}/project/bin/dump/config'
+      And a script '{ROOT}/project/bin/do-something'
       When I run 'bin d'
       Then it is successful
       And the output is:
         """
         Matching Commands
-        bin deploy live
-        bin deploy staging
-        bin dump config
+        bin deploy ...
+        bin do-something
+        bin dump ...
         """

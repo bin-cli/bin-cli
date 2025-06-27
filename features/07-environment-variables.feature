@@ -9,18 +9,17 @@ Feature: Environment Variables To Use in Scripts
       And the output is 'Usage: bin sample [...]'
 
     Scenario: The command name passed is the original command, not the unique prefix
-      Given a script '{ROOT}/project/bin/sample' that outputs '$BIN_COMMAND'
+      Given a script '{ROOT}/project/bin/sample' that outputs 'Usage: $BIN_COMMAND [...]'
       When I run 'bin s'
       Then it is successful
-      And the output is 'bin sample'
+      And the output is 'Usage: bin sample [...]'
 
-    # TODO: Does this still make sense when using symlink aliases? Perhaps not...
-    Scenario: The command name passed is the original command, not the alias
-      Given a script '{ROOT}/project/bin/sample' that outputs '$BIN_COMMAND'
+    Scenario: When using an alias, the command name passed is the alias
+      Given a script '{ROOT}/project/bin/sample' that outputs 'Usage: $BIN_COMMAND [...]'
       And a symlink '{ROOT}/project/bin/alias' pointing to 'sample'
       When I run 'bin alias'
       Then it is successful
-      And the output is 'bin sample'
+      And the output is 'Usage: bin alias [...]'
 
   Rule: $0 should be used as a fallback for $BIN_COMMAND
 

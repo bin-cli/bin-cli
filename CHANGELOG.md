@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-Scripts starting with underscore (`_`) are no longer ignored ([#66])
+- Subcommands are no longer listed recursively ([#66])
+- Scripts starting with underscore (`_`) are no longer treated specially ([#66])
 
 ### Removed
 
@@ -24,6 +25,7 @@ The following were removed ([#66]) in an effort to speed things up ([#61]), simp
 - Inline commands (`command = ...`)
 - Man pages (`man bin`, `man binconfig`)
 - Scripts with hidden extensions (`command.sh` -> `bin command`)
+- Warnings about broken symlinks and non-executable files
 
 In addition, the `.deb` and `.rpm` packages will no longer be built, including the Ubuntu PPA.
 

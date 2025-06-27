@@ -84,7 +84,7 @@ Feature: Tab completion
     Scenario: Tab completion works with the cursor in the middle of the string
       Given a script '{ROOT}/project/bin/deploy/live'
       And a script '{ROOT}/project/bin/deploy/staging'
-      When I tab complete 'bin d|eploy '
+      When I tab complete 'bin d|ep ignored'
       Then it is successful
       And the output is:
         """
@@ -96,6 +96,15 @@ Feature: Tab completion
       When I tab complete 'bin deploy live '
       Then it is successful
       And there is no output
+
+    Scenario: Nothing is output if a parameter before the last one is ambiguous
+      Given a script '{ROOT}/project/bin/hello/world'
+      Given a script '{ROOT}/project/bin/hi/world'
+      When I tab complete 'bin h wor'
+      Then it is successful
+      And there is no output
+
+  Rule: Tab completion works with aliases
 
     Scenario: Tab completion works for aliases
       Given a script '{ROOT}/project/bin/deploy'
@@ -158,7 +167,7 @@ Feature: Tab completion
         right
         """
 
-  Rule: Various files are excluded from tab completion
+  Rule: Some files are excluded from tab completion
 
     Scenario: Scripts starting with '.' are excluded from tab completion
       Given a script '{ROOT}/project/bin/visible'

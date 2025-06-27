@@ -298,11 +298,7 @@ repo/
     └── publish -> deploy
 ```
 
-This means `bin publish` is an alias for `bin deploy`, and running either would execute the `bin/deploy` script.
-
-Be sure to use relative targets, not absolute ones, so they work in any location. (Absolute targets will be rejected, for safety.)
-
-Aliases are listed alongside the commands when you run `bin` with no parameters (or with a non-unique prefix). For example:
+This means `bin publish` is an alias for `bin deploy`. Aliases are listed alongside the commands when you run `bin` with no parameters (or with a non-unique prefix). For example:
 
 <pre>
 $ bin
@@ -310,6 +306,10 @@ $ bin
 bin artisan <em>(alias: art)</em>
 bin deploy <em>(aliases: publish, push)</em>
 </pre>
+
+Be sure to use relative targets, not absolute ones, so they work in any location. (Absolute targets will be rejected to prevent mistakes.)
+
+If a symlink points to a script outside `bin/`, or a script within a subdirectory, it will be displayed as a regular command.
 
 <details>
 <summary><em>Can I define aliases for commands that have subcommands (i.e. directories)?</em></summary>
@@ -324,7 +324,7 @@ bin deploy <em>(aliases: publish, push)</em>
 >     └── push -> deploy
 > ```
 >
-> `bin push live` would be an alias for `bin deploy live`, and so on.
+> `bin push` would be an alias for `bin deploy`, so `bin push live` would be an alias for `bin deploy live`, and so on.
 
 </details>
 

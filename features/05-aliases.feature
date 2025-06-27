@@ -14,9 +14,9 @@ Feature: Aliases
       And a symlink '{ROOT}/project/bin/two' pointing to '{ROOT}/project/bin/one'
       When I run 'bin'
       Then it fails with exit code 246
-      And the error is "bin: The symlink '{ROOT}/project/bin/two' must use a relative path, not absolute ('{ROOT}/project/bin/one')"
+      And the error is "bin: The symlink '{ROOT}/project/bin/two' must use a relative path not absolute ('{ROOT}/project/bin/one')"
 
-    Scenario: A broken symlink is displayed as a warning
+    Scenario: Broken symlinks are ignored
       Given a symlink '{ROOT}/project/bin/broken' pointing to 'missing'
       When I run 'bin'
       Then it is successful
@@ -24,9 +24,6 @@ Feature: Aliases
         """
         Available Commands
         None found
-
-        Warning: The following symlinks point to targets that don't exist:
-        {ROOT}/project/bin/broken => missing
         """
 
   Rule: Aliases are displayed in the command listing
@@ -64,8 +61,20 @@ Feature: Aliases
       And the output is:
         """
         Available Commands
-        bin deploy live (alias: publish live)
-        bin deploy staging (alias: publish staging)
+        bin deploy ... (alias: publish)
+        """
+
+    Scenario: If the alias is used for the parent command, it is used when listing subcommands
+      Given a script '{ROOT}/project/bin/deploy/live'
+      And a script '{ROOT}/project/bin/deploy/staging'
+      And a symlink '{ROOT}/project/bin/publish' pointing to 'deploy'
+      When I run 'bin publish'
+      Then it is successful
+      And the output is:
+        """
+        Available Subcommands
+        bin publish live
+        bin publish staging
         """
 
   Rule: Aliases are considered by unique prefix matching

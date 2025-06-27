@@ -25,9 +25,9 @@ Feature: Automatic exclusions
       Then it fails with exit code 246
       And the error is "bin: Command names may not start with '.'"
 
-  Rule: Files that are not executable are listed as warnings
+  Rule: Files that are not executable are ignored
 
-    Scenario: Files that are not executable are listed as warnings
+    Scenario: Files that are not executable are not listed
       Given a script '{ROOT}/project/bin/executable'
       And an empty file '{ROOT}/project/bin/not-executable'
       When I run 'bin'
@@ -36,9 +36,6 @@ Feature: Automatic exclusions
         """
         Available Commands
         bin executable
-
-        Warning: The following files are not executable (chmod +x):
-        {ROOT}/project/bin/not-executable
         """
 
     Scenario: Files that are not executable cannot be executed
