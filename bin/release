@@ -90,11 +90,13 @@ read -rs -p 'Then press Enter to continue...'
 echo
 
 # Update my dotfiles (if available)
-if [[ -d ~/.git && -x ~/.bin/setup/bin ]]; then
+# Use the version from GitHub rather than building locally to double-check that it works
+if [[ -d ~/.git && -f ~/.bin/bin ]]; then
     echo
     echo "${LCYAN}Updating Dotfiles...${RESET}"
     $maybe cd
-    $maybe .bin/setup/bin
+    $maybe wget "https://github.com/bin-cli/bin-cli/releases/download/$tag/bin" -O .bin/bin
+    $maybe chmod +x .bin/bin
     $maybe git add .bin/bin
     $maybe git commit -m "Upgrade to $(bin --version)"
     $maybe git push
