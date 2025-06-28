@@ -13,6 +13,37 @@ shopt -s nullglob
 
 readonly VERSION='1.2.3-source' # DO NOT CHANGE (see bin/build)
 
+#===== HELPERS: DEBUGGING  =====================================================
+
+# Use BIN_DEBUG=1 to output debugging information to stderr, or BIN_DEBUG_LOG to output it to a file
+if [[ -n ${BIN_DEBUG-} && -z ${BIN_DEBUG_LOG-} ]]; then
+    BIN_DEBUG_LOG='/dev/stderr' # kcov-ignore-line: Not tested
+fi
+
+debug() {
+    if [[ -z ${BIN_DEBUG_LOG-} ]]; then
+        return # kcov-ignore-line: Not tested
+    fi
+
+    local line
+    line=$(debug_line)
+    echo "$@" "[line $line]" >>"$BIN_DEBUG_LOG"
+}
+
+debug_line() {
+    local lines
+    lines=${BASH_LINENO[*]:1:${#BASH_LINENO[@]}-2}
+    echo "${lines// /, }"
+}
+
+bug() {
+    # kcov-ignore-start: This should never be needed!
+    local line
+    line=$(debug_line)
+    fail "BUG: $1 on line $line"
+    # kcov-ignore-end
+}
+
 #===== HELPERS: OUTPUT & ERROR HANDLING  =======================================
 
 if [[ -t 1 ]]; then
@@ -60,35 +91,6 @@ fail() {
 
     echo "$exe: $message" >&2
     exit "$code"
-}
-
-# Use BIN_DEBUG=1 to output debugging information to stderr, or BIN_DEBUG_LOG to output it to a file
-if [[ -n ${BIN_DEBUG-} && -z ${BIN_DEBUG_LOG-} ]]; then
-    BIN_DEBUG_LOG='/dev/stderr' # kcov-ignore-line: Not tested
-fi
-
-debug() {
-    if [[ -z ${BIN_DEBUG_LOG-} ]]; then
-        return # kcov-ignore-line: Not tested
-    fi
-
-    local line
-    line=$(debug_line)
-    echo "$@" "[line $line]" >>"$BIN_DEBUG_LOG"
-}
-
-debug_line() {
-    local lines
-    lines=${BASH_LINENO[*]:1:${#BASH_LINENO[@]}-2}
-    echo "${lines// /, }"
-}
-
-bug() {
-    # kcov-ignore-start: This should never be needed!
-    local line
-    line=$(debug_line)
-    fail "BUG: $1 on line $line"
-    # kcov-ignore-end
 }
 
 #===== PARSE ARGUMENTS =========================================================
@@ -230,7 +232,6 @@ if [[ $action = 'complete-bash' ]]; then
     done
 
     # Tab-complete option names (but only if the '-' is typed)
-    # (We don't currently support tab-completing the values - e.g. directory names for --dir)
     if $can_have_more_options && [[ ${1-} = -* ]]; then
 
         # kcov-ignore-start: Usage not detected
@@ -274,6 +275,81 @@ in_array() {
 
     return 1
 }
+
+#===== LOCATE THE BIN/ DIRECTORY ===============================================
+
+# The BIN_TEST_ROOT env var is ignored in production builds, but is used as
+# an alternative to 'chroot' (which doesn't work on all OS's) in the tests
+if [[ $VERSION = '1.2.3-dev' ]]; then
+    readonly ROOT_DIR=${BIN_TEST_ROOT-}
+else
+    readonly ROOT_DIR='' # kcov-ignore-line: Not tested
+fi
+
+findup() (
+    cd "$1"
+    shift
+
+    while true; do
+
+        if test "$@"; then
+            echo "$PWD"
+            return 0
+        fi
+
+        if [[ ${PWD%/} = "$ROOT_DIR" ]]; then
+            return 1
+        fi
+
+        cd ..
+
+    done
+)
+
+# Determine paths
+if [[ -n $fixed_bin_dir ]]; then
+
+    # Look for given directory given by '--dir', which can either be an absolute
+    # path, which is searched directly, or a directory name, which is found
+    # by searching upwards from the current working directory as normal.
+
+    if [[ $fixed_bin_dir = /* ]]; then
+        # Absolute path
+        if [[ ! -d $fixed_bin_dir ]]; then
+            fail "Specified directory '$fixed_bin_dir/' is missing"
+        fi
+
+        bin_dir=$fixed_bin_dir
+    else
+        # Directory name
+        if ! bin_dir_parent=$(findup "$PWD" -d "$fixed_bin_dir"); then
+            fail "Could not find '$fixed_bin_dir/' directory starting from '$PWD'" $ERR_NOT_FOUND
+        fi
+
+        bin_dir="${bin_dir_parent%/}/$fixed_bin_dir"
+    fi
+
+else
+
+    # Otherwise search for a bin/ directory
+    if ! bin_dir_parent=$(findup "$PWD" -d bin); then
+        fail "Could not find 'bin/' directory starting from '$PWD'" $ERR_NOT_FOUND
+    fi
+
+    bin_dir="${bin_dir_parent%/}/bin"
+
+    # Ignore common global bin/ directories (/bin, /usr/bin, etc.)
+    if in_array "$bin_dir" \
+       "$ROOT_DIR/bin" \
+       "$ROOT_DIR/usr/bin" \
+       "$ROOT_DIR/usr/local/bin" \
+       "$ROOT_DIR/snap/bin" \
+       "$HOME/.local/bin" \
+       "$HOME/bin"
+    then
+        fail "Could not find 'bin/' directory starting from '$PWD' (ignored '$bin_dir')" $ERR_NOT_FOUND
+    fi
+fi
 
 #===== HELPERS: SEARCH FOR COMMANDS & ALIASES ==================================
 
@@ -374,81 +450,6 @@ list_commands() {
         echo
     done | sort
 }
-
-#===== LOCATE THE BIN/ DIRECTORY ===============================================
-
-# The BIN_TEST_ROOT env var is ignored in production builds, but is used as
-# an alternative to 'chroot' (which doesn't work on all OS's) in the tests
-if [[ $VERSION = '1.2.3-dev' ]]; then
-    readonly ROOT_DIR=${BIN_TEST_ROOT-}
-else
-    readonly ROOT_DIR='' # kcov-ignore-line: Not tested
-fi
-
-findup() (
-    cd "$1"
-    shift
-
-    while true; do
-
-        if test "$@"; then
-            echo "$PWD"
-            return 0
-        fi
-
-        if [[ ${PWD%/} = "$ROOT_DIR" ]]; then
-            return 1
-        fi
-
-        cd ..
-
-    done
-)
-
-# Determine paths
-if [[ -n $fixed_bin_dir ]]; then
-
-    # Look for given directory given by '--dir', which can either be an absolute
-    # path, which is searched directly, or a directory name, which is found
-    # by searching upwards from the current working directory as normal.
-
-    if [[ $fixed_bin_dir = /* ]]; then
-        # Absolute path
-        if [[ ! -d $fixed_bin_dir ]]; then
-            fail "Specified directory '$fixed_bin_dir/' is missing"
-        fi
-
-        bin_dir=$fixed_bin_dir
-    else
-        # Directory name
-        if ! bin_dir_parent=$(findup "$PWD" -d "$fixed_bin_dir"); then
-            fail "Could not find '$fixed_bin_dir/' directory starting from '$PWD'" $ERR_NOT_FOUND
-        fi
-
-        bin_dir="${bin_dir_parent%/}/$fixed_bin_dir"
-    fi
-
-else
-
-    # Otherwise search for a bin/ directory
-    if ! bin_dir_parent=$(findup "$PWD" -d bin); then
-        fail "Could not find 'bin/' directory starting from '$PWD'" $ERR_NOT_FOUND
-    fi
-
-    bin_dir="${bin_dir_parent%/}/bin"
-
-    # Ignore common global bin/ directories (/bin, /usr/bin, etc.)
-    if in_array "$bin_dir" \
-       "$ROOT_DIR/bin" \
-       "$ROOT_DIR/usr/bin" \
-       "$ROOT_DIR/usr/local/bin" \
-       "$ROOT_DIR/snap/bin" \
-       "$HOME/.local/bin" \
-       "$HOME/bin"
-    then
-        fail "Could not find 'bin/' directory starting from '$PWD' (ignored '$bin_dir')" $ERR_NOT_FOUND
-    fi
-fi
 
 #===== PARSE PARAMETERS AND FIND/RUN THE COMMAND ===============================
 
