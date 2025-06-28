@@ -37,8 +37,17 @@ Feature: Environment Variables To Use in Scripts
       Then it is successful
       And the output is 'You used: bin'
 
-    Scenario: The alternative executable name is passed in an environment variable when aliased
+    Scenario: The alternative executable name is passed in an environment variable when passed in explicitly
       Given a script '{ROOT}/project/bin/sample' that outputs 'You used: $BIN_EXE'
       When I run 'bin --exe other sample'
       Then it is successful
       And the output is 'You used: other'
+
+    # This doesn't work with kcov because $0 is set to 'bin' instead of 'b', though I'm not sure why
+    @disable-kcov
+    Scenario: The alternative executable name is passed in an environment variable when symlinked
+      Given a script '{ROOT}/project/bin/sample' that outputs 'You used: $BIN_EXE'
+      And a symlink '{ROOT}/usr/bin/b' pointing to 'bin'
+      When I run 'b sample'
+      Then it is successful
+      And the output is 'You used: b'
