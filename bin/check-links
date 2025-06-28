@@ -2,7 +2,7 @@
 set -euo pipefail
 
 if [[ ${1-} = '--help' || ${1-} = '-h' ]]; then
-    echo "Usage: ${BIN_COMMAND-$0} [FILE]..."
+    echo "Usage: ${BIN_COMMAND-$0} [FILES...]"
     echo
     echo 'Check links in the given Markdown files. By default, checks *.md in the repository root.'
     exit

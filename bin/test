@@ -3,7 +3,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 if [[ ${1-} = '--help' || ${1-} = '-h' ]]; then
-    echo "Usage: ${BIN_COMMAND-$0} [CUCUMBER.JS OPTIONS]"
+    echo "Usage: ${BIN_COMMAND-$0} [CUCUMBER.JS OPTIONS...]"
     echo
     echo 'Run tests and display additional debugging information if they fail.'
     exit

@@ -38,4 +38,3 @@ jobs:
           prerelease: "${{ contains(github.ref_name, '-') }}"
           files: |
             dist/bin
-            dist/bin.1.gz

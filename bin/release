@@ -3,35 +3,99 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 RESET=$'\e[0m'
+YELLOW=$'\e[33m'
 LRED=$'\e[91m'
 LYELLOW=$'\e[93m'
 LCYAN=$'\e[96m'
 
-version=${1-}
+# Parse arguments
+help() {
+    echo "Usage: ${BIN_COMMAND-$0} [OPTIONS]"
+    echo
+    echo 'Tag a new release of Bin CLI in Git and release it on GitHub.'
+    echo 'The version number is automatically read from the CHANGELOG.'
+    echo
+    echo 'Options:'
+    echo '  -d, --dry-run    Only display what would happen'
+    echo '  -h, --help       Display this help'
+}
 
-if [[ -z $version || $version = '--help' || $version = '-h' ]]; then
-    echo "Usage: ${BIN_COMMAND-$0} <VERSION>"
-    exit
+args=$(getopt -n "${BIN_COMMAND-$0}" -o 'dh' -l 'dry-run,help' -- "$@")
+eval set -- "$args"
+
+dry_run=false
+
+while true; do
+    case "$1" in
+        -d | --dry-run) dry_run=true; shift ;;
+        -h | --help) help; exit ;;
+        --) shift; break ;;
+    esac
+done
+
+# Confirm before doing a dry run
+if $dry_run; then
+    echo "${YELLOW}DRY RUN - nothing will actually be tagged or changed${RESET}"
+    echo
+    maybe='echo $'
+else
+    maybe=''
 fi
 
+# Check everything is committed
 if [[ -n $(git status --porcelain) ]]; then
     echo "${LRED}Error: There are uncommitted local changes${RESET}" >&2
+    $dry_run || exit 1
+    echo "${YELLOW}DRY RUN - continuing anyway...${RESET}"
+    echo
+fi
+
+# Get the latest version number from the changelog
+echo "${LCYAN}Checking version number...${RESET}"
+version=$(sed -nE '/^\#\# \[([0-9]+\.[0-9]+\.[0-9]+(-[^]]+)?)\] .*/ { s//\1/; p; q }' CHANGELOG.md)
+tag="v$version"
+
+# Check that version hasn't already been tagged
+if git show-ref -q --verify "refs/tags/$tag"; then
+    echo "${LRED}Error: The latest version ($version) has already been tagged in Git (remember to update CHANGELOG.md)${RESET}" >&2
     exit 1
 fi
 
-echo "${LCYAN}Testing the application...${RESET}"
+# Show me to double-check
+lib/ask.sh "This will tag $tag - continue?" Y || exit 1
+echo
+
+# Make sure the tests pass
+echo "${LCYAN}Testing locally...${RESET}"
 bin/test
 echo
 
+# Release it
 echo "${LCYAN}Tagging in Git (will trigger release via GitHub Actions)...${RESET}"
-git tag "v$version"
-git push origin HEAD "v$version"
+$maybe git tag "$tag"
+$maybe git push origin HEAD "$tag"
 echo
 
-echo "${LCYAN}Done. Next steps:${RESET}"
+# Manual steps
+echo "${LCYAN}Manual action required${RESET}"
+
+echo "${LYELLOW}Check the test/release status:${RESET}"
+echo "https://github.com/bin-cli/bin-cli/actions/workflows/release.yml"
 echo
-echo "${LYELLOW}Check the release status:${RESET}"
-echo 'https://github.com/bin-cli/bin-cli/actions/workflows/release-github.yml'
-echo
+
 echo "${LYELLOW}Write the changelog and publish the release on GitHub:${RESET}"
 echo 'https://github.com/bin-cli/bin-cli/releases'
+echo
+read -rs -p 'Then press Enter to continue...'
+echo
+
+# Update my dotfiles (if available)
+if [[ -d ~/.git && -x ~/.bin/setup/bin ]]; then
+    echo
+    echo "${LCYAN}Updating Dotfiles...${RESET}"
+    $maybe cd
+    $maybe .bin/setup/bin
+    $maybe git add .bin/bin
+    $maybe git commit -m "Upgrade to $(bin --version)"
+    $maybe git push
+fi
