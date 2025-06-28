@@ -8,8 +8,6 @@ It is implemented as a self-contained Bash script, small enough to bundle with y
 
 Collaborators / contributors who choose not to install Bin can run the scripts directly, so you can enjoy the benefits without adding a hard dependency or extra barrier to entry.
 
-_To see how Bin compares to some of the alternatives (Just, Task, Make, etc.), see [the wiki](https://github.com/bin-cli/bin-cli/wiki/Alternatives-to-Bin-CLI)._
-
 ## How It Works
 
 A project just needs a `bin/` folder and some executable scripts - for example:
@@ -22,9 +20,9 @@ repo/
     └── hello
 ```
 
-The scripts can be written in [any language](https://github.com/bin-cli/bin-cli/wiki/Hello%2C-World),
-or can even be compiled binaries, as long as they are executable (`chmod +x`). Here is a very simple
-`bin/hello` shell script:
+The scripts can be written in any language, or can even be compiled binaries, as
+long as they are executable (`chmod +x`). Here is a very simple `bin/hello`
+shell script:
 
 ```bash
 #!/bin/sh

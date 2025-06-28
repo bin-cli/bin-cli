@@ -15,14 +15,7 @@ Feel free to open an [Issue], but please note that Bin CLI is intentionally kept
 
 ## Documentation Changes
 
-### README
-
 You can [fork and edit the README] directly on GitHub, then submit a pull request.
-
-### Wiki
-
-[The wiki] is used for tangential tips and thoughts. Editing is restricted, but
-feel free to open an [Issue] if you think anything could be improved.
 
 ## Pull Requests
 
@@ -80,7 +73,6 @@ If you prefer the 90's approach, feel free to send a patch or [Git bundle] to [d
 [Node.js]: https://nodejs.org/
 [README]: README.md
 [ShellCheck]: https://www.shellcheck.net/
-[The wiki]: https://github.com/bin-cli/bin-cli/wiki
 [awk]: https://www.gnu.org/software/gawk/manual/gawk.html
 [d@djm.me]: mailto:d@djm.me
 [fork and edit the README]: https://github.com/bin-cli/bin-cli/edit/main/README.md
