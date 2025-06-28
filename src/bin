@@ -173,8 +173,10 @@ fi
 
 # This doesn't do the tab completion - it just outputs the script to be 'eval'ed
 # in the shell to enable tab completion.
+declare complete_command
+
 if [[ $action = 'completion' ]]; then
-    declare complete_command=("$(basename "$0")")
+    complete_command=("$(basename "$0")")
     if $is_custom_exe; then
         complete_command+=("--exe" "'$exe'")
     fi
@@ -187,7 +189,10 @@ fi
 
 #===== PREPARE FOR TAB COMPLETION (IF NEEDED) ==================================
 
+declare args
 declare -i num_parameters_to_ignore=0
+declare option_name
+declare -a option_names
 
 if [[ $action = 'complete-bash' ]]; then
 
@@ -195,7 +200,7 @@ if [[ $action = 'complete-bash' ]]; then
     # The current cursor position is available in $COMP_POINT.
     # Ignore everything after the cursor, and assign everything before it to $1,
     # $2, etc. as if it had been executed already.
-    declare args=${COMP_LINE:0:$COMP_POINT}
+    args=${COMP_LINE:0:$COMP_POINT}
 
     # shellcheck disable=SC2086 # We want this to be split into separate arguments
     # Note: This doesn't handle quotes properly - but I couldn't come up with anything better!
@@ -235,7 +240,7 @@ if [[ $action = 'complete-bash' ]]; then
     if $can_have_more_options && [[ ${1-} = -* ]]; then
 
         # kcov-ignore-start: Usage not detected
-        declare option_names=(
+        option_names=(
             # '--complete-bash' # Shouldn't normally be entered by hand
             '--completion'
             '--dir'
@@ -246,7 +251,6 @@ if [[ $action = 'complete-bash' ]]; then
         )
         # kcov-ignore-end
 
-        declare option_name
         for option_name in "${option_names[@]}"; do
             if [[ $option_name = "$1"* ]]; then
                 # 'echo' treats '-e' as an option rather than the string to output
@@ -456,9 +460,10 @@ list_commands() {
 declare current_directory=$bin_dir
 declare full_command=''
 declare matching_command=''
+declare typed_command
 
 while [[ $# -gt $num_parameters_to_ignore ]]; do
-    declare typed_command=$1
+    typed_command=$1
     shift
 
     find_matching_commands "$current_directory" "$typed_command"

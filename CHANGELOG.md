@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Very minor and unlikely bug where `bin --completion` would give invalid output but not error if `basename` is unavailable or fails
+
 ## [2.0.0] - 2025-06-28
 
 ### Fixed
