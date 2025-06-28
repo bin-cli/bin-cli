@@ -26,16 +26,15 @@ git clone https://github.com/bin-cli/bin-cli.git
 cd bin-cli
 ```
 
-Make changes to `src/bin`, and update the tests in `features/*.feature` to match.
+Make changes to `src/bin`, and update the tests in `tests/*.bash` to match.
 
 To run the tests locally, you will need:
 
-- A recent version of [Node.js] (tests are powered by [Cucumber.js])
 - [kcov]
 - [ShellCheck]
 - [awk]
 
-If you are using Ubuntu 24.04 or Debian 12, the `bin/setup` script will install most of these for you (except nvm/Node.js).
+If you are using Ubuntu 24.04 or Debian 12, the `bin/setup` script will install most of these for you.
 
 Run `bin/tdd` to automatically run the test suite each time you make a change, or manually run `bin/test` if you prefer.
 
@@ -66,11 +65,9 @@ If you prefer the 90's approach, feel free to send a patch or [Git bundle] to [d
 
 [#66]: https://github.com/bin-cli/bin-cli/issues/66
 [CHANGELOG]: CHANGELOG.md
-[Cucumber.js]: https://cucumber.io/docs/installation/javascript/
 [Git bundle]: https://www.chiark.greenend.org.uk/~sgtatham/quasiblog/git-no-forge/#bundle
 [Issue]: https://github.com/bin-cli/bin-cli/issues
 [Issues]: https://github.com/bin-cli/bin-cli/issues
-[Node.js]: https://nodejs.org/
 [README]: README.md
 [ShellCheck]: https://www.shellcheck.net/
 [awk]: https://www.gnu.org/software/gawk/manual/gawk.html

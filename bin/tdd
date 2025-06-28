@@ -3,7 +3,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 if [[ ${1-} = '--help' || ${1-} = '-h' ]]; then
-    echo "Usage: ${BIN_COMMAND-$0} [CUCUMBER.JS OPTIONS...]"
+    echo "Usage: ${BIN_COMMAND-$0}"
     echo
     echo 'Run tests, then wait for something to change and run them again.'
     exit
@@ -22,11 +22,15 @@ while true; do
     clear
 
     # Build and test it
-    bin/test "$@" || true
+    if bin/test; then
+        # Just because it's nice to see something visual, show the command listing
+        echo
+        dist/bin
+    fi
 
     # Wait until something changes
     inotifywait -qqr \
         -e create -e modify -e move -e attrib -e delete \
-        bin/build features src
+        bin/build bin/test src tests
 
 done

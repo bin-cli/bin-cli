@@ -5,11 +5,8 @@ cd "$(dirname "$0")/.."
 if [[ ${1-} = '--help' || ${1-} = '-h' ]]; then
     echo "Usage: ${BIN_COMMAND-$0}"
     echo
-    echo 'Delete all generated files (dist/, node_modules/, temp/).'
+    echo 'Delete all generated files (dist/, temp/).'
     exit
 fi
 
-rm -rf \
-    dist \
-    node_modules \
-    temp
+rm -rf dist temp

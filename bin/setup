@@ -15,7 +15,7 @@ LCYAN=$'\e[96m'
 install_kcov=false
 packages_to_install=()
 
-sudo=
+sudo=''
 if [[ $UID -gt 0 ]]; then
     sudo='sudo'
 fi
@@ -44,8 +44,8 @@ echo "${LCYAN}Checking for missing development dependencies...${RESET}"
 require curl
 require gawk
 require inotifywait inotify-tools
+require jq
 require kcov
-require npm
 require shellcheck
 
 if [[ ${#packages_to_install[@]} -gt 0 ]]; then
@@ -60,13 +60,7 @@ fi
 if $install_kcov; then
     echo
     echo "${LCYAN}Installing kcov...${RESET}"
-    wget -O /tmp/kcov.deb https://launchpad.net/ubuntu/+archive/primary/+files/kcov_38+dfsg-1_amd64.deb
-    sudo dpkg -i /tmp/kcov.deb
+    curl -fsSL https://launchpad.net/ubuntu/+archive/primary/+files/kcov_38+dfsg-1_amd64.deb > /tmp/kcov.deb
+    $sudo apt-get -y install /tmp/kcov.deb
     rm -f /tmp/kcov.deb
-fi
-
-if [[ ! -d node_modules ]]; then
-    echo
-    echo "${LCYAN}Installing Node modules...${RESET}"
-    npm ci
 fi

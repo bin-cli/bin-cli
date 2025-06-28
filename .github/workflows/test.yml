@@ -57,22 +57,17 @@ jobs:
       - name: Install Alpine Linux in chroot
         uses: jirutka/setup-alpine@cf5fddcea495dcc19c0f991c6f6fa6a7abf3d50a # v1.3.0
 
-      - name: Install Bash and Node.js
+      - name: Install Bash
         shell: alpine.sh --root {0}
-        run: apk update && apk add bash nodejs npm
-
-      - name: Install JavaScript packages
-        shell: alpine.sh {0}
-        run: npm ci
+        run: apk update && apk add bash
 
       - name: Run all tests
         shell: alpine.sh {0}
         run: bin/test
         env:
-          DISABLE_KCOV: true
+          DISABLE_KCOV: 1
+          DISABLE_SHELLCHECK: 1
 
-  # On macOS, we run almost all tests, except those that require kcov
-  # While kcov can run on macOS, it's *really* slow (even with --include-path)
   test-on-macos:
     name: Test on macOS
     runs-on: macos-latest
@@ -83,21 +78,13 @@ jobs:
       - name: Upgrade Bash and Install ShellCheck
         run: brew update && brew install bash shellcheck
 
-      - name: Install Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        with:
-          cache: npm
-
-      - name: Install JavaScript packages
-        run: npm ci
-
-      - name: Run all tests (except coverage)
+      - name: Run all tests (except coverage and ShellCheck)
         run: bin/test
         env:
-          DISABLE_KCOV: true
+          # While kcov can run on macOS, it's *really* slow (even with --include-path)
+          DISABLE_KCOV: 1
+          DISABLE_SHELLCHECK: 1
 
-  # On Windows, we just run some very basic tests - because translating
-  # between Windows and Unix-style paths in Node.js gets too complicated!
   test-on-git-for-windows:
     name: Test on Windows (Git for Windows)
     runs-on: windows-latest
@@ -105,9 +92,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Run simple tests
+      - name: Run a basic smoke test
         shell: bash
-        run: bin/simple-test
+        run: bin/build && dist/bin
+
+      # GitHub Actions runners doesn't seem to have the necessary permissions for
+      # MSYS='winsymlinks:nativestrict' to work, so these are disabled until I find
+      # an alternative (or explicitly disable the tests that require symlinks)
+
+      #- name: Run all tests (except coverage and ShellCheck)
+      #  shell: bash
+      #  run: bin/test
+      #  env:
+      #    DISABLE_KCOV: 1
+      #    DISABLE_SHELLCHECK: 1
+      #    LANG: en_US.UTF-8
 
   test-on-msys2:
     name: Test on Windows (MSYS2)
@@ -116,9 +115,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Run simple tests
+      - name: Run a basic smoke test
         shell: C:\msys64\usr\bin\bash.exe {0}
-        run: bin/simple-test
+        run: bin/build && dist/bin
+
+      #- name: Run all tests (except coverage and ShellCheck)
+      #  shell: C:\msys64\usr\bin\bash.exe {0}
+      #  run: bin/test
+      #  env:
+      #    DISABLE_KCOV: 1
+      #    DISABLE_SHELLCHECK: 1
+      #    LANG: en_US.UTF-8
 
   test-on-cygwin:
     name: Test on Windows (Cygwin)
@@ -130,9 +137,13 @@ jobs:
       - name: Install Cygwin
         uses: egor-tensin/setup-cygwin@d2c752bab416d4b0662591bd366fc2686297c82d # v4.0.1
 
-      - name: Run simple tests
+      - name: Run all tests (except coverage and ShellCheck)
         shell: C:\tools\cygwin\bin\bash.exe -e {0}
-        run: bin/simple-test
+        run: bin/test
+        env:
+          DISABLE_KCOV: 1
+          DISABLE_SHELLCHECK: 1
+          LANG: en_US.UTF-8
 
   test-on-wsl:
     name: Test on Windows (WSL)
@@ -144,6 +155,9 @@ jobs:
       - name: Install WSL distribution
         uses: Vampire/setup-wsl@3b46b44374d5d0ae94654c45d114a3ed7a0e07a8 # v5.0.1
 
-      - name: Run simple tests
+      - name: Run all tests (except coverage)
         shell: wsl-bash {0}
-        run: bin/simple-test
+        # wsl-bash doesn't seem to support 'env'
+        # TEST_TEMP is required because the repo is in a Windows not Linux
+        # directory, so the 'execute' bit is always set for files
+        run: DISABLE_KCOV=1 DISABLE_SHELLCHECK=1 TEST_TEMP=/tmp/bin-cli-temp bin/test

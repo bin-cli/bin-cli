@@ -9,48 +9,15 @@ if [[ ${1-} = '--help' || ${1-} = '-h' ]]; then
     exit
 fi
 
-RESET=$'\e[0m'
-BOLD=$'\e[1m'
-UNDERLINE=$'\e[4m'
-LRED=$'\e[91m'
-LGREEN=$'\e[92m'
-LMAGENTA=$'\e[95m'
-LCYAN=$'\e[96m'
+bin/build >/dev/null || exit
 
-result=0
+for file in tests/support/*.bash; do
+    source "$file"
+done
 
-# Build
-bin/build || result=$?
+for file in tests/*.bash; do
+    test_file=$file
+    source "$file"
+done
 
-# Run tests
-if [[ $result -eq 0 ]]; then
-    bin/cucumber --fail-fast "$@" || result=$?
-fi
-
-# If it failed, output debugging information
-if [[ -f temp/command.txt ]]; then
-    echo
-    echo "${LMAGENTA}${BOLD}${UNDERLINE}Command${RESET}"
-    cat temp/command.txt
-fi
-
-if [[ -f temp/stdout.txt ]]; then
-    echo
-    echo "${LGREEN}${BOLD}${UNDERLINE}Output${RESET}"
-    cat temp/stdout.txt
-fi
-
-if [[ -f temp/stderr.txt ]]; then
-    echo
-    echo "${LRED}${BOLD}${UNDERLINE}Errors${RESET}"
-    cat temp/stderr.txt
-fi
-
-if [[ -f temp/debug.txt ]]; then
-    echo
-    echo "${LCYAN}${BOLD}${UNDERLINE}Debug log${RESET}"
-    cat temp/debug.txt
-fi
-
-# Return the result code
-exit $result
+display-final-result
