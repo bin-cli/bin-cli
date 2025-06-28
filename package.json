@@ -7,7 +7,7 @@
     "is-executable": "^2.0.1",
     "markdown-link-check": "~3.13.7",
     "marked": "^15.0.12",
-    "shell-quote": "^1.8.2",
+    "shell-quote": "^1.8.3",
     "which": "^5.0.0"
   }
 }
