@@ -12,18 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.0] - 2025-06-28
 
-### Fixed
-
-- Bin CLI is much faster (most noticeable during tab completion) ([#61])
-
-### Changed
-
-- Subcommands are no longer listed recursively ([#66])
-- Scripts starting with underscore (`_`) are no longer treated specially ([#66])
-
 ### Removed
 
-The following low-value features were removed in an effort to speed things up ([#61]), simplify/minimise ongoing maintenance, and focus on the core features that matter ([#66]):
+**BREAKING:** The following low-value features were removed in an effort to speed things up ([#61]), simplify/minimise ongoing maintenance, and focus on the core features that matter ([#66]):
 
 - Aliases defined in config files (`alias = ...`, `aliases = ...`) (but symlink aliases are still supported)
 - Create (`--create`, `-c`) and edit (`--edit`, `-e`) actions
@@ -38,6 +29,17 @@ The following low-value features were removed in an effort to speed things up ([
 - Warnings about broken symlinks and non-executable files
 
 In addition, the `.deb` and `.rpm` packages will no longer be built, including the Ubuntu PPA.
+
+### Changed
+
+- **BREAKING:** Scripts starting with underscore (`_`) are no longer treated specially ([#66])
+- Subcommands are no longer listed recursively ([#66])
+- Symlinks pointing to files/directories outside `bin/` (or inside subdirectories) are now allowed and treated as regular commands
+- `$BIN_COMMAND` and `$0` are set to the alias that was used rather than the target command (consistent with calling them directly via symlinks)
+
+### Fixed
+
+- Bin CLI is now much faster (most noticeable during tab completion) ([#61])
 
 ## [1.0.2] - 2025-03-06
 
