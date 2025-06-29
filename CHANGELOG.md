@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Very minor and unlikely bug where `bin --completion` would give invalid output but not error if `basename` is unavailable or fails ([26f1ab3])
+- Very minor and unlikely bug where `bin --completion` would give invalid output but not error if `basename` is unavailable or fails ([dcaa47e])
 
 ## [2.0.0] - 2025-06-28
 
@@ -291,7 +291,7 @@ Since this would have taken us from version 0.9 to 0.10, and I think it is more-
 [#8]: https://github.com/bin-cli/bin-cli/issues/8
 [#2]: https://github.com/bin-cli/bin-cli/issues/2
 
-[26f1ab3]: https://github.com/bin-cli/bin-cli/commit/26f1ab3f1986af83bead7ce261d30647b4b78812
+[dcaa47e]: https://github.com/bin-cli/bin-cli/commit/dcaa47eaa159987e5bf94edddd376bc55203447b
 [ba4cdca]: https://github.com/bin-cli/bin-cli/commit/ba4cdca9526a7bb4c7515a3fb9a3db00054378af
 [fb9e285]: https://github.com/bin-cli/bin-cli/commit/fb9e2851811c6a4f3c977fdacccb7241772a8a45
 [0ad26c8]: https://github.com/bin-cli/bin-cli/commit/0ad26c8bea3ec9af77c198387c690df8e9a00a3d
