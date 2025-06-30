@@ -272,7 +272,7 @@ bin sample
 
 > You can define an alias using a custom name - see [custom script directory](#custom-script-directory), below.
 >
-> But you can't configure a different directory name on a per-project basis (except by writing your own wrapper function).
+> But you can't configure a different directory name on a per-project basis (except perhaps by writing your own wrapper function - see below).
 
 </details>
 
@@ -362,7 +362,7 @@ Or perhaps a wrapper function:
 
 ```bash
 bin() {
-    if [[ $PWD == /path/to/repo* ]]; then
+    if [[ $PWD/ == /path/to/repo/* ]]; then
         command bin --dir scripts "$@"
     else
         command bin "$@"
