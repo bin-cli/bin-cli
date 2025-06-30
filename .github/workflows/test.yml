@@ -20,8 +20,8 @@ jobs:
 
   # On Linux, we run every test including coverage checking, then upload the
   # compiled script and coverage report in case they are needed
-  test-on-ubuntu:
-    name: Test on Ubuntu
+  ubuntu:
+    name: Ubuntu
     runs-on: ubuntu-24.04 # https://github.com/bin-cli/bin-cli/issues/43
     steps:
       - name: Checkout
@@ -47,8 +47,8 @@ jobs:
           name: coverage
           path: temp/coverage/merged/
 
-  test-on-alpine:
-    name: Test on Alpine
+  alpine:
+    name: Alpine
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -68,8 +68,8 @@ jobs:
           DISABLE_KCOV: 1
           DISABLE_SHELLCHECK: 1
 
-  test-on-macos:
-    name: Test on macOS
+  macos:
+    name: macOS
     runs-on: macos-latest
     steps:
       - name: Checkout
@@ -85,8 +85,26 @@ jobs:
           DISABLE_KCOV: 1
           DISABLE_SHELLCHECK: 1
 
-  test-on-git-for-windows:
-    name: Test on Windows (Git for Windows)
+  cygwin:
+    name: 'Windows: Cygwin'
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install Cygwin
+        uses: egor-tensin/setup-cygwin@d2c752bab416d4b0662591bd366fc2686297c82d # v4.0.1
+
+      - name: Run all tests (except coverage and ShellCheck)
+        shell: C:\tools\cygwin\bin\bash.exe -e {0}
+        run: bin/test
+        env:
+          DISABLE_KCOV: 1
+          DISABLE_SHELLCHECK: 1
+          LANG: en_US.UTF-8
+
+  git-for-windows:
+    name: 'Windows: Git for Windows'
     runs-on: windows-latest
     steps:
       - name: Checkout
@@ -108,8 +126,8 @@ jobs:
       #    DISABLE_SHELLCHECK: 1
       #    LANG: en_US.UTF-8
 
-  test-on-msys2:
-    name: Test on Windows (MSYS2)
+  msys2:
+    name: 'Windows: MSYS2'
     runs-on: windows-latest
     steps:
       - name: Checkout
@@ -127,26 +145,8 @@ jobs:
       #    DISABLE_SHELLCHECK: 1
       #    LANG: en_US.UTF-8
 
-  test-on-cygwin:
-    name: Test on Windows (Cygwin)
-    runs-on: windows-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-
-      - name: Install Cygwin
-        uses: egor-tensin/setup-cygwin@d2c752bab416d4b0662591bd366fc2686297c82d # v4.0.1
-
-      - name: Run all tests (except coverage and ShellCheck)
-        shell: C:\tools\cygwin\bin\bash.exe -e {0}
-        run: bin/test
-        env:
-          DISABLE_KCOV: 1
-          DISABLE_SHELLCHECK: 1
-          LANG: en_US.UTF-8
-
-  test-on-wsl:
-    name: Test on Windows (WSL)
+  wsl:
+    name: 'Windows: WSL'
     runs-on: windows-latest
     steps:
       - name: Checkout
