@@ -18,10 +18,31 @@ env:
 
 jobs:
 
-  # On Linux, we run every test including coverage checking, then upload the
+  alpine:
+    name: 'Linux: Alpine'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install Alpine Linux in chroot
+        uses: jirutka/setup-alpine@cf5fddcea495dcc19c0f991c6f6fa6a7abf3d50a # v1.3.0
+
+      - name: Install Bash
+        shell: alpine.sh --root {0}
+        run: apk update && apk add bash
+
+      - name: Run all tests
+        shell: alpine.sh {0}
+        run: bin/test
+        env:
+          DISABLE_KCOV: 1
+          DISABLE_SHELLCHECK: 1
+
+  # On Ubuntu, we run every test including coverage checking, then upload the
   # compiled script and coverage report in case they are needed
   ubuntu:
-    name: Ubuntu
+    name: 'Linux: Ubuntu'
     runs-on: ubuntu-24.04 # https://github.com/bin-cli/bin-cli/issues/43
     steps:
       - name: Checkout
@@ -46,27 +67,6 @@ jobs:
         with:
           name: coverage
           path: temp/coverage/merged/
-
-  alpine:
-    name: Alpine
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-
-      - name: Install Alpine Linux in chroot
-        uses: jirutka/setup-alpine@cf5fddcea495dcc19c0f991c6f6fa6a7abf3d50a # v1.3.0
-
-      - name: Install Bash
-        shell: alpine.sh --root {0}
-        run: apk update && apk add bash
-
-      - name: Run all tests
-        shell: alpine.sh {0}
-        run: bin/test
-        env:
-          DISABLE_KCOV: 1
-          DISABLE_SHELLCHECK: 1
 
   macos:
     name: macOS
