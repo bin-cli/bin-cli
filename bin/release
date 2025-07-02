@@ -76,22 +76,14 @@ $maybe git tag "$tag"
 $maybe git push origin HEAD "$tag"
 echo
 
-# Manual steps
-echo "${LCYAN}Manual action required${RESET}"
-
-echo "${LYELLOW}Check the test/release status:${RESET}"
+echo "${LYELLOW}Please check the release has completed successfully:${RESET}"
 echo "https://github.com/bin-cli/bin-cli/actions/workflows/release.yml"
-echo
-
-echo "${LYELLOW}Write the changelog and publish the release on GitHub:${RESET}"
-echo 'https://github.com/bin-cli/bin-cli/releases'
-echo
-read -rs -p 'Then press Enter to continue...'
-echo
 
 # Update my dotfiles (if available)
 # Use the version from GitHub rather than building locally to double-check that it works
 if [[ -d ~/.git && -f ~/.bin/bin ]]; then
+    echo
+    read -rs -p 'Then press Enter to continue...'
     echo
     echo "${LCYAN}Updating Dotfiles...${RESET}"
     $maybe cd

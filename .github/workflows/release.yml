@@ -13,6 +13,9 @@ env:
   FORCE_COLOR: 1
 
 jobs:
+
+  # This is just to double-check before releasing it - it should already
+  # have been tested on the main branch before it is tagged!
   test:
     name: Test
     uses: ./.github/workflows/test.yml
@@ -30,11 +33,9 @@ jobs:
       - name: Build Bin CLI
         run: bin/build "${GITHUB_REF_NAME/v}"
 
-      - name: Create GitHub Draft Release
-        uses: crowbarmaster/GH-Automatic-Releases@d01f8167e06547c06e2a94267e378e7ca513e3ec # v1.6.0
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 # v2.3.2
         with:
-          repo_token: '${{ secrets.GITHUB_TOKEN }}'
-          draft: true
           prerelease: "${{ contains(github.ref_name, '-') }}"
-          files: |
-            dist/bin
+          body: 'See the [CHANGELOG](${{ github.server_url }}/${{ github.repository }}/blob/main/CHANGELOG.md) for details.'
+          files: dist/bin
