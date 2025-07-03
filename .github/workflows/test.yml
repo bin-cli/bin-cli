@@ -147,7 +147,7 @@ jobs:
 
   wsl:
     name: 'Windows: WSL'
-    runs-on: windows-latest
+    runs-on: windows-2025 # https://github.com/Vampire/setup-wsl/issues/72#issuecomment-2677169517
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
