@@ -10,12 +10,12 @@ Please use the [Issues] section to report bugs (except [security vulnerabilities
 
 ## Feature Suggestions
 
-Feel free to open an [Issue], but please note that Bin CLI is intentionally kept as simple as possible
-(see [#66] for details) so I'm only likely to accept/implement high-value features.
+Feel free to open an [Issue], but please note that Bin CLI is intentionally kept as simple as possible (see
+[#66] for details), so I'm only likely to accept/implement high-value features that don't slow things down.
 
-## Documentation Changes
+## Documentation Improvements
 
-You can [fork and edit the README] directly on GitHub, then submit a pull request.
+You can [fork and edit the README] directly on GitHub, then submit a pull request, or just open an [Issue] to let me know.
 
 ## Pull Requests
 
@@ -34,11 +34,12 @@ To run the tests locally, you will need:
 - [ShellCheck]
 - [awk]
 
-If you are using Ubuntu 24.04 or Debian 12, the `bin/setup` script will install most of these for you.
+If you are using Ubuntu 24.04 or Debian 12 (or similar), the `bin/setup` script will install most of these for you.
 
 Run `bin/tdd` to automatically run the test suite each time you make a change, or manually run `bin/test` if you prefer.
 
-To test the changes interactively, run `bin/dev`.
+To test the changes interactively, run `bin/dev`. To build a version for your own use, run `bin/build <version>`,
+specifying your own version number such as `1.2.3-yourname.0`, then copy `dist/bin` to your preferred location.
 
 Remember to update the `--help` output, [README] and [CHANGELOG] as appropriate.
 
@@ -59,9 +60,10 @@ git push -u myfork HEAD
 Browse to the repository fork on GitHub (`https://github.com/YOUR_USERNAME/bin-cli/tree/YOUR_BRANCH`) and click
 "Compare & pull request". Finally, check/update the details and click "Create pull request".
 
-## Patches
+## Email
 
-If you prefer the 90's approach, feel free to send a patch or [Git bundle] to [d@djm.me] instead.
+If you prefer the 90's approach, feel free to send a suggestion, patch,
+[Git bundle], thank you note to [d@djm.me] instead.
 
 [#66]: https://github.com/bin-cli/bin-cli/issues/66
 [CHANGELOG]: CHANGELOG.md

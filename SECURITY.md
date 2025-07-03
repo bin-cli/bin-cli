@@ -1,8 +1,7 @@
 # Security Policy
 
-If you discover a security vulnerability, please
-[report it via GitHub](https://github.com/bin-cli/bin-cli/security/advisories/new)
-or email [d@djm.me](mailto:d@djm.me).
+If you discover a security vulnerability, please email [d@djm.me](mailto:d@djm.me) or
+[report it via GitHub](https://github.com/bin-cli/bin-cli/security/advisories/new).
 
 Since the main purpose of *Bin CLI* is to run arbitrary code, the ability to run
 arbitrary code is not a vulnerability - unless it is in a context where users
