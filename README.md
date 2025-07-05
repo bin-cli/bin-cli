@@ -409,11 +409,14 @@ You can skip it (i.e. use `alias b='bin'`) if you prefer it to say `bin`.
 > bin --completion --exe b > ~/.local/share/bash-completion/completions/b
 > ```
 >
-> If you are using an alias with a [custom script directory](#custom-script-directory), e.g. `alias scr='bin --dir scripts'`, add the same parameter here:
+> If you are using an alias with a [custom script directory](#custom-script-directory), add the same parameter here:
 >
 > ```bash
 > mkdir -p ~/.local/share/bash-completion/completions
 > bin --completion --exe scr --dir scripts > ~/.local/share/bash-completion/completions/scr
+>
+> # Using single quotes around $HOME here so it's not expanded until runtime:
+> bin --completion --exe dev --dir '$HOME/.local/bin/dev' > ~/.local/share/bash-completion/completions/dev
 > ```
 
 </details>
