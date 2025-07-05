@@ -21,19 +21,28 @@ repo/
 ```
 
 The scripts can be written in any language, or can even be compiled binaries, as
-long as they are executable (`chmod +x`). Here is a very simple `bin/hello`
-shell script:
+long as they are executable (`chmod +x`).  To demonstrate, here is a very simple
+`bin/hello` shell script:
 
 ```bash
 #!/bin/sh
 echo "Hello, ${1:-World}!"
 ```
 
+### Running Commands
+
 To execute it, run:
 
-```
+```bash
 $ bin hello
 Hello, World!
+```
+
+Any additional parameters are passed through to the script/executable:
+
+```bash
+$ bin hello Dave
+Hello, Dave!
 ```
 
 Now you may be thinking why not just run it directly, like this:
