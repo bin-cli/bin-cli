@@ -191,27 +191,6 @@ To any of the following files:
 - `~/.bashrc`
 
 <details>
-<summary><em>How to use tab completion with a custom alias?</em></summary>
-
-> If you are using a simple [shell alias](#aliasing-the-bin-command), e.g. `alias b=bin`, update the filename to match and add `--exe <name>`:
->
-> ```bash
-> # e.g. in /usr/share/bash-completion/completions/b
-> command -v bin &>/dev/null && eval "$(bin --completion --exe b)"
-> ```
->
-> If you are using an alias with a [custom script directory](#custom-script-directory), e.g. `alias scr='bin --dir scripts'`, add the same parameter here:
->
-> ```bash
-> # e.g. in /usr/share/bash-completion/completions/scr
-> command -v bin &>/dev/null && eval "$(bin --completion --exe scr --dir scripts)"
-> ```
->
-> If you have multiple aliases, just create a file for each one (or put them all together in `~/.bash_completion` or `~/.bashrc`).
-
-</details>
-
-<details>
 <summary><em>Why use <code>eval</code>?</em></summary>
 
 > Using `eval` makes it more future-proof - in case I need to change how tab completion works in the future.
@@ -429,6 +408,25 @@ You can skip it (i.e. use `alias b='bin'`) if you prefer it to say `bin`.
 >
 > ```bash
 > $ ln -s bin ~/.local/bin/b
+> ```
+
+</details>
+
+<details>
+<summary><em>How to use tab completion with a custom alias?</em></summary>
+
+> Update the filename to match (if applicable) and add `--exe <name>`:
+>
+> ```bash
+> # e.g. in /usr/share/bash-completion/completions/b
+> command -v bin &>/dev/null && eval "$(bin --completion --exe b)"
+> ```
+>
+> If you are using an alias with a [custom script directory](#custom-script-directory), e.g. `alias scr='bin --dir scripts'`, add the same parameter here:
+>
+> ```bash
+> # e.g. in /usr/share/bash-completion/completions/scr
+> command -v bin &>/dev/null && eval "$(bin --completion --exe scr --dir scripts)"
 > ```
 
 </details>
