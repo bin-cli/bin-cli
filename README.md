@@ -171,33 +171,21 @@ PATH="$HOME/.local/bin:$PATH"
 
 ### Tab Completion
 
-To enable tab completion in Bash, add this:
+To enable tab completion in Bash, run:
 
 ```bash
-command -v bin &>/dev/null && eval "$(bin --completion)"
+# System-wide installs
+bin --completion | sudo tee /etc/bash_completion.d/bin >/dev/null
+
+# Per-user installs
+mkdir -p $HOME/.local/share/bash-completion/completions
+bin --completion > $HOME/.local/share/bash-completion/completions/bin
 ```
-
-To any of the following files:
-
-- `/usr/share/bash-completion/completions/bin` (recommended for system-wide installs)
-- `/etc/bash_completion.d/bin`
-- `~/.local/share/bash-completion/completions/bin` (recommended for per-user installs)
-- `~/.bash_completion`
-- `~/.bashrc`
 
 <details>
 <summary><em>What about other shells (Zsh, Fish, etc)?</em></summary>
 
 > Only Bash is supported at this time. I will add other shells if there is [demand for it](https://github.com/bin-cli/bin-cli/issues/12), or gladly accept [pull requests](https://github.com/bin-cli/bin-cli/pulls).
-
-</details>
-
-<details>
-<summary><em>Why use <code>eval</code>?</em></summary>
-
-> Using `eval` makes it more future-proof - in case I need to change how tab completion works in the future.
->
-> If you prefer, you can manually run `bin --completion` and paste the output into the file instead.
 
 </details>
 
@@ -243,16 +231,15 @@ If you want to be notified when a new version is released, watch [this repo](htt
 
 ### Uninstalling
 
-To remove it again, just delete the `bin` script:
+To remove it again, just delete the `bin` script and tab completion script:
 
 ```bash
-sudo rm /usr/local/bin/bin
-```
+sudo rm /usr/local/bin/bin /etc/bash_completion.d/bin
 
 Or:
 
 ```bash
-rm ~/.local/bin/bin
+rm ~/.local/bin/bin ~/.local/share/bash-completion/completions/bin
 ```
 
 ## Other Features
@@ -415,18 +402,30 @@ You can skip it (i.e. use `alias b='bin'`) if you prefer it to say `bin`.
 <details>
 <summary><em>How to use tab completion with a custom alias?</em></summary>
 
-> Update the filename to match (if applicable) and add `--exe <name>`:
+> Add `--exe <name>` to the command and update the filename to match - for example:
 >
 > ```bash
-> # e.g. in /usr/share/bash-completion/completions/b
-> command -v bin &>/dev/null && eval "$(bin --completion --exe b)"
+> bin --completion --exe b | sudo tee /etc/bash_completion.d/b >/dev/null
+> ```
+>
+> Or:
+>
+> ```bash
+> mkdir -p ~/.local/share/bash-completion/completions
+> bin --completion --exe b > ~/.local/share/bash-completion/completions/b
 > ```
 >
 > If you are using an alias with a [custom script directory](#custom-script-directory), e.g. `alias scr='bin --dir scripts'`, add the same parameter here:
 >
 > ```bash
-> # e.g. in /usr/share/bash-completion/completions/scr
-> command -v bin &>/dev/null && eval "$(bin --completion --exe scr --dir scripts)"
+> bin --completion --exe scr --dir scripts | sudo tee /etc/bash_completion.d/scr >/dev/null
+> ```
+>
+> Or:
+>
+> ```bash
+> mkdir -p ~/.local/share/bash-completion/completions
+> bin --completion --exe scr --dir scripts > ~/.local/share/bash-completion/completions/scr
 > ```
 
 </details>
