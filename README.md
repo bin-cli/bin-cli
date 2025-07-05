@@ -122,7 +122,7 @@ bin help
 
 ## Installation
 
-Bin CLI is a single script that you can simply [download](https://github.com/bin-cli/bin-cli/releases/latest/download/bin) to anywhere in your `$PATH`.
+Bin CLI is a single script - simply [download `bin`](https://github.com/bin-cli/bin-cli/releases/latest/download/bin) to anywhere in your `$PATH`.
 
 To install it system-wide (for all users) in `/usr/local/bin`:
 
@@ -131,7 +131,7 @@ sudo wget https://github.com/bin-cli/bin-cli/releases/latest/download/bin -O /us
 sudo chmod +x /usr/local/bin/bin
 ```
 
-To install it for the current user only in `$HOME/.local/bin`:
+Or to install it for the current user only in `$HOME/.local/bin`:
 
 ```bash
 mkdir -p ~/.local/bin
@@ -143,18 +143,6 @@ echo 'PATH="$HOME/.local/bin:$PATH"' >> ~/.profile
 PATH="$HOME/.local/bin:$PATH"
 ```
 
-To remove it again, just delete the file:
-
-```bash
-sudo rm /usr/local/bin/bin
-```
-
-Or:
-
-```bash
-rm ~/.local/bin/bin
-```
-
 <details>
 <summary><em>What are the system requirements?</em></summary>
 
@@ -162,24 +150,22 @@ rm ~/.local/bin/bin
 >
 > - Bash 4.x or above (macOS users can upgrade via [Homebrew](https://formulae.brew.sh/formula/bash))
 > - [Core Utilities](https://www.gnu.org/software/coreutils/coreutils.html), [BusyBox](https://busybox.net/) or equivalent
->   (specifically `basename`, `chmod`, `dirname`, `mkdir`, `readlink`, `sort`, `tr`, `uniq`)
+>   (specifically `basename`, `env`, `readlink`, `sort`)
 
 </details>
 
 <details>
-<summary><em>What if <code>wget</code> is not available?</em></summary>
+<summary><em>How to download with <code>curl</code> instead of <code>wget</code></em></summary>
 
-> You can use `curl` instead:
->
 > ```bash
 > sudo curl https://github.com/bin-cli/bin-cli/releases/latest/download/bin -Lo /usr/local/bin/bin
-> curl https://github.com/bin-cli/bin-cli/releases/latest/download/bin -Lo ~/.local/bin/bin
 > ```
 >
-> At least one of `curl` or `wget` are usually installed, or can easily be
-> installed, so that covers 99.99% of cases... Or you can click
-> [this link](https://github.com/bin-cli/bin-cli/releases/latest/download/bin)
-> to download it using your browser.
+> Or:
+> 
+> ```bash
+> curl https://github.com/bin-cli/bin-cli/releases/latest/download/bin -Lo ~/.local/bin/bin
+> ```
 
 </details>
 
@@ -200,6 +186,13 @@ To any of the following files:
 - `~/.bashrc`
 
 <details>
+<summary><em>What about other shells (Zsh, Fish, etc)?</em></summary>
+
+> Only Bash is supported at this time. I will add other shells if there is [demand for it](https://github.com/bin-cli/bin-cli/issues/12), or gladly accept [pull requests](https://github.com/bin-cli/bin-cli/pulls).
+
+</details>
+
+<details>
 <summary><em>Why use <code>eval</code>?</em></summary>
 
 > Using `eval` makes it more future-proof - in case I need to change how tab completion works in the future.
@@ -208,20 +201,7 @@ To any of the following files:
 
 </details>
 
-<details>
-<summary><em>What about other shells (Zsh, Fish, etc)?</em></summary>
-
-> Only Bash is supported at this time. I will add other shells if there is [demand for it](https://github.com/bin-cli/bin-cli/issues/12), or gladly accept [pull requests](https://github.com/bin-cli/bin-cli/pulls).
-
-</details>
-
-### Upgrading
-
-To upgrade to the latest version at any time, just repeat the same `wget` command as above.
-
-If you want to be notified when a new version is released, watch [this repo](https://github.com/bin-cli/bin-cli) (select Watch > Custom > Releases, or Watch > All Activity if you prefer).
-
-## Per-Project Setup
+### Per-Project Setup
 
 In the root of the repository, create a `bin/` directory. For example:
 
@@ -255,14 +235,25 @@ That's all there is to it. Now you can run them:
 bin sample
 ```
 
-<details>
-<summary><em>Does the directory name need to be <code>bin/</code>?</em></summary>
+### Upgrading
 
-> You can define an alias using a custom name - see [custom script directory](#custom-script-directory), below.
->
-> But you can't configure a different directory name on a per-project basis (except perhaps by writing your own wrapper function - see below).
+To upgrade to the latest version at any time, just repeat the same `wget` command as above.
 
-</details>
+If you want to be notified when a new version is released, watch [this repo](https://github.com/bin-cli/bin-cli) (select Watch > Custom > Releases, or Watch > All Activity if you prefer).
+
+### Uninstalling
+
+To remove it again, just delete the `bin` script:
+
+```bash
+sudo rm /usr/local/bin/bin
+```
+
+Or:
+
+```bash
+rm ~/.local/bin/bin
+```
 
 ## Other Features
 
