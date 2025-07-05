@@ -122,23 +122,23 @@ bin help
 
 ## Installation
 
-Bin CLI is a single script - simply [download `bin`](https://github.com/bin-cli/bin-cli/releases/latest/download/bin) to anywhere in your `$PATH`.
-
-To install it system-wide (for all users) in `/usr/local/bin`:
-
-```bash
-sudo wget https://github.com/bin-cli/bin-cli/releases/latest/download/bin -O /usr/local/bin/bin
-sudo chmod +x /usr/local/bin/bin
-```
-
-Or to install it for the current user only in `$HOME/.local/bin`:
+Bin CLI is a single script - simply [download `bin`](https://github.com/bin-cli/bin-cli/releases/latest/download/bin) to anywhere in your `$PATH`. For example:
 
 ```bash
 mkdir -p ~/.local/bin
 wget https://github.com/bin-cli/bin-cli/releases/latest/download/bin -O ~/.local/bin/bin
 chmod +x ~/.local/bin/bin
+```
 
-# If $HOME/.local/bin is not already in your $PATH:
+Then test it:
+
+```bash
+bin --version
+```
+
+If `$HOME/.local/bin` is not already in your `$PATH`, so you get `command not found`, you may need to add it:
+
+```bash
 echo 'PATH="$HOME/.local/bin:$PATH"' >> ~/.profile
 PATH="$HOME/.local/bin:$PATH"
 ```
@@ -155,14 +155,20 @@ PATH="$HOME/.local/bin:$PATH"
 </details>
 
 <details>
-<summary><em>How to download with <code>curl</code> instead of <code>wget</code></em></summary>
+<summary><em>How to install it system-wide (for all users)?</em></summary>
 
-> ```bash
-> sudo curl https://github.com/bin-cli/bin-cli/releases/latest/download/bin -Lo /usr/local/bin/bin
-> ```
->
-> Or:
-> 
+I recommend installing it in `/usr/local/bin/`:
+
+```bash
+sudo wget https://github.com/bin-cli/bin-cli/releases/latest/download/bin -O /usr/local/bin/bin
+sudo chmod +x /usr/local/bin/bin
+```
+
+</details>
+
+<details>
+<summary><em>How to download it <code>curl</code> instead of <code>wget</code>?</em></summary>
+
 > ```bash
 > curl https://github.com/bin-cli/bin-cli/releases/latest/download/bin -Lo ~/.local/bin/bin
 > ```
@@ -171,16 +177,23 @@ PATH="$HOME/.local/bin:$PATH"
 
 ### Tab Completion
 
-To enable tab completion in Bash, run:
+To configure tab completion in Bash, run:
 
 ```bash
-# System-wide installs
-bin --completion | sudo tee /etc/bash_completion.d/bin >/dev/null
-
-# Per-user installs
 mkdir -p $HOME/.local/share/bash-completion/completions
 bin --completion > $HOME/.local/share/bash-completion/completions/bin
 ```
+
+<details>
+<summary><em>How to install tab completion system-wide (for all users)?</em></summary>
+
+I recommend configuring it in `/etc/bash_completion.d/`:
+
+```bash
+bin --completion | sudo tee /etc/bash_completion.d/bin >/dev/null
+```
+
+</details>
 
 <details>
 <summary><em>What about other shells (Zsh, Fish, etc)?</em></summary>
@@ -231,12 +244,7 @@ If you want to be notified when a new version is released, watch [this repo](htt
 
 ### Uninstalling
 
-To remove it again, just delete the `bin` script and tab completion script:
-
-```bash
-sudo rm /usr/local/bin/bin /etc/bash_completion.d/bin
-
-Or:
+To remove it again, just delete the `bin` script and tab completion script, for example:
 
 ```bash
 rm ~/.local/bin/bin ~/.local/share/bash-completion/completions/bin
@@ -385,14 +393,6 @@ You can skip it (i.e. use `alias b='bin'`) if you prefer it to say `bin`.
 <details>
 <summary><em>Alternatively, you can use a symlink</em></summary>
 
-> System-wide installation:
->
-> ```bash
-> $ sudo ln -s bin /usr/local/bin/b
-> ```
->
-> Per-user installation:
->
 > ```bash
 > $ ln -s bin ~/.local/bin/b
 > ```
@@ -405,23 +405,11 @@ You can skip it (i.e. use `alias b='bin'`) if you prefer it to say `bin`.
 > Add `--exe <name>` to the command and update the filename to match - for example:
 >
 > ```bash
-> bin --completion --exe b | sudo tee /etc/bash_completion.d/b >/dev/null
-> ```
->
-> Or:
->
-> ```bash
 > mkdir -p ~/.local/share/bash-completion/completions
 > bin --completion --exe b > ~/.local/share/bash-completion/completions/b
 > ```
 >
 > If you are using an alias with a [custom script directory](#custom-script-directory), e.g. `alias scr='bin --dir scripts'`, add the same parameter here:
->
-> ```bash
-> bin --completion --exe scr --dir scripts | sudo tee /etc/bash_completion.d/scr >/dev/null
-> ```
->
-> Or:
 >
 > ```bash
 > mkdir -p ~/.local/share/bash-completion/completions
