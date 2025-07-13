@@ -11,7 +11,7 @@ Please use the [Issues] section to report bugs (except [security vulnerabilities
 ## Feature Suggestions
 
 Feel free to open an [Issue], but please note that Bin CLI is intentionally kept as simple as possible (see
-[#66] for details), so I'm only likely to accept/implement high-value features that don't slow things down.
+[GOALS]), so I'm only likely to accept/implement high-value features that don't slow things down.
 
 ## Documentation Improvements
 
@@ -65,9 +65,9 @@ Browse to the repository fork on GitHub (`https://github.com/YOUR_USERNAME/bin-c
 If you prefer the 90's approach, feel free to send a suggestion, patch,
 [Git bundle], thank you note to [d@djm.me] instead.
 
-[#66]: https://github.com/bin-cli/bin-cli/issues/66
 [CHANGELOG]: CHANGELOG.md
 [Git bundle]: https://www.chiark.greenend.org.uk/~sgtatham/quasiblog/git-no-forge/#bundle
+[GOALS]: GOALS.md
 [Issue]: https://github.com/bin-cli/bin-cli/issues
 [Issues]: https://github.com/bin-cli/bin-cli/issues
 [README]: README.md
