@@ -423,9 +423,9 @@ You can skip it (i.e. use `alias b='bin'`) if you prefer it to say `bin`.
 
 ### Automatic Exclusions
 
-Files starting with `.` (dot / period) are always ignored and cannot be executed with Bin.
+Files/directories starting with `.` (dot / period) are always ignored and cannot be executed with Bin.
 
-Files that are not executable (not `chmod +x`) are listed as warnings in the command listing, and will error if you try to run them.
+Files that are not executable (not `chmod +x`) are not listed, nor considered for unique prefix matching or tab completion, and will error if you try to run them.
 
 The directories `/bin`, `/snap/bin`, `/usr/bin`, `/usr/local/bin`, `$HOME/bin` and `$HOME/.local/bin` are ignored when searching parent directories, because they are common locations for global executables (typically in `$PATH`).
 
