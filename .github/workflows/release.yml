@@ -34,7 +34,7 @@ jobs:
         run: bin/build "${GITHUB_REF_NAME/v}"
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 # v2.3.2
+        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # v2.3.3
         with:
           prerelease: "${{ contains(github.ref_name, '-') }}"
           body: 'See the [CHANGELOG](${{ github.server_url }}/${{ github.repository }}/blob/main/CHANGELOG.md) for details.'
