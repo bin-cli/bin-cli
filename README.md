@@ -6,7 +6,7 @@ It automatically [searches in parent directories](#how-it-works), so you can run
 
 It is implemented as a self-contained Bash script, small enough to bundle with your dotfiles or projects if you want to.  It only requires Bash 4+ and a small number of [coreutils](https://www.gnu.org/software/coreutils/manual/) commands, so it should work on almost any Unix-like system (Linux, macOS with Homebrew, etc.). On Windows, it can be used on [WSL](https://learn.microsoft.com/en-us/windows/wsl/about), [Git Bash](https://gitforwindows.org/), [Cygwin](https://www.cygwin.com/) or [MSYS2](https://www.msys2.org/).
 
-Collaborators / contributors who choose not to install Bin can run the scripts directly, so you can enjoy the benefits without adding a hard dependency or extra barrier to entry.
+Collaborators / contributors who choose not to install `bin` can run the scripts directly, so you can enjoy the benefits without adding a hard dependency or extra barrier to entry.
 
 ## How It Works
 
